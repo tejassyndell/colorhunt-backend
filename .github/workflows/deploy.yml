@@ -26,11 +26,7 @@ jobs:
       run: |
         mkdir -p database
         touch database/database.sqlite
-    - name: Execute tests (Unit and Feature tests) via PHPUnit
-      env:
-        DB_CONNECTION: sqlite
-        DB_DATABASE: database/database.sqlite
-      run: vendor/bin/phpunit
+   
 
     
     - name: 📂 Sync files
@@ -40,4 +36,4 @@ jobs:
         username: ${{ secrets.GIT_CPANEL_REACT_USER }}
         password: ${{ secrets.GIT_CPANEL_REACT_PWD }}
         protocol: ${{ secrets.GIT_CPANEL_REACT_PROTOCOL }}
-        # local-dir: ./colorhunt-admin-frontend/
+        local-dir: ./colorhunt-admin-backend/

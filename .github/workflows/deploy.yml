@@ -22,13 +22,7 @@ jobs:
       run: php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     - name: Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
-    - name: Create Database
-      run: |
-        mkdir -p database
-        touch database/database.sqlite
    
-
-    
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@v2.0.0
       with:

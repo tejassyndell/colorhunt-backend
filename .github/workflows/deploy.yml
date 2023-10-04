@@ -29,5 +29,5 @@ jobs:
         server: ${{ secrets.GIT_CPANEL_REACT_SERVER }}
         username: ${{ secrets.GIT_CPANEL_REACT_USER }}
         password: ${{ secrets.GIT_CPANEL_REACT_PWD }}
-        protocol: ${{ secrets.GIT_CPANEL_REACT_PROTOCOL }}
+    
        

@@ -800,10 +800,20 @@ class POController extends Controller
 
 
 
-    public function approvedarticallist()
-    {
-        return DB::select('SELECT * FROM `article` where ArticleStatus="1" ');
-    }
+    // public function approvedarticallist()
+    // {
+    //     return DB::select('SELECT * FROM `article` where ArticleStatus="1" ');
+    // }
+
+    //adding aditional code 
+//change the functionality
+
+public function approvedarticallist($id)
+{
+    return DB::select('SELECT * FROM `article` a 
+                       INNER JOIN `articlephotos` ap ON a.Id = ap.ArticlesId
+                       WHERE a.Id = ' . $id);
+}
 
     public function GetArticalIdWise($id)
     {

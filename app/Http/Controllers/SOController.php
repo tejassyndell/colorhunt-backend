@@ -1327,7 +1327,7 @@ class SOController extends Controller
     //Purchase return id wise get the data - start
     public function PrDateRemarkFromPRONO($id)
     {
-        return DB::select("SELECT concat(prn.PurchaseReturnNumber, '/',fn.StartYear,'-',fn.EndYear) as PRO_Number_FinancialYear, prn.Id, prn.VendorId, prn.Remark FROM `purchasereturnnumber` prn inner join financialyear fn on fn.Id=prn.FinancialYearId where prn.Id ='" . $id . "'");
+        return DB::select("SELECT CONCAT( prn.PurchaseReturnNumber, '/', fn.StartYear, '-', fn.EndYear ) AS PRO_Number_FinancialYear, prn.Id, prn.VendorId, prn.Remark, v.Name FROM `purchasereturnnumber` prn INNER JOIN financialyear fn ON fn.Id = prn.FinancialYearId LEFT JOIN vendor v ON v.Id = prn.VendorId where prn.Id ='" . $id . "'");    
     }
     //Purchase return id wise get the data - end
 

@@ -1268,79 +1268,283 @@ class MasterController extends Controller
         return $randomString;
     }
 
+    // public function DeleteArticlePhotos($id, $LoggedId)
+    // {
+    //     // $getdata = DB::select('SELECT * From articlephotos WHERE Id = ' . $id . '');
+    //     $getdata = ArticlePhotos::where('Id', $id)->first();
+    //     return $getdata;
+    //     $article = DB::select("select Id, ArticleNumber from article where Id = " . $getdata[0]->ArticlesId);
+    //     $userRec = DB::select("select Id, Name from users where Id = " . $LoggedId);
+    //     $array = array();
+    //     if ($getdata) {
+    //         $destinationPath = 'uploads';
+    //         File::delete($destinationPath . '/' . $getdata->Name);
+    //         UserLogs::create([
+    //             'Module' => 'Article Photos',
+    //             'ModuleNumberId' => $article[0]->Id,
+    //             'LogType' => 'Deleted',
+    //             'LogDescription' => $userRec[0]->Name . " " . 'deleted article photo with Article Number' . " " . $article[0]->ArticleNumber,
+    //             'UserId' => $userRec[0]->Id,
+    //             'updated_at' => null
+    //         ]);
+    //         return DB::table('articlephotos')->where('Id', '=', $id)->delete();
+    //     } else {
+    //         return $array;
+    //     }
+    // }
+
+     //added aditional code
+    //change the functionality
+    
     public function DeleteArticlePhotos($id, $LoggedId)
     {
-        // $getdata = DB::select('SELECT * From articlephotos WHERE Id = ' . $id . '');
         $getdata = ArticlePhotos::where('Id', $id)->first();
-        return $getdata;
-        $article = DB::select("select Id, ArticleNumber from article where Id = " . $getdata[0]->ArticlesId);
-        $userRec = DB::select("select Id, Name from users where Id = " . $LoggedId);
-        $array = array();
+        //return $getdata;
+        
         if ($getdata) {
+            $article = DB::select("select Id, ArticleNumber from article where Id = ?", [$getdata->ArticlesId]);
+            $userRec = DB::select("select id, Name from users where Id = ?", [$LoggedId]);
+    
             $destinationPath = 'uploads';
             File::delete($destinationPath . '/' . $getdata->Name);
+    
             UserLogs::create([
                 'Module' => 'Article Photos',
                 'ModuleNumberId' => $article[0]->Id,
                 'LogType' => 'Deleted',
-                'LogDescription' => $userRec[0]->Name . " " . 'deleted article photo with Article Number' . " " . $article[0]->ArticleNumber,
-                'UserId' => $userRec[0]->Id,
+                'LogDescription' => $userRec[0]->Name . ' deleted article photo with Article Number ' . $article[0]->ArticleNumber,
+                'UserId' => $userRec[0]->id,
                 'updated_at' => null
             ]);
-            return DB::table('articlephotos')->where('Id', '=', $id)->delete();
-        } else {
-            return $array;
+    
+            DB::table('articlephotos')->where('Id', $id)->delete();
         }
+    
+        // You might want to handle the case when $getdata is not found
+        // and return an appropriate response or error message.
+    
+        return response()->json(['message' => 'Article photo deleted successfully']);
     }
 
+    // public function GetArticlePhotos()
+    // {   
+    //     $articlePhotos = DB::select('SELECT ap.*, a.ArticleNumber From articlephotos ap left join article a on a.Id = ap.ArticlesId ORDER BY ap.Id DESC');
+    //     foreach ($articlePhotos as $articlePhoto) {
+    //         if (file_exists( public_path().'/uploads'.'/'. $articlePhoto->Name )) {
+    //             $articlePhoto->Name = $articlePhoto->Name;
+    //         } else {
+    //             $articlePhoto->Name = null;
+    //         }
+    //     }
+    //     return $articlePhotos;
+    // }
+
+    //added aditional code
+    //change the functionality
+
     public function GetArticlePhotos()
-    {   
-        $articlePhotos = DB::select('SELECT ap.*, a.ArticleNumber From articlephotos ap left join article a on a.Id = ap.ArticlesId ORDER BY ap.Id DESC');
-        foreach ($articlePhotos as $articlePhoto) {
-            if (file_exists( public_path().'/uploads'.'/'. $articlePhoto->Name )) {
-                $articlePhoto->Name = $articlePhoto->Name;
-            } else {
-                $articlePhoto->Name = null;
+    {
+    $baseURL = url('/'); // Get the base URL of the application
+    
+    $articlePhotos = DB::select('SELECT ap.*, a.ArticleNumber FROM articlephotos ap LEFT JOIN article a ON a.Id = ap.ArticlesId ORDER BY ap.Id DESC');
+    
+    foreach ($articlePhotos as $articlePhoto) {
+        $photoData = json_decode($articlePhoto->Name);
+    
+        if ($photoData && is_array($photoData)) {
+            $imageUrls = [];
+    
+            foreach ($photoData as $photoInfo) {
+                if (isset($photoInfo->photo)) {
+                    $fileName = $photoInfo->photo;
+                    $imageUrl = $baseURL . '/uploads/' . $fileName;
+    
+                    // Add the image URL to the array
+                    $imageUrls[] = $imageUrl;
+                }
             }
+    
+            // Assign the array of image URLs to the "Name" property
+            $articlePhoto->Name = $imageUrls;
+        } else {
+            $articlePhoto->Name = null;
         }
-        return $articlePhotos;
     }
+    
+    return $articlePhotos;
+    }
+
+    // public function ArticlePhotos(Request $request)
+    // {
+    //     $data = $request->all();
+    //     $images = array();
+    //     if ($files = $data['myfile']) {
+    //         foreach ($files as $file) {
+    //             $name = $file->getClientOriginalName();
+    //             $randomstring = $this->generateRandomString();
+    //             $name_extension = explode(".", $name);
+    //             $newname = $randomstring . '.' . $name_extension[1];
+    //             $file->move('uploads', $newname);
+    //             $images[] = $newname;
+    //         }
+    //     }
+    //     if (count($images) > 0) {
+    //         foreach ($images as $img) {
+    //             $articlePhotoId = DB::table('articlephotos')->insertGetId(
+    //                 ['ArticlesId' => $data['ArticleId'], 'Name' => $img, "CreatedDate" => date("Y-m-d H:i:s")]
+    //             );
+    //         }
+    //         $article = Article::where('Id', $data['ArticleId'])->first();
+    //         $userRec = Users::where('Id', $data['UserId'])->first();
+    //         UserLogs::create([
+    //             'Module' => 'Article Photos',
+    //             'ModuleNumberId' => $articlePhotoId,
+    //             'LogType' => 'Created',
+    //             'LogDescription' => $userRec->Name . " " . 'added article photo with Article Number' . " " . $article->ArticleNumber,
+    //             'UserId' => $userRec->Id,
+    //             'updated_at' => null
+    //         ]);
+    //         return response()->json(array("result" => "true"), 200);
+    //     } else {
+    //         return response()->json(array("result" => "false"), 200);
+    //     }
+    // }
+
+    //added additional code
+    //change the functionality
 
     public function ArticlePhotos(Request $request)
     {
         $data = $request->all();
-        $images = array();
-        if ($files = $data['myfile']) {
+        //return $data;
+        $images = [];
+    
+        if ($files = $request->file('myfile')) {
             foreach ($files as $file) {
                 $name = $file->getClientOriginalName();
-                $randomstring = $this->generateRandomString();
                 $name_extension = explode(".", $name);
-                $newname = $randomstring . '.' . $name_extension[1];
+                $newname = uniqid() . '.' . $name_extension[1];
                 $file->move('uploads', $newname);
-                $images[] = $newname;
+                $images[] = ['photo' => $newname]; // Store each photo as an object
             }
         }
+    
         if (count($images) > 0) {
-            foreach ($images as $img) {
-                $articlePhotoId = DB::table('articlephotos')->insertGetId(
-                    ['ArticlesId' => $data['ArticleId'], 'Name' => $img, "CreatedDate" => date("Y-m-d H:i:s")]
-                );
+            $existingEntry = DB::table('articlephotos')->where('ArticlesId', $data['ArticleId'])->first();
+           
+    
+            if ($existingEntry) {
+                $existingImages = json_decode($existingEntry->Name, true);
+    
+                if (!is_array($existingImages)) {
+                    // If existing images are not in array format, initialize an empty array
+                    $existingImages = [];
+                }
+    
+                // Merge the new images with the existing array
+                $images = array_merge($existingImages, $images);
+                
+    
+                DB::table('articlephotos')
+                    ->where('ArticlesId', $data['ArticleId'])
+                    ->update([
+                        'Name' => json_encode($images),
+                        'CreatedDate' => now(),
+                    ]);
+            } else {
+                DB::table('articlephotos')->insert([
+                    'ArticlesId' => $data['ArticleId'],
+                    'Name' => json_encode($images),
+                    'CreatedDate' => now(),
+                ]);
             }
-            $article = Article::where('Id', $data['ArticleId'])->first();
-            $userRec = Users::where('Id', $data['UserId'])->first();
-            UserLogs::create([
-                'Module' => 'Article Photos',
-                'ModuleNumberId' => $articlePhotoId,
-                'LogType' => 'Created',
-                'LogDescription' => $userRec->Name . " " . 'added article photo with Article Number' . " " . $article->ArticleNumber,
-                'UserId' => $userRec->Id,
-                'updated_at' => null
-            ]);
-            return response()->json(array("result" => "true"), 200);
+    
+            return response()->json(['result' => 'true'], 200);
         } else {
-            return response()->json(array("result" => "false"), 200);
+            return response()->json(['result' => 'false'], 200);
         }
     }
+
+    //added aditional code
+    //destroy functionality
+    public function destroy($url)
+    {
+        $imageUrl = urldecode($url);
+
+        $articlePhoto = ArticlePhotos::where('Name', 'like', '%"photo":"' . $imageUrl . '"%')->first();
+
+        if ($articlePhoto) {
+            $photos = json_decode($articlePhoto->Name, true);
+            $index = null;
+
+            foreach ($photos as $key => $photo) {
+                if ($photo['photo'] === $imageUrl) {
+                    $index = $key;
+                    break;
+                }
+            }
+
+            if ($index !== null) {
+                $photos = array_values($photos);
+                array_splice($photos, $index, 1);
+
+                $articlePhoto->Name = json_encode($photos);
+                $articlePhoto->save();
+
+                return response()->json(['message' => 'Image removed from database successfully'], 200);
+            }
+        }
+
+        return response()->json(['message' => 'Image not found in database'], 404);
+    }
+
+    //add aditional code
+    //updatePrimaryImage functionality
+    public function updatePrimaryImage(Request $request)
+    {
+        // Validate the incoming request
+        $request->validate([
+            'newImage' => 'required|image|mimes:jpeg,png,jpg,gif',
+
+
+            'oldImage' => 'required|string',
+        ]);
+
+        // Get the old and new image names from the request
+        $oldImage = $request->input('oldImage');
+        $newImage = $request->file('newImage');
+
+        // Find records in the 'articlephotos' table where the JSON 'Name' column contains the old image name
+        $articlePhotos = ArticlePhotos::where('Name', 'LIKE', '%"photo":"' . $oldImage . '"%')->get();
+
+        if ($articlePhotos->isNotEmpty()) {
+            foreach ($articlePhotos as $articlePhoto) {
+                // Decode the JSON data into an associative array
+                $imageData = json_decode($articlePhoto->Name, true);
+
+                // Loop through the images and replace the old image name with the new image name
+                foreach ($imageData as &$image) {
+                    if (isset($image['photo']) && $image['photo'] === $oldImage) {
+                        $image['photo'] = $newImage->getClientOriginalName();
+                    }
+                }
+
+                // Encode the modified array back to JSON and update the 'Name' column
+                $articlePhoto->Name = json_encode($imageData);
+                $articlePhoto->save();
+
+                // Move the new image to the 'uploads' folder
+                $newImage->move(public_path('uploads'), $newImage->getClientOriginalName());
+            }
+
+            // Return the new image URL for the response
+            return response()->json(['newImageUrl' => asset('uploads/' . $newImage->getClientOriginalName())]);
+        } else {
+            // Handle the case where no records were found with the old image name in the JSON data
+            return response()->json(['error' => 'No records found with the old image name'], 404);
+        }
+    }
+
 
     public function GetDashboard()
     {

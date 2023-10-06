@@ -361,9 +361,14 @@ Route::delete('deletepopon/{PON}/{LoggedId}', 'POController@deletepopon');
 //Article Photos API
 Route::post('articlephotos', 'MasterController@ArticlePhotos');
 Route::get('getarticlephotoslist', 'MasterController@GetArticlePhotos');
-Route::get('deletearticlephoto/{id}/{LoggedId}', 'MasterController@DeleteArticlePhotos');
+Route::delete('deletearticlephoto/{id}/{LoggedId}', 'MasterController@DeleteArticlePhotos');
 Route::get('articallist', 'POController@GetArtical');
 Route::get('articallistoutlet/{id}', 'POController@GetArticalForOutlet'); //Nitin
+//adding aditional code
+//adding 2 more apis
+Route::delete('/images/{url}', 'MasterController@destroy')->name('images.destroy');
+
+Route::post('update-primary-image', 'MasterController@updatePrimaryImage');
  
 
 //Article Launch
@@ -380,7 +385,7 @@ Route::post('articlelaunchlist', 'POController@articleLaunchList'); //Nitin-Jaim
 
 
 
-Route::get('approvedarticallist', 'POController@approvedarticallist');
+Route::get('approvedarticallist/{id}', 'POController@approvedarticallist');
 Route::get('articlerateassignso', 'POController@ArticleRateAssignSO');
 Route::get('getarticalidwise/{id}', 'POController@GetArticalIdWise');
 Route::get('getarticaldata/{id}', 'POController@GetArticaldata');

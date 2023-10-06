@@ -108,6 +108,17 @@ Route::post('brandpostlist', 'MasterController@Postbrand');
 Route::delete('deletebrand/{id}', 'MasterController@Deletebrand');
 Route::get('getbrandidwise/{id}', 'MasterController@GetBrandIdWise');
 Route::put('updatebrand/{field}', 'MasterController@UpdateBrand');
+
+//added aditional code
+//added transportaton apis
+//Transportation API
+Route::post('addtransportation', 'MasterController@AddTransportation');
+Route::get('transportationlist', 'MasterController@GetTransportation');
+Route::post('transportationpostlist', 'MasterController@PostTransportation');
+Route::delete('deletetransportation/{id}', 'MasterController@DeleteTransportation');
+Route::get('gettransportationidwise/{id}', 'MasterController@GetTransportationIdWise');
+Route::put('updatetransportation/{field}', 'MasterController@UpdateTransportation');
+
 //Rack API
 Route::post('addrack', 'MasterController@AddRack');
 Route::get('racklist', 'MasterController@Getrack');

@@ -9,6 +9,7 @@ use App\Subcategory;
 use App\Rangeseries;
 use App\Article;
 use App\ArticlePhotos;
+use App\Transportation;
 use App\Pages;
 use App\Rack;
 use App\Ratio;
@@ -538,6 +539,90 @@ class MasterController extends Controller
             $field = Rack::create($request->all());
             return response()->json($field, 201);
         }
+    }
+
+    //added aditional code
+
+     //Transportation functionality
+
+     //AddTransportation function
+
+     public function AddTransportation(Request $request)
+     {
+         $field = Transportation::create($request->all());
+         return response()->json($field, 201);
+     }
+     //added aditional code
+     //GetTransportation functionality
+     public function GetTransportation()
+     {
+         return Transportation::orderBy('Name', 'ASC')->get();
+     }
+     //add aditional code
+     //PostTransportation functionality
+     public function PostTransportation(Request $request)
+     {
+         $data = $request->all();
+         $search = $data["search"];
+         $startnumber = $data["start"];
+         $vnddataTotal = DB::select("SELECT count(*) as Total From transportation");
+         $vnTotal = $vnddataTotal[0]->Total;
+         $length = $data["length"];
+         if ($search['value'] != null && strlen($search['value']) > 2) {
+             $searchstring = "WHERE Name like '%" . $search['value'] . "%'";
+             $vnddataTotalFilter = DB::select("SELECT count(*) as Total From transportation " . $searchstring);
+             $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
+         } else {
+             $searchstring = "";
+             $vnddataTotalFilterValue = $vnTotal;
+         }
+         $column = $data["order"][0]["column"];
+         switch ($column) {
+             case 1:
+                 $ordercolumn = "Name";
+                 break;
+             default:
+                 $ordercolumn = "Name";
+                 break;
+         }
+         $order = "";
+         if ($data["order"][0]["dir"]) {
+             $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
+         }
+         $vnddata = DB::select("SELECT * From transportation " . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length);
+         return array(
+             'datadraw' => $data["draw"],
+             'recordsTotal' => $vnTotal,
+             'recordsFiltered' => $vnddataTotalFilterValue,
+             'response' => 'success',
+             'startnumber' => $startnumber,
+             'search' => count($vnddata),
+             'data' => $vnddata,
+         );
+     }
+     //add aditional code
+     //UpdateTransportation functionality
+     public function UpdateTransportation(Request $request)
+    {
+        $data = $request->all();
+        Transportation::where('id', $data['id'])->update(array(
+            'Name' => $data['Name'],
+           
+
+        ));
+        return response()->json("SUCCESS", 200);
+    }
+    //add aditional code
+    //DeleteTransportation functionality
+    public function DeleteTransportation($id)
+    {
+        return DB::table('transportation')->where('Id', '=', $id)->delete();
+    }
+    //add aditional code
+    //GetTransportationIdWise functionality
+    public function GetTransportationIdWise($id)
+    {
+        return DB::select('SELECT * From transportation WHERE Id = ' . $id . '');
     }
 
     public function Getrack()

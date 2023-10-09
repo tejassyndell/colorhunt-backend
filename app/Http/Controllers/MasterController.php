@@ -767,63 +767,65 @@ class MasterController extends Controller
     {
         return DB::select('SELECT * From vendor WHERE Id = ' . $id . '');
     }
-    ///Party Module
+
+   ///Party Module
+    //adding aditional code
+    //added a function old vrsion to new version
     public function AddParty(Request $request)
     {
         $data = $request->all();
-        if($data['OutletArticleRate'] == null){
+        if ($data['OutletArticleRate'] == null) {
             $data['OutletArticleRate'] = 0;
         }
-        $party = array();
+    
         if (isset($data['SoAddParty'])) {
-            $party['Name'] = $data['PartyName'];
-            $party['PhoneNumber'] = $data['PartyContact'];
-            $party['Address'] = $data['PartyAddress'];
-            $party['State'] = $data['State'];
-            $party['City'] = $data['City'];
-            $party['PinCode'] = $data['PinCode'];
-            $party['Country'] = $data['Country'];
-            $party['OutletArticleRate'] = $data['OutletArticleRate'];
-            $party['ContactPerson'] = $data['ContactPerson'];
-            $party['OutletAssign'] = 0;
-            $party['UserId'] = $data['SalesPerson'];
-            $party['Source'] = $data['Source'];
-            $dataresult = DB::select('SELECT * FROM `party` WHERE `Name` LIKE "' . $data['PartyName'] . '"');
-            if ($dataresult) {
-                return response()->json('allreadyexits', 201);
-            } else {
-                $field = Party::create($party);
-                return response()->json($field, 201);
-            }
+            $party = [
+                'Name' => $data['PartyName'],
+                'PhoneNumber' => $data['PartyContact'],
+                'Address' => $data['PartyAddress'],
+                'Aditional_phone_numbers' => ($data['Aditional_phone_numbers']), // Save additional phone numbers as a JSON array
+                'State' => $data['State'],
+                'City' => $data['City'],
+                'PinCode' => $data['PinCode'],
+                'Country' => $data['Country'],
+                'OutletArticleRate' => $data['OutletArticleRate'],
+                'ContactPerson' => $data['ContactPerson'],
+                'OutletAssign' => 0,
+                'UserId' => $data['SalesPerson'],
+                'Source' => $data['Source'],
+            ];
         } else {
-            $party['Name'] = $data['Name'];
-            $party['Address'] = $data['Address'];
-            $party['PhoneNumber'] = $data['PhoneNumber'];
-            $party['State'] = $data['State'];
-            $party['City'] = $data['City'];
-            $party['PinCode'] = $data['PinCode'];
-            $party['Country'] = $data['Country'];
-            $party['OutletArticleRate'] = $data['OutletArticleRate'];
-            $party['ContactPerson'] = $data['ContactPerson'];
-            $party['GSTNumber'] = $data['GSTNumber'];
-            $party['GSTType'] = $data['GSTType'];
-            $party['Discount'] = $data['Discount'];
-            if ($data['OutletAssign'] == "") {
-                $party['OutletAssign'] = 0;
-            } else {
-                $party['OutletAssign'] = $data['OutletAssign'];
-            }
-            $party['UserId'] = $data['SalesPerson'];
-            $party['Source'] = $data['Source'];
-            $dataresult = DB::select('SELECT * FROM `party` WHERE `Name` LIKE "' . $data['Name'] . '"');
-            if ($dataresult) {
-                return response()->json('allreadyexits', 201);
-            } else {
-                $field = Party::create($party);
-                return response()->json($field, 201);
-            }
+            $party = [
+                'Name' => $data['Name'],
+                'Address' => $data['Address'],
+                'PhoneNumber' => $data['PhoneNumber'],
+                'Aditional_phone_numbers' =>($data['Aditional_phone_numbers']), // Save additional phone numbers as a JSON array
+                'State' => $data['State'],
+                'City' => $data['City'],
+                'PinCode' => $data['PinCode'],
+                'Country' => $data['Country'],
+                'OutletArticleRate' => $data['OutletArticleRate'],
+                'ContactPerson' => $data['ContactPerson'],
+                'GSTNumber' => $data['GSTNumber'],
+                'GSTType' => $data['GSTType'],
+                'Discount' => $data['Discount'],
+                'OutletAssign' => empty($data['OutletAssign']) ? 0 : $data['OutletAssign'],
+                'UserId' => $data['SalesPerson'],
+                'Source' => $data['Source'],
+            ];
+        }
+    
+        // Check if the party name already exists in the database
+        $dataresult = DB::select('SELECT * FROM `party` WHERE `Name` LIKE ?', [$party['Name']]);
+        if ($dataresult) {
+            return response()->json('allreadyexits', 201);
+        } else {
+            $field = Party::create($party);
+            return response()->json($field, 201);
         }
     }
+
+
     public function GeParty()
     {
         return Party::orderBy('Name', 'ASC')->where('Status', 1)->where('UserId', '!=', null)->get();
@@ -1220,6 +1222,10 @@ class MasterController extends Controller
             'UserId' => $data['SalesPerson'],
             'Address' => $data['Address'],
             'PhoneNumber' => $data['PhoneNumber'],
+             //add aditional code
+            //added aditional phone number field
+            // Save additional phone numbers as a JSON array
+            'Aditional_phone_numbers' => ($data['Aditional_phone_numbers']), 
             'ContactPerson' => $data['ContactPerson'],
             'State' => $data['State'],
             'City' => $data['City'],

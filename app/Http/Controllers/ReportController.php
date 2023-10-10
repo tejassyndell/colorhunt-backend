@@ -36,7 +36,7 @@ class ReportController extends Controller
                 if (strpos($openInward->NoPacks, ',') != false) {
                     $openInwardPacks = $openInwardPacks + array_sum(explode(',', $openInward->NoPacks));
                 } else {
-                    $openInwardPacks = $openInwardPacks + (int)$openInward->NoPacks;
+                    $openInwardPacks = $openInwardPacks + (int) $openInward->NoPacks;
                 }
                 $article->openStock = $article->openStock + $openInwardPacks;
             }
@@ -45,7 +45,7 @@ class ReportController extends Controller
                 if (strpos($openSalesReturn->NoPacks, ',') != false) {
                     $openSalesReturnPacks = $openSalesReturnPacks + array_sum(explode(',', $openSalesReturn->NoPacks));
                 } else {
-                    $openSalesReturnPacks = $openSalesReturnPacks + (int)$openSalesReturn->NoPacks;
+                    $openSalesReturnPacks = $openSalesReturnPacks + (int) $openSalesReturn->NoPacks;
                 }
                 $article->openStock = $article->openStock + $openSalesReturnPacks;
             }
@@ -54,7 +54,7 @@ class ReportController extends Controller
                 if (strpos($openPro->NoPacks, ',') != false) {
                     $openProPacks = $openProPacks + array_sum(explode(',', $openPro->NoPacks));
                 } else {
-                    $openProPacks = $openProPacks + (int)$openPro->NoPacks;
+                    $openProPacks = $openProPacks + (int) $openPro->NoPacks;
                 }
                 $article->openStock = $article->openStock + $openProPacks;
             }
@@ -69,7 +69,7 @@ class ReportController extends Controller
                 if (strpos($openOutward->NoPacks, ',') != false) {
                     $openOutwardPacks = $openOutwardPacks + array_sum(explode(',', $openOutward->NoPacks));
                 } else {
-                    $openOutwardPacks = $openOutwardPacks + (int)$openOutward->NoPacks;
+                    $openOutwardPacks = $openOutwardPacks + (int) $openOutward->NoPacks;
                 }
                 $article->openStock = $article->openStock - $openOutwardPacks;
             }
@@ -78,7 +78,7 @@ class ReportController extends Controller
                 if (strpos($openPurchaseReturn->NoPacks, ',') != false) {
                     $openPurchaseReturnPacks = $openPurchaseReturnPacks + array_sum(explode(',', $openPurchaseReturn->NoPacks));
                 } else {
-                    $openPurchaseReturnPacks = $openPurchaseReturnPacks + (int)$openPurchaseReturn->NoPacks;
+                    $openPurchaseReturnPacks = $openPurchaseReturnPacks + (int) $openPurchaseReturn->NoPacks;
                 }
                 $article->openStock = $article->openStock - $openPurchaseReturnPacks;
             }
@@ -87,7 +87,7 @@ class ReportController extends Controller
                 if (strpos($openCon->NoPacks, ',') != false) {
                     $openConPacks = $openConPacks + array_sum(explode(',', $openCon->NoPacks));
                 } else {
-                    $openConPacks = $openConPacks + (int)$openCon->NoPacks;
+                    $openConPacks = $openConPacks + (int) $openCon->NoPacks;
                 }
                 $article->openStock = $article->openStock - $openConPacks;
             }
@@ -96,7 +96,7 @@ class ReportController extends Controller
                 if (strpos($openShortage->NoPacks, ',') != false) {
                     $openShortagePacks = $openShortagePacks + array_sum(explode(',', $openShortage->NoPacks));
                 } else {
-                    $openShortagePacks = $openShortagePacks + (int)$openShortage->NoPacks;
+                    $openShortagePacks = $openShortagePacks + (int) $openShortage->NoPacks;
                 }
                 $article->openStock = $article->openStock - $openShortagePacks;
             }
@@ -113,7 +113,7 @@ class ReportController extends Controller
             $article->consStock = 0;
             $article->shortageStock = 0;
             //addition range stock
-            $rangeInwards = DB::select("select * from (select i.NoPacks, DATE_FORMAT(i.created_at,'%Y-%m-%d') as CreatedDate, DATE_FORMAT(i.created_at, '%h:%m:%S') as CreatedTime, i.ArticleId from inward i inner join article a on a.Id=i.ArticleId) as dd where dd.CreatedDate >= '" . $startdate . "' and dd.CreatedDate <= '" .  $enddate . "' and dd.ArticleId='" . $article->Id . "'");
+            $rangeInwards = DB::select("select * from (select i.NoPacks, DATE_FORMAT(i.created_at,'%Y-%m-%d') as CreatedDate, DATE_FORMAT(i.created_at, '%h:%m:%S') as CreatedTime, i.ArticleId from inward i inner join article a on a.Id=i.ArticleId) as dd where dd.CreatedDate >= '" . $startdate . "' and dd.CreatedDate <= '" . $enddate . "' and dd.ArticleId='" . $article->Id . "'");
             $rangeSalesReturns = DB::select("select * from (select sr.NoPacks, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, sr.ArticleId from salesreturn sr) as dd where dd.CreatedDate >= '" . $startdate . "' and dd.CreatedDate <= '" . $enddate . "' and dd.ArticleId='" . $article->Id . "'");
             $rangePros = DB::select("select * from (select st.TransferNoPacks as NoPacks, DATE_FORMAT(st.created_at,'%Y-%m-%d') as CreatedDate, st.TransferArticleId as ArticleId from stocktransfer st) as dd where dd.CreatedDate >= '" . $startdate . "' and dd.CreatedDate <= '" . $enddate . "' and dd.ArticleId='" . $article->Id . "'");
             foreach ($rangeInwards as $rangeInward) {
@@ -121,7 +121,7 @@ class ReportController extends Controller
                 if (strpos($rangeInward->NoPacks, ',') != false) {
                     $rangeInwardPacks = $rangeInwardPacks + array_sum(explode(',', $rangeInward->NoPacks));
                 } else {
-                    $rangeInwardPacks = $rangeInwardPacks + (int)$rangeInward->NoPacks;
+                    $rangeInwardPacks = $rangeInwardPacks + (int) $rangeInward->NoPacks;
                 }
                 $article->inwardStock = $article->inwardStock + $rangeInwardPacks;
             }
@@ -130,7 +130,7 @@ class ReportController extends Controller
                 if (strpos($rangeSalesReturn->NoPacks, ',') != false) {
                     $rangeSalesReturnPacks = $rangeSalesReturnPacks + array_sum(explode(',', $rangeSalesReturn->NoPacks));
                 } else {
-                    $rangeSalesReturnPacks = $rangeSalesReturnPacks + (int)$rangeSalesReturn->NoPacks;
+                    $rangeSalesReturnPacks = $rangeSalesReturnPacks + (int) $rangeSalesReturn->NoPacks;
                 }
                 $article->salesReturnStock = $article->salesReturnStock + $rangeSalesReturnPacks;
             }
@@ -139,7 +139,7 @@ class ReportController extends Controller
                 if (strpos($rangePro->NoPacks, ',') != false) {
                     $rangeProPacks = $rangeProPacks + array_sum(explode(',', $rangePro->NoPacks));
                 } else {
-                    $rangeProPacks = $rangeProPacks + (int)$rangePro->NoPacks;
+                    $rangeProPacks = $rangeProPacks + (int) $rangePro->NoPacks;
                 }
                 $article->proStock = $article->proStock + $rangeProPacks;
             }
@@ -157,7 +157,7 @@ class ReportController extends Controller
                 if (strpos($rangeDomesticOutward->NoPacks, ',') != false) {
                     $domesticOutwardStock = $domesticOutwardStock + array_sum(explode(',', $rangeDomesticOutward->NoPacks));
                 } else {
-                    $domesticOutwardStock = $domesticOutwardStock + (int)$rangeDomesticOutward->NoPacks;
+                    $domesticOutwardStock = $domesticOutwardStock + (int) $rangeDomesticOutward->NoPacks;
                 }
                 $article->domesticOutwardStock = $article->domesticOutwardStock + $domesticOutwardStock;
             }
@@ -166,7 +166,7 @@ class ReportController extends Controller
                 if (strpos($rangeExportOutward->NoPacks, ',') != false) {
                     $exportOutwardStock = $exportOutwardStock + array_sum(explode(',', $rangeExportOutward->NoPacks));
                 } else {
-                    $exportOutwardStock = $exportOutwardStock + (int)$rangeExportOutward->NoPacks;
+                    $exportOutwardStock = $exportOutwardStock + (int) $rangeExportOutward->NoPacks;
                 }
                 $article->exportOutwardStock = $article->exportOutwardStock + $exportOutwardStock;
             }
@@ -175,7 +175,7 @@ class ReportController extends Controller
                 if (strpos($rangePurchaseReturn->NoPacks, ',') != false) {
                     $rangePurchaseReturnPacks = $rangePurchaseReturnPacks + array_sum(explode(',', $rangePurchaseReturn->NoPacks));
                 } else {
-                    $rangePurchaseReturnPacks = $rangePurchaseReturnPacks + (int)$rangePurchaseReturn->NoPacks;
+                    $rangePurchaseReturnPacks = $rangePurchaseReturnPacks + (int) $rangePurchaseReturn->NoPacks;
                 }
                 $article->purchaseReturnStock = $article->purchaseReturnStock + $rangePurchaseReturnPacks;
             }
@@ -184,7 +184,7 @@ class ReportController extends Controller
                 if (strpos($rangeCon->NoPacks, ',') != false) {
                     $rangeConPacks = $rangeConPacks + array_sum(explode(',', $rangeCon->NoPacks));
                 } else {
-                    $rangeConPacks = $rangeConPacks + (int)$rangeCon->NoPacks;
+                    $rangeConPacks = $rangeConPacks + (int) $rangeCon->NoPacks;
                 }
                 $article->consStock = $article->consStock + $rangeConPacks;
             }
@@ -193,7 +193,7 @@ class ReportController extends Controller
                 if (strpos($rangeShortage->NoPacks, ',') != false) {
                     $rangeShortagePacks = $rangeShortagePacks + array_sum(explode(',', $rangeShortage->NoPacks));
                 } else {
-                    $rangeShortagePacks = $rangeShortagePacks + (int)$rangeShortage->NoPacks;
+                    $rangeShortagePacks = $rangeShortagePacks + (int) $rangeShortage->NoPacks;
                 }
                 $article->shortageStock = $article->shortageStock + $rangeShortagePacks;
             }
@@ -220,7 +220,8 @@ class ReportController extends Controller
     }
 
 
-    public function getarticallaunchdata($id){
+    public function getarticallaunchdata($id)
+    {
         return DB::select('SELECT atr.ArticleRate (SELECT * From FROM article a INNER JOIN articlerate atr, articlelaunch WHERE ArticleId = ' . $id . '');
     }
 
@@ -234,13 +235,13 @@ class ReportController extends Controller
 
         $sum = 0;
 
-        
-        
-        
+
+
+
         foreach ($data as $vl) {
-            $object = (object)$vl;
-            
-           
+            $object = (object) $vl;
+
+
             // Split the comma-separated values into an array
             // $values = explode(',', $object->SalesNoPacks);
             // Loop through the values and add them to the sum
@@ -264,15 +265,15 @@ class ReportController extends Controller
             $carbonDate = Carbon::parse($date);
             $formattedDate = $carbonDate->format('d-m-Y');
 
-            if($vl->LaunchDate != null){
+            if ($vl->LaunchDate != null) {
                 $date = $vl->LaunchDate;
                 $carbonLDate = Carbon::parse($date);
                 $formattedLDate = $carbonLDate->format('d-m-Y');
             }
-            
-            if($vl->partyId == 0){
+
+            if ($vl->partyId == 0) {
                 $object->LaunchDate = $formattedLDate;
-            }else{
+            } else {
                 $object->LaunchDate = '-';
                 //REMOVE
                 //  $object->LaunchDate = $formattedLDate;
@@ -287,10 +288,10 @@ class ReportController extends Controller
             if ($vl->ArticleOpenFlag = 0) {
                 // $object->TotalPieces = $NoPacks;
                 $article = Article::select('category.Title', 'article.StyleDescription', 'subcategory.Name as Subcategory', 'brand.Name as BrandName')
-                ->join('category', 'category.Id', '=', 'article.CategoryId')
-                ->leftjoin('subcategory', 'subcategory.Id', '=', 'article.SubCategoryId')
-                ->join('brand', 'brand.Id', '=', 'article.BrandId')
-                ->where('article.Id', $vl->Id)->first();
+                    ->join('category', 'category.Id', '=', 'article.CategoryId')
+                    ->leftjoin('subcategory', 'subcategory.Id', '=', 'article.SubCategoryId')
+                    ->join('brand', 'brand.Id', '=', 'article.BrandId')
+                    ->where('article.Id', $vl->Id)->first();
 
 
                 // Initialize a variable to hold the sum
@@ -301,11 +302,11 @@ class ReportController extends Controller
                 $object->Subcategory = $article->Subcategory;
                 $object->BrandName = $article->BrandName;
             }
-            
 
 
-            $sorecords  = Outward::where('ArticleId', $vl->Id)->get();
-            
+
+            $sorecords = Outward::where('ArticleId', $vl->Id)->get();
+
             if (count($sorecords) > 0) {
                 if (strpos($vl->SalesNoPacks, ',') !== false) {
                     $SalesNoPacks = [];
@@ -316,31 +317,31 @@ class ReportController extends Controller
 
                         for ($i = 0; $i < count(explode(",", $vl->SalesNoPacks)); $i++) {
                             $OutwardNoPacks = explode(",", $sorecord->NoPacks);
-                            $SalesNoPacks[$i] = (int)$SalesNoPacks[$i] - (int)$OutwardNoPacks[$i];
+                            $SalesNoPacks[$i] = (int) $SalesNoPacks[$i] - (int) $OutwardNoPacks[$i];
                         }
                         if (array_sum($SalesNoPacks) > 0) {
-                            $object->SoColorwise =     implode(',', $SalesNoPacks);
+                            $object->SoColorwise = implode(',', $SalesNoPacks);
                             $object->TotalPieces = array_sum($SalesNoPacks);
                         } else {
-                            $object->SoColorwise =     "";
+                            $object->SoColorwise = "";
                             $object->SoTotalQuantity = "";
                         }
                     }
                 } else {
                     $SalesNoPacks = 0;
                     foreach ($sorecords as $sorecord) {
-                        $SalesNoPacks = $SalesNoPacks - (int)$sorecord->NoPacks;
+                        $SalesNoPacks = $SalesNoPacks - (int) $sorecord->NoPacks;
                     }
                     if ($SalesNoPacks > 0) {
-                        $object->SoColorwise =     $SalesNoPacks;
+                        $object->SoColorwise = $SalesNoPacks;
                         $object->SoTotalQuantity = $SalesNoPacks;
                     } else {
-                        $object->SoColorwise =     "";
+                        $object->SoColorwise = "";
                         $object->SoTotalQuantity = "";
                     }
                 }
             } else {
-                $object->SoColorwise =     "";
+                $object->SoColorwise = "";
                 $object->SoTotalQuantity = "";
             }
         }
@@ -369,25 +370,24 @@ class ReportController extends Controller
     // }   
 
     public function GetAllStocks()
-
     {
 
         //ORIGINAL
         // $data = DB::select("select dv.Id, dv.ArticleNumber, dv.ArticleOpenFlag, dv.SalesNoPacks, dv.TotalPieces, dv.ArticleColor, dv.ArticleSize, dv.ArticleRatio, dv.Colorflag, dv.Title, dv.BrandName, dv.Subcategory,  dv.SeriesName, dv.Series, dv.StyleDescription, CountNoPacks(dv.ArticleRatio) as TotalArticleRatio, DATE_FORMAT(dv.created_at, '%d-%m-%Y') as InwardDate  from (select * from (SELECT (case when pl.ProductStatus IS NULL then 1 else pl.ProductStatus end)  as ProductStatusData, a.Id, a.ArticleNumber, a.ArticleOpenFlag, inw.created_at, inw.SalesNoPacks, CountNoPacks(inw.SalesNoPacks) as TotalPieces, GROUP_CONCAT(DISTINCT CONCAT(ac.ArticleColorName) ORDER BY ac.Id SEPARATOR ',') as ArticleColor, GROUP_CONCAT(DISTINCT CONCAT(asz.ArticleSizeName) ORDER BY asz.Id SEPARATOR ',') as ArticleSize, a.ArticleRatio, cat.Colorflag, cat.Title, bn.Name as BrandName, subc.Name as Subcategory, rs.SeriesName, rs.Series, a.StyleDescription FROM `inward` inw inner join article a on a.Id=inw.ArticleId left join articlecolor ac on ac.ArticleId=a.Id left join articlesize asz on asz.ArticleId=a.Id left join po p on p.ArticleId=a.Id inner join category cat on cat.Id=a.CategoryId left join productlaunch pl on pl.ArticleId=a.Id left join brand bn on bn.Id= a.BrandId left join subcategory subc on subc.Id=a.SubCategoryId left join rangeseries rs on rs.Id=a.SeriesId group by a.Id) as ddd where ddd.ProductStatusData= 1 and ddd.ArticleOpenFlag=0 HAVING ddd.TotalPieces > 0 Union SELECT 1, a.Id, a.ArticleNumber, a.ArticleOpenFlag, '-', mxn.NoPacks as TotalPieces, '-', '-', '-', '-',c.Title, '-', '-', '-', '-', '-','-' FROM `mixnopacks` mxn inner join article a on a.Id=mxn.ArticleId left join po p on p.ArticleId=a.Id left join category c on c.Id=a.CategoryId where a.ArticleOpenFlag=1 HAVING TotalPieces > 0) as dv");
-        
+
         // $data1 = DB::select("SELECT dv.Id, dv.ArticleNumber, dv.ArticleOpenFlag, dv.SalesNoPacks, dv.TotalPieces, dv.ArticleColor, dv.ArticleSize, dv.ArticleRatio, dv.Colorflag, dv.Title, dv.BrandName, dv.Subcategory, dv.SeriesName, dv.Series, dv.StyleDescription, TotalArticleRatio, DATE_FORMAT(dv.created_at, '%d-%m-%Y') as InwardDate FROM ( SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag, inw.created_at, inw.SalesNoPacks, CountNoPacks(inw.SalesNoPacks) as TotalPieces, GROUP_CONCAT(DISTINCT CONCAT(ac.ArticleColorName) ORDER BY ac.Id SEPARATOR ',') as ArticleColor, GROUP_CONCAT(DISTINCT CONCAT(asz.ArticleSizeName) ORDER BY asz.Id SEPARATOR ',') as ArticleSize, a.ArticleRatio, cat.Colorflag, cat.Title, bn.Name as BrandName, subc.Name as Subcategory, rs.SeriesName, rs.Series, a.StyleDescription, CountNoPacks(a.ArticleRatio) as TotalArticleRatio FROM inward inw INNER JOIN article a ON a.Id = inw.ArticleId LEFT JOIN articlecolor ac ON ac.ArticleId = a.Id LEFT JOIN articlesize asz ON asz.ArticleId = a.Id INNER JOIN category cat ON cat.Id = a.CategoryId LEFT JOIN brand bn ON bn.Id = a.BrandId LEFT JOIN subcategory subc ON subc.Id = a.SubCategoryId LEFT JOIN rangeseries rs ON rs.Id = a.SeriesId WHERE a.ArticleOpenFlag = 0 AND inw.SalesNoPacks > 0 GROUP BY a.Id ) dv");
         // $data2 = DB::select("SELECT 1, a.Id, a.ArticleNumber, a.ArticleOpenFlag, '-', mxn.NoPacks as TotalPieces, '-', '-', '-', '-',c.Title, '-', '-', '-', '-', '-','-' FROM `mixnopacks` mxn inner join article a on a.Id=mxn.ArticleId left join po p on p.ArticleId=a.Id left join category c on c.Id=a.CategoryId where a.ArticleOpenFlag=1 HAVING TotalPieces > 0");
-        
-        
+
+
         // $data = array_merge($data1 );
-        
 
 
 
-        $array1 = DB::select("SELECT * from (SELECT dv.Id, dv.ArticleNumber, dv.ArticleOpenFlag, dv.SalesNoPacks, dv.TotalPieces, dv.ArticleColor, dv.ArticleSize, dv.ArticleRatio, dv.Colorflag, dv.Title, dv.BrandName, dv.Subcategory, dv.SeriesName, dv.Series, dv.StyleDescription, TotalArticleRatio, DATE_FORMAT(dv.created_at, '%d-%m-%Y') as InwardDate FROM ( SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag, inw.created_at, inw.SalesNoPacks, CountNoPacks(inw.SalesNoPacks) as TotalPieces, GROUP_CONCAT(DISTINCT CONCAT(ac.ArticleColorName) ORDER BY ac.Id SEPARATOR ',') as ArticleColor, GROUP_CONCAT(DISTINCT CONCAT(asz.ArticleSizeName) ORDER BY asz.Id SEPARATOR ',') as ArticleSize, a.ArticleRatio, cat.Colorflag, cat.Title, bn.Name as BrandName, subc.Name as Subcategory, rs.SeriesName, rs.Series, a.StyleDescription, CountNoPacks(a.ArticleRatio) as TotalArticleRatio FROM inward inw INNER JOIN article a ON a.Id = inw.ArticleId LEFT JOIN articlecolor ac ON ac.ArticleId = a.Id LEFT JOIN articlesize asz ON asz.ArticleId = a.Id INNER JOIN category cat ON cat.Id = a.CategoryId LEFT JOIN brand bn ON bn.Id = a.BrandId LEFT JOIN subcategory subc ON subc.Id = a.SubCategoryId LEFT JOIN rangeseries rs ON rs.Id = a.SeriesId WHERE a.ArticleOpenFlag = 0 GROUP BY a.Id ) dv where dv.ArticleOpenFlag = 0)v where v.TotalPieces > 0"); 
-    
-        
-        $array2 = DB::select("SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag,  '' AS ArticleColor, '' AS ArticleSize, '' AS ArticleRatio, '' as Colorflag, '' as BrandName, '' as Subcategory, '' as SeriesName, '' as Series, '' as StyleDescription, '' as TotalArticleRatio, '' as InwardDate, mxn.NoPacks as SalesNoPacks, mxn.NoPacks as TotalPieces, c.Title FROM `mixnopacks` mxn INNER JOIN article a ON a.Id = mxn.ArticleId LEFT JOIN po p ON p.ArticleId = a.Id LEFT JOIN category c ON c.Id = a.CategoryId WHERE a.ArticleOpenFlag = 1 AND mxn.NoPacks > 0 GROUP BY a.ArticleNumber"); 
+
+        $array1 = DB::select("SELECT * from (SELECT dv.Id, dv.ArticleNumber, dv.ArticleOpenFlag, dv.SalesNoPacks, dv.TotalPieces, dv.ArticleColor, dv.ArticleSize, dv.ArticleRatio, dv.Colorflag, dv.Title, dv.BrandName, dv.Subcategory, dv.SeriesName, dv.Series, dv.StyleDescription, TotalArticleRatio, DATE_FORMAT(dv.created_at, '%d-%m-%Y') as InwardDate FROM ( SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag, inw.created_at, inw.SalesNoPacks, CountNoPacks(inw.SalesNoPacks) as TotalPieces, GROUP_CONCAT(DISTINCT CONCAT(ac.ArticleColorName) ORDER BY ac.Id SEPARATOR ',') as ArticleColor, GROUP_CONCAT(DISTINCT CONCAT(asz.ArticleSizeName) ORDER BY asz.Id SEPARATOR ',') as ArticleSize, a.ArticleRatio, cat.Colorflag, cat.Title, bn.Name as BrandName, subc.Name as Subcategory, rs.SeriesName, rs.Series, a.StyleDescription, CountNoPacks(a.ArticleRatio) as TotalArticleRatio FROM inward inw INNER JOIN article a ON a.Id = inw.ArticleId LEFT JOIN articlecolor ac ON ac.ArticleId = a.Id LEFT JOIN articlesize asz ON asz.ArticleId = a.Id INNER JOIN category cat ON cat.Id = a.CategoryId LEFT JOIN brand bn ON bn.Id = a.BrandId LEFT JOIN subcategory subc ON subc.Id = a.SubCategoryId LEFT JOIN rangeseries rs ON rs.Id = a.SeriesId WHERE a.ArticleOpenFlag = 0 GROUP BY a.Id ) dv where dv.ArticleOpenFlag = 0)v where v.TotalPieces > 0");
+
+
+        $array2 = DB::select("SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag,  '' AS ArticleColor, '' AS ArticleSize, '' AS ArticleRatio, '' as Colorflag, '' as BrandName, '' as Subcategory, '' as SeriesName, '' as Series, '' as StyleDescription, '' as TotalArticleRatio, '' as InwardDate, mxn.NoPacks as SalesNoPacks, mxn.NoPacks as TotalPieces, c.Title FROM `mixnopacks` mxn INNER JOIN article a ON a.Id = mxn.ArticleId LEFT JOIN po p ON p.ArticleId = a.Id LEFT JOIN category c ON c.Id = a.CategoryId WHERE a.ArticleOpenFlag = 1 AND mxn.NoPacks > 0 GROUP BY a.ArticleNumber");
 
 
 
@@ -411,7 +411,7 @@ class ReportController extends Controller
 
         // unset($item); // Unset the reference to the last item
 
-        
+
         // $mergedArray = $result;
 
 
@@ -420,7 +420,7 @@ class ReportController extends Controller
 
         foreach ($result as $vl) {
 
-            $object = (object)$vl;
+            $object = (object) $vl;
 
             $NoPacks = $vl->SalesNoPacks;
 
@@ -448,7 +448,7 @@ class ReportController extends Controller
 
             }
 
-            $sorecords  = SO::where('ArticleId', $vl->Id)->where('Status', 0)->get();
+            $sorecords = SO::where('ArticleId', $vl->Id)->where('Status', 0)->get();
 
             if (count($sorecords) > 0) {
 
@@ -470,19 +470,19 @@ class ReportController extends Controller
 
                             $OutwardNoPacks = explode(",", $sorecord->OutwardNoPacks);
 
-                            $SalesNoPacks[$i] = (int)$SalesNoPacks[$i] + (int)$OutwardNoPacks[$i];
+                            $SalesNoPacks[$i] = (int) $SalesNoPacks[$i] + (int) $OutwardNoPacks[$i];
 
                         }
 
                         if (array_sum($SalesNoPacks) > 0) {
 
-                            $object->SoColorwise =     implode(',', $SalesNoPacks);
+                            $object->SoColorwise = implode(',', $SalesNoPacks);
 
                             $object->SoTotalQuantity = array_sum($SalesNoPacks);
 
                         } else {
 
-                            $object->SoColorwise =     "";
+                            $object->SoColorwise = "";
 
                             $object->SoTotalQuantity = "";
 
@@ -496,19 +496,19 @@ class ReportController extends Controller
 
                     foreach ($sorecords as $sorecord) {
 
-                        $SalesNoPacks = $SalesNoPacks + (int)$sorecord->OutwardNoPacks;
+                        $SalesNoPacks = $SalesNoPacks + (int) $sorecord->OutwardNoPacks;
 
                     }
 
                     if ($SalesNoPacks > 0) {
 
-                        $object->SoColorwise =     $SalesNoPacks;
+                        $object->SoColorwise = $SalesNoPacks;
 
                         $object->SoTotalQuantity = $SalesNoPacks;
 
                     } else {
 
-                        $object->SoColorwise =     "";
+                        $object->SoColorwise = "";
 
                         $object->SoTotalQuantity = "";
 
@@ -518,7 +518,7 @@ class ReportController extends Controller
 
             } else {
 
-                $object->SoColorwise =     "";
+                $object->SoColorwise = "";
 
                 $object->SoTotalQuantity = "";
             }
@@ -766,10 +766,10 @@ class ReportController extends Controller
     public function GetOutletStocksRefil($PartyId)
     {
 
-        if($PartyId == 4){
+        if ($PartyId == 4) {
 
             $articles = $this->GetAllStocks();
-            
+
             foreach ($articles['data'] as &$item) {
                 $item->OLSTOCKS = '-';
                 $item->OLTotalPieces = '-';
@@ -778,22 +778,22 @@ class ReportController extends Controller
 
             return $articles;
 
-        }else{
-            
-            
+        } else {
+
+
             $articles = $this->GetAllStocks();
             $array1 = $articles['data'];
 
 
             $articlesArray = DB::select('(select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutlet` right join `outward` on `transportoutlet`.`OutwardNumberId` = `outward`.`OutwardNumberId` inner join `article` on `article`.`Id` = `outward`.`ArticleId`  where `transportoutlet`.`TransportStatus` = 1 AND `transportoutlet`.`PartyId` = ' . $PartyId . ' )  union (select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutwardpacks` inner join `article` on `article`.`Id` = `transportoutwardpacks`.`ArticleId` where `transportoutwardpacks`.`OutwardId` = 0 AND `transportoutwardpacks`.`PartyId` = ' . $PartyId . ') order by `ArticleId` asc');
             $collectionArticles = collect($articlesArray);
-            $articles  = $collectionArticles->unique()->values()->all();
+            $articles = $collectionArticles->unique()->values()->all();
             foreach ($articles as $key => $article) {
                 $objectArticle = $article;
-                $articleArray = (array)$article; 
+                $articleArray = (array) $article;
                 $articleData = DB::select('select `category`.`Colorflag`, `article`.`ArticleRatio`,`article`.`ArticleOpenFlag`, `category`.`Title`, `brand`.`Name` as `BrandName`, `subcategory`.`Name` as `Subcategory`, `rangeseries`.`SeriesName`, `rangeseries`.`Series`, `article`.`StyleDescription` from `article` inner join `category` on `article`.`CategoryId` = `category`.`Id` left join `brand` on `brand`.`Id` = `article`.`BrandId` left join `subcategory` on `subcategory`.`Id` = `article`.`SubCategoryId` left join `rangeseries` on `rangeseries`.`Id` = `article`.`SeriesId` where `article`.`Id` = ' . $articleArray['ArticleId']);
                 $articlesColors = DB::select("select   GROUP_CONCAT(DISTINCT CONCAT(articlesize.ArticleSizeName) ORDER BY articlesize.Id SEPARATOR ',') as ArticleSize , GROUP_CONCAT(DISTINCT CONCAT(articlecolor.ArticleColorName) ORDER BY articlecolor.Id SEPARATOR ',') as ArticleColor from article left join articlecolor on articlecolor.ArticleId=article.Id left join articlesize on articlesize.ArticleId=article.Id  where article.Id=" . $articleArray['ArticleId']);
-                $articleData = (array)$articleData[0];
+                $articleData = (array) $articleData[0];
                 $objectArticle->Colorflag = $articleData['Colorflag'];
                 $objectArticle->ArticleRatio = $articleData['ArticleRatio'];
                 if ($articleData['ArticleRatio']) {
@@ -815,11 +815,11 @@ class ReportController extends Controller
                         $objectArticle->ArticleColor = "";
                     }
                 } else {
-                    $articleouter = Article::select('ArticleColor')->where('Id',  $articleArray['ArticleId'])->first();
+                    $articleouter = Article::select('ArticleColor')->where('Id', $articleArray['ArticleId'])->first();
                     if (json_decode($articleouter['ArticleColor'])) {
-                        $objectArticle->ArticleColor  = implode(',', array_column(json_decode($articleouter['ArticleColor']), 'Name'));
+                        $objectArticle->ArticleColor = implode(',', array_column(json_decode($articleouter['ArticleColor']), 'Name'));
                     } else {
-                        $objectArticle->ArticleColor  = "";
+                        $objectArticle->ArticleColor = "";
                     }
                 }
                 $objectArticle->ArticleSize = $articlesColors[0]->ArticleSize;
@@ -835,15 +835,15 @@ class ReportController extends Controller
                     if ($outletArticle) {
                         $outletArticleColors = json_decode($outletArticle->ArticleColor);
                     } else {
-                        $outletArticleColors  = json_decode($articlesColors[0]->ArticleColor);
+                        $outletArticleColors = json_decode($articlesColors[0]->ArticleColor);
                     }
-                    $outletArticleColors =  (array)$outletArticleColors;
+                    $outletArticleColors = (array) $outletArticleColors;
                     if (count($outletArticleColors) > 0) {
                         $SalesNoPacks = [];
                         foreach ($outletArticleColors as $makearray) {
                             array_push($SalesNoPacks, 0);
                         }
-                        $getTransportOutwardpacks =  TransportOutwardpacks::select('NoPacks', 'ColorId')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
+                        $getTransportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
                         if (count($getTransportOutwardpacks) != 0) {
                             // $collectionTransportOutwardpacks = collect($transportOutwardpacks);
                             // $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
@@ -852,7 +852,7 @@ class ReportController extends Controller
                                 if ($outletArticle) {
                                     $outletArticleColors = json_decode($outletArticle->ArticleColor);
                                 } else {
-                                    $article = Article::select('ArticleColor')->where('Id',  $articleArray['ArticleId'])->first();
+                                    $article = Article::select('ArticleColor')->where('Id', $articleArray['ArticleId'])->first();
                                     $outletArticleColors = json_decode($article['ArticleColor']);
                                 }
                                 $count = 0;
@@ -868,7 +868,7 @@ class ReportController extends Controller
                             }
                         }
                         $newimplodeSalesNoPacks = implode(",", $SalesNoPacks);
-                        $objectArticle->STOCKS =  $newimplodeSalesNoPacks;
+                        $objectArticle->STOCKS = $newimplodeSalesNoPacks;
                         if (array_sum($SalesNoPacks) <= 0) {
                             unset($articles[$key]);
                         } else {
@@ -877,11 +877,11 @@ class ReportController extends Controller
                         }
                         // return $objectArticle->TotalPieces;
                     } else {
-                        $transportOutwardpacks =  TransportOutwardpacks::select('NoPacks')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
+                        $transportOutwardpacks = TransportOutwardpacks::select('NoPacks')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
                         $TotalTransportOutwardpacks = 0;
                         if (count($transportOutwardpacks) != 0) {
                             $collectionTransportOutwardpacks = collect($transportOutwardpacks);
-                            $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
+                            $getTransportOutwardpacks = $collectionTransportOutwardpacks->unique()->values()->all();
                             foreach ($getTransportOutwardpacks as $getTransportOutwardpack) {
                                 $TotalTransportOutwardpacks = $TotalTransportOutwardpacks + $getTransportOutwardpack->NoPacks;
                             }
@@ -902,11 +902,11 @@ class ReportController extends Controller
                         foreach (explode(",", $allRecords[0]->NoPacks) as $makearray) {
                             array_push($SalesNoPacks, 0);
                         }
-                        $transportOutwardpacks =  TransportOutwardpacks::select('NoPacks', 'ColorId')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
+                        $transportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
                         $TotalTransportOutwardpacks = 0;
                         if (count($transportOutwardpacks) != 0) {
                             $collectionTransportOutwardpacks = collect($transportOutwardpacks);
-                            $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
+                            $getTransportOutwardpacks = $collectionTransportOutwardpacks->unique()->values()->all();
                             foreach ($getTransportOutwardpacks as $getTransportOutwardpack) {
                                 $outletArticle = Outletimport::where('ArticleId', $articleArray['ArticleId'])->where('PartyId', $PartyId)->first();
                                 if ($outletArticle) {
@@ -927,7 +927,7 @@ class ReportController extends Controller
                                 }
                             }
                         }
-                        foreach ($allRecords as  $allRecord) {
+                        foreach ($allRecords as $allRecord) {
                             for ($i = 0; $i < count(explode(",", $allRecord->NoPacks)); $i++) {
                                 $noPacks = explode(",", $allRecord->NoPacks);
                                 if ($allRecord->type == 0) {
@@ -942,33 +942,33 @@ class ReportController extends Controller
                             }
                         }
                         $newimplodeSalesNoPacks = implode(",", $SalesNoPacks);
-                        $objectArticle->STOCKS =  $newimplodeSalesNoPacks;
+                        $objectArticle->STOCKS = $newimplodeSalesNoPacks;
                         if (array_sum($SalesNoPacks) <= 0) {
                             unset($articles[$key]);
                         } else {
                             $objectArticle->TotalPieces = array_sum($SalesNoPacks);
                         }
                     } else {
-                        $transportOutwardpacks =  TransportOutwardpacks::select('NoPacks')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
+                        $transportOutwardpacks = TransportOutwardpacks::select('NoPacks')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
                         $TotalTransportOutwardpacks = 0;
                         if (count($transportOutwardpacks) != 0) {
                             $collectionTransportOutwardpacks = collect($transportOutwardpacks);
-                            $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
+                            $getTransportOutwardpacks = $collectionTransportOutwardpacks->unique()->values()->all();
                             foreach ($getTransportOutwardpacks as $getTransportOutwardpack) {
                                 $TotalTransportOutwardpacks = $TotalTransportOutwardpacks + $getTransportOutwardpack->NoPacks;
                             }
                         }
                         $TotalInwardPacks = $TotalTransportOutwardpacks;
                         $TotalOutwardPacks = 0;
-                        foreach ($allRecords as  $allRecord) {
+                        foreach ($allRecords as $allRecord) {
                             if ($allRecord->type == 0) {
-                                $TotalInwardPacks = $TotalInwardPacks + (int)$allRecord->NoPacks;
+                                $TotalInwardPacks = $TotalInwardPacks + (int) $allRecord->NoPacks;
                             } elseif ($allRecord->type == 1) {
-                                $TotalOutwardPacks = $TotalOutwardPacks + (int)$allRecord->NoPacks;
+                                $TotalOutwardPacks = $TotalOutwardPacks + (int) $allRecord->NoPacks;
                             } elseif ($allRecord->type == 2) {
-                                $TotalInwardPacks = $TotalInwardPacks + (int)$allRecord->NoPacks;
+                                $TotalInwardPacks = $TotalInwardPacks + (int) $allRecord->NoPacks;
                             } elseif ($allRecord->type == 3) {
-                                $TotalOutwardPacks = $TotalOutwardPacks + (int)$allRecord->NoPacks;
+                                $TotalOutwardPacks = $TotalOutwardPacks + (int) $allRecord->NoPacks;
                             }
                         }
                         $totalStock = $TotalInwardPacks - $TotalOutwardPacks;
@@ -982,63 +982,63 @@ class ReportController extends Controller
                 }
             }
             $partyName = Party::select('Name')->where('Id', $PartyId)->first();
-            
-            
-        $array2 = array("data" => array_values($articles)) ;
 
-            
+
+            $array2 = array("data" => array_values($articles));
+
+
             $array2 = $array2['data'];
-            
+
             // return $array1;
 
 
-        $mergedArray = [];
-        foreach ($array1 as $item1) {
-            $found = false;
-            foreach ($array2 as $item2) {
-                if ($item2->ArticleNumber === $item1->ArticleNumber) {
-                    $item1->OLSTOCKS = $item2->STOCKS;
-                    $item1->OLTotalPieces = $item2->TotalPieces;
-                    $found = true;
-                    break;
+            $mergedArray = [];
+            foreach ($array1 as $item1) {
+                $found = false;
+                foreach ($array2 as $item2) {
+                    if ($item2->ArticleNumber === $item1->ArticleNumber) {
+                        $item1->OLSTOCKS = $item2->STOCKS;
+                        $item1->OLTotalPieces = $item2->TotalPieces;
+                        $found = true;
+                        break;
+                    }
                 }
-            }
-            if (!$found) {
-                $item1->OLSTOCKS = '-';
-                $item1->OLTotalPieces = '-';
-            }
-            $mergedArray[] = $item1;
-        }
-
-
-        $currentDate = Carbon::now()->toDateString();
-        $fromd = '2021-07-04'; 
-        $tod = $currentDate; 
-        $id = $PartyId; 
-        $Outward_for_outlet = $this->outwardOutletReport($fromd, $tod, $id);
-
-        $Outward_for_outlet = $Outward_for_outlet['data'];
-
-
-
-        $mergedArray2 = [];
-        foreach ($mergedArray as $item1) {
-            $found = false;
-            foreach ($Outward_for_outlet as $item2) {
-                if ($item2->ArticleNumber === $item1->ArticleNumber) {
-                    $item1->outwd = $item2->Quantity;
-                    $found = true;
-                    break;
+                if (!$found) {
+                    $item1->OLSTOCKS = '-';
+                    $item1->OLTotalPieces = '-';
                 }
+                $mergedArray[] = $item1;
             }
-            if (!$found) {
-                $item1->outwd = '-';
-            }
-            $mergedArray2[] = $item1;
-        }
 
 
-        // return $Outward_for_outlet;
+            $currentDate = Carbon::now()->toDateString();
+            $fromd = '2021-07-04';
+            $tod = $currentDate;
+            $id = $PartyId;
+            $Outward_for_outlet = $this->outwardOutletReport($fromd, $tod, $id);
+
+            $Outward_for_outlet = $Outward_for_outlet['data'];
+
+
+
+            $mergedArray2 = [];
+            foreach ($mergedArray as $item1) {
+                $found = false;
+                foreach ($Outward_for_outlet as $item2) {
+                    if ($item2->ArticleNumber === $item1->ArticleNumber) {
+                        $item1->outwd = $item2->Quantity;
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    $item1->outwd = '-';
+                }
+                $mergedArray2[] = $item1;
+            }
+
+
+            // return $Outward_for_outlet;
 
 
 
@@ -1051,17 +1051,17 @@ class ReportController extends Controller
     public function GetOutletStocks($PartyId)
     {
 
-        if($PartyId == 4){
-           
+        if ($PartyId == 4) {
+
             $articlesArray = DB::select('(select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutlet` right join `outward` on `transportoutlet`.`OutwardNumberId` = `outward`.`OutwardNumberId` inner join `article` on `article`.`Id` = `outward`.`ArticleId`  where `transportoutlet`.`TransportStatus` = 1 )  union (select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutwardpacks` inner join `article` on `article`.`Id` = `transportoutwardpacks`.`ArticleId` where `transportoutwardpacks`.`OutwardId` = 0 ) order by `ArticleId` asc');
             $collectionArticles = collect($articlesArray);
-            $articles  = $collectionArticles->unique()->values()->all();
+            $articles = $collectionArticles->unique()->values()->all();
             foreach ($articles as $key => $article) {
                 $objectArticle = $article;
-                $articleArray = (array)$article;
+                $articleArray = (array) $article;
                 $articleData = DB::select('select `category`.`Colorflag`, `article`.`ArticleRatio`,`article`.`ArticleOpenFlag`, `category`.`Title`, `brand`.`Name` as `BrandName`, `subcategory`.`Name` as `Subcategory`, `rangeseries`.`SeriesName`, `rangeseries`.`Series`, `article`.`StyleDescription` from `article` inner join `category` on `article`.`CategoryId` = `category`.`Id` left join `brand` on `brand`.`Id` = `article`.`BrandId` left join `subcategory` on `subcategory`.`Id` = `article`.`SubCategoryId` left join `rangeseries` on `rangeseries`.`Id` = `article`.`SeriesId` where `article`.`Id` = ' . $articleArray['ArticleId']);
                 $articlesColors = DB::select("select   GROUP_CONCAT(DISTINCT CONCAT(articlesize.ArticleSizeName) ORDER BY articlesize.Id SEPARATOR ',') as ArticleSize , GROUP_CONCAT(DISTINCT CONCAT(articlecolor.ArticleColorName) ORDER BY articlecolor.Id SEPARATOR ',') as ArticleColor from article left join articlecolor on articlecolor.ArticleId=article.Id left join articlesize on articlesize.ArticleId=article.Id  where article.Id=" . $articleArray['ArticleId']);
-                $articleData = (array)$articleData[0];
+                $articleData = (array) $articleData[0];
                 $objectArticle->Colorflag = $articleData['Colorflag'];
                 $objectArticle->ArticleRatio = $articleData['ArticleRatio'];
                 if ($articleData['ArticleRatio']) {
@@ -1083,11 +1083,11 @@ class ReportController extends Controller
                         $objectArticle->ArticleColor = "";
                     }
                 } else {
-                    $articleouter = Article::select('ArticleColor')->where('Id',  $articleArray['ArticleId'])->first();
+                    $articleouter = Article::select('ArticleColor')->where('Id', $articleArray['ArticleId'])->first();
                     if (json_decode($articleouter['ArticleColor'])) {
-                        $objectArticle->ArticleColor  = implode(',', array_column(json_decode($articleouter['ArticleColor']), 'Name'));
+                        $objectArticle->ArticleColor = implode(',', array_column(json_decode($articleouter['ArticleColor']), 'Name'));
                     } else {
-                        $objectArticle->ArticleColor  = "";
+                        $objectArticle->ArticleColor = "";
                     }
                 }
                 $objectArticle->ArticleSize = $articlesColors[0]->ArticleSize;
@@ -1103,15 +1103,15 @@ class ReportController extends Controller
                     if ($outletArticle) {
                         $outletArticleColors = json_decode($outletArticle->ArticleColor);
                     } else {
-                        $outletArticleColors  = json_decode($articlesColors[0]->ArticleColor);
+                        $outletArticleColors = json_decode($articlesColors[0]->ArticleColor);
                     }
-                    $outletArticleColors =  (array)$outletArticleColors;
+                    $outletArticleColors = (array) $outletArticleColors;
                     if (count($outletArticleColors) > 0) {
                         $SalesNoPacks = [];
                         foreach ($outletArticleColors as $makearray) {
                             array_push($SalesNoPacks, 0);
                         }
-                        $getTransportOutwardpacks =  TransportOutwardpacks::select('NoPacks', 'ColorId')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->get();
+                        $getTransportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->get();
                         if (count($getTransportOutwardpacks) != 0) {
                             // $collectionTransportOutwardpacks = collect($transportOutwardpacks);
                             // $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
@@ -1120,7 +1120,7 @@ class ReportController extends Controller
                                 if ($outletArticle) {
                                     $outletArticleColors = json_decode($outletArticle->ArticleColor);
                                 } else {
-                                    $article = Article::select('ArticleColor')->where('Id',  $articleArray['ArticleId'])->first();
+                                    $article = Article::select('ArticleColor')->where('Id', $articleArray['ArticleId'])->first();
                                     $outletArticleColors = json_decode($article['ArticleColor']);
                                 }
                                 $count = 0;
@@ -1136,7 +1136,7 @@ class ReportController extends Controller
                             }
                         }
                         $newimplodeSalesNoPacks = implode(",", $SalesNoPacks);
-                        $objectArticle->STOCKS =  $newimplodeSalesNoPacks;
+                        $objectArticle->STOCKS = $newimplodeSalesNoPacks;
                         if (array_sum($SalesNoPacks) <= 0) {
                             unset($articles[$key]);
                         } else {
@@ -1145,11 +1145,11 @@ class ReportController extends Controller
                         }
                         // return $objectArticle->TotalPieces;
                     } else {
-                        $transportOutwardpacks =  TransportOutwardpacks::select('NoPacks')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->get();
+                        $transportOutwardpacks = TransportOutwardpacks::select('NoPacks')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->get();
                         $TotalTransportOutwardpacks = 0;
                         if (count($transportOutwardpacks) != 0) {
                             $collectionTransportOutwardpacks = collect($transportOutwardpacks);
-                            $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
+                            $getTransportOutwardpacks = $collectionTransportOutwardpacks->unique()->values()->all();
                             foreach ($getTransportOutwardpacks as $getTransportOutwardpack) {
                                 $TotalTransportOutwardpacks = $TotalTransportOutwardpacks + $getTransportOutwardpack->NoPacks;
                             }
@@ -1170,11 +1170,11 @@ class ReportController extends Controller
                         foreach (explode(",", $allRecords[0]->NoPacks) as $makearray) {
                             array_push($SalesNoPacks, 0);
                         }
-                        $transportOutwardpacks =  TransportOutwardpacks::select('NoPacks', 'ColorId')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->get();
+                        $transportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->get();
                         $TotalTransportOutwardpacks = 0;
                         if (count($transportOutwardpacks) != 0) {
                             $collectionTransportOutwardpacks = collect($transportOutwardpacks);
-                            $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
+                            $getTransportOutwardpacks = $collectionTransportOutwardpacks->unique()->values()->all();
                             foreach ($getTransportOutwardpacks as $getTransportOutwardpack) {
                                 $outletArticle = Outletimport::where('ArticleId', $articleArray['ArticleId'])->first();
                                 if ($outletArticle) {
@@ -1195,42 +1195,42 @@ class ReportController extends Controller
                                 }
                             }
                         }
-                        foreach ($allRecords as  $allRecord) {
+                        foreach ($allRecords as $allRecord) {
                             for ($i = 0; $i < count(explode(",", $allRecord->NoPacks)); $i++) {
                                 $noPacks = explode(",", $allRecord->NoPacks);
                                 // if ($allRecord->type == 0) {
-                                    // $SalesNoPacks[$i] = $SalesNoPacks[$i] + $noPacks[$i];
+                                // $SalesNoPacks[$i] = $SalesNoPacks[$i] + $noPacks[$i];
                                 // }
                             }
                         }
                         $newimplodeSalesNoPacks = implode(",", $SalesNoPacks);
-                        $objectArticle->STOCKS =  $newimplodeSalesNoPacks;
+                        $objectArticle->STOCKS = $newimplodeSalesNoPacks;
                         if (array_sum($SalesNoPacks) <= 0) {
                             unset($articles[$key]);
                         } else {
                             $objectArticle->TotalPieces = array_sum($SalesNoPacks);
                         }
                     } else {
-                        $transportOutwardpacks =  TransportOutwardpacks::select('NoPacks')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->get();
+                        $transportOutwardpacks = TransportOutwardpacks::select('NoPacks')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->get();
                         $TotalTransportOutwardpacks = 0;
                         if (count($transportOutwardpacks) != 0) {
                             $collectionTransportOutwardpacks = collect($transportOutwardpacks);
-                            $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
+                            $getTransportOutwardpacks = $collectionTransportOutwardpacks->unique()->values()->all();
                             foreach ($getTransportOutwardpacks as $getTransportOutwardpack) {
                                 $TotalTransportOutwardpacks = $TotalTransportOutwardpacks + $getTransportOutwardpack->NoPacks;
                             }
                         }
                         $TotalInwardPacks = $TotalTransportOutwardpacks;
                         $TotalOutwardPacks = 0;
-                        foreach ($allRecords as  $allRecord) {
+                        foreach ($allRecords as $allRecord) {
                             if ($allRecord->type == 0) {
-                                $TotalInwardPacks = $TotalInwardPacks + (int)$allRecord->NoPacks;
+                                $TotalInwardPacks = $TotalInwardPacks + (int) $allRecord->NoPacks;
                             } elseif ($allRecord->type == 1) {
-                                $TotalOutwardPacks = $TotalOutwardPacks + (int)$allRecord->NoPacks;
+                                $TotalOutwardPacks = $TotalOutwardPacks + (int) $allRecord->NoPacks;
                             } elseif ($allRecord->type == 2) {
-                                $TotalInwardPacks = $TotalInwardPacks + (int)$allRecord->NoPacks;
+                                $TotalInwardPacks = $TotalInwardPacks + (int) $allRecord->NoPacks;
                             } elseif ($allRecord->type == 3) {
-                                $TotalOutwardPacks = $TotalOutwardPacks + (int)$allRecord->NoPacks;
+                                $TotalOutwardPacks = $TotalOutwardPacks + (int) $allRecord->NoPacks;
                             }
                         }
                         $totalStock = $TotalInwardPacks - $TotalOutwardPacks;
@@ -1246,16 +1246,56 @@ class ReportController extends Controller
             return array("data" => array_values($articles), 'PartyName' => '$partyName->Name');
 
 
-        }else{
+        } else {
             $articlesArray = DB::select('(select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutlet` right join `outward` on `transportoutlet`.`OutwardNumberId` = `outward`.`OutwardNumberId` inner join `article` on `article`.`Id` = `outward`.`ArticleId`  where `transportoutlet`.`TransportStatus` = 1 AND `transportoutlet`.`PartyId` = ' . $PartyId . ' )  union (select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutwardpacks` inner join `article` on `article`.`Id` = `transportoutwardpacks`.`ArticleId` where `transportoutwardpacks`.`OutwardId` = 0 AND `transportoutwardpacks`.`PartyId` = ' . $PartyId . ') order by `ArticleId` asc');
             $collectionArticles = collect($articlesArray);
-            $articles  = $collectionArticles->unique()->values()->all();
+            $articles = $collectionArticles->unique()->values()->all();
             foreach ($articles as $key => $article) {
                 $objectArticle = $article;
-                $articleArray = (array)$article; 
-                $articleData = DB::select('select `category`.`Colorflag`, `article`.`ArticleRatio`,`article`.`ArticleOpenFlag`, `category`.`Title`, `brand`.`Name` as `BrandName`, `subcategory`.`Name` as `Subcategory`, `rangeseries`.`SeriesName`, `rangeseries`.`Series`, `article`.`StyleDescription` from `article` inner join `category` on `article`.`CategoryId` = `category`.`Id` left join `brand` on `brand`.`Id` = `article`.`BrandId` left join `subcategory` on `subcategory`.`Id` = `article`.`SubCategoryId` left join `rangeseries` on `rangeseries`.`Id` = `article`.`SeriesId` where `article`.`Id` = ' . $articleArray['ArticleId']);
-                $articlesColors = DB::select("select   GROUP_CONCAT(DISTINCT CONCAT(articlesize.ArticleSizeName) ORDER BY articlesize.Id SEPARATOR ',') as ArticleSize , GROUP_CONCAT(DISTINCT CONCAT(articlecolor.ArticleColorName) ORDER BY articlecolor.Id SEPARATOR ',') as ArticleColor from article left join articlecolor on articlecolor.ArticleId=article.Id left join articlesize on articlesize.ArticleId=article.Id  where article.Id=" . $articleArray['ArticleId']);
-                $articleData = (array)$articleData[0];
+                $articleArray = (array) $article;
+                $articleId = $articleArray['ArticleId'];
+
+                $articleData = DB::select("
+                SELECT 
+    c.Colorflag, 
+    a.ArticleRatio, 
+    a.ArticleOpenFlag, 
+    c.Title, 
+    b.Name AS BrandName, 
+    sc.Name AS Subcategory, 
+    rs.SeriesName, 
+    rs.Series, 
+    a.StyleDescription 
+FROM 
+    article a
+INNER JOIN 
+    category c ON a.CategoryId = c.Id
+LEFT JOIN 
+    brand b ON b.Id = a.BrandId
+LEFT JOIN 
+    subcategory sc ON sc.Id = a.SubCategoryId
+LEFT JOIN 
+    rangeseries rs ON rs.Id = a.SeriesId
+WHERE 
+    a.Id = :articleId
+
+", ['articleId' => $articleId]);
+
+                $articlesColors = DB::select("
+    SELECT   
+        GROUP_CONCAT(DISTINCT articlesize.ArticleSizeName ORDER BY articlesize.Id SEPARATOR ',') as ArticleSize , 
+        GROUP_CONCAT(DISTINCT articlecolor.ArticleColorName ORDER BY articlecolor.Id SEPARATOR ',') as ArticleColor 
+    FROM 
+        article
+    LEFT JOIN 
+        articlecolor ON articlecolor.ArticleId = article.Id
+    LEFT JOIN 
+        articlesize ON articlesize.ArticleId = article.Id  
+    WHERE 
+        article.Id = :articleId
+", ['articleId' => $articleId]);
+
+                $articleData = (array) $articleData[0];
                 $objectArticle->Colorflag = $articleData['Colorflag'];
                 $objectArticle->ArticleRatio = $articleData['ArticleRatio'];
                 if ($articleData['ArticleRatio']) {
@@ -1277,17 +1317,70 @@ class ReportController extends Controller
                         $objectArticle->ArticleColor = "";
                     }
                 } else {
-                    $articleouter = Article::select('ArticleColor')->where('Id',  $articleArray['ArticleId'])->first();
+                    $articleouter = Article::select('ArticleColor')->where('Id', $articleArray['ArticleId'])->first();
                     if (json_decode($articleouter['ArticleColor'])) {
-                        $objectArticle->ArticleColor  = implode(',', array_column(json_decode($articleouter['ArticleColor']), 'Name'));
+                        $objectArticle->ArticleColor = implode(',', array_column(json_decode($articleouter['ArticleColor']), 'Name'));
                     } else {
-                        $objectArticle->ArticleColor  = "";
+                        $objectArticle->ArticleColor = "";
                     }
                 }
                 $objectArticle->ArticleSize = $articlesColors[0]->ArticleSize;
                 // if ($PartyId == 1) {
                 // $allRecords = DB::select("(select outletsalesreturn.NoPacks as NoPacks, 2 as type, outletsalesreturnnumber.CreatedDate as SortDate, from outletsalesreturn inner join outletsalesreturnnumber on outletsalesreturn.SalesReturnNumber = outletsalesreturnnumber.Id where (ArticleId = '" . $articleArray['ArticleId'] . "' and outletsalesreturn.OutletPartyId = '" . $PartyId . "')) union (select outlet.NoPacks as NoPacks, 1 as type, outletnumber.CreatedDate as SortDate from outlet inner join outletnumber on outlet.OutletNumberId = outletnumber.Id where (ArticleId = '" . $articleArray['ArticleId'] . "' and outletnumber.PartyId = '" . $PartyId . "')) union (select outward.NoPacks as NoPacks, 0 as type, outwardnumber.created_at as SortDate from outward inner join transportoutlet on outward.OutwardNumberId = transportoutlet.OutwardNumberId inner join outwardnumber on outward.OutwardNumberId = outwardnumber.Id where (ArticleId = '" . $articleArray['ArticleId'] . "' and transportoutlet.TransportStatus = 1 and outward.PartyId = '" . $PartyId . "')) union (select salesreturn.NoPacks as NoPacks, 3 as type ,salesreturnnumber.CreatedDate as SortDate from outward inner join salesreturn on salesreturn.OutwardId = outward.Id inner join salesreturnnumber on salesreturnnumber.Id = salesreturn.SalesReturnNumber where (outward.PartyId = '" . $PartyId . "' and outward.ArticleId = '" . $articleArray['ArticleId'] . "')) order by SortDate asc");
-                $allRecords = DB::select("select * from (select outletsalesreturn.NoPacks as NoPacks, 2 as type, outletsalesreturnnumber.CreatedDate as SortDate from outletsalesreturn inner join outletsalesreturnnumber on outletsalesreturn.SalesReturnNumber = outletsalesreturnnumber.Id where (ArticleId = '" . $articleArray['ArticleId'] . "' and outletsalesreturn.OutletPartyId = '" . $PartyId . "') union (select outlet.NoPacks as NoPacks, 1 as type, outletnumber.CreatedDate as SortDate from outlet inner join outletnumber on outlet.OutletNumberId = outletnumber.Id where (ArticleId = '" . $articleArray['ArticleId'] . "' and outletnumber.PartyId = '" . $PartyId . "')) union (select outward.NoPacks as NoPacks, 0 as type, transportoutlet.ReceivedDate as SortDate from outward inner join transportoutlet on outward.OutwardNumberId = transportoutlet.OutwardNumberId inner join outwardnumber on outward.OutwardNumberId = outwardnumber.Id where (ArticleId = '" . $articleArray['ArticleId'] . "' and transportoutlet.TransportStatus = 1 and outward.PartyId = '" . $PartyId . "')) union (select salesreturn.NoPacks as NoPacks, 3 as type, salesreturnnumber.CreatedDate as SortDate from outward inner join salesreturn on salesreturn.OutwardId = outward.Id inner join salesreturnnumber on salesreturnnumber.Id = salesreturn.SalesReturnNumber where (outward.PartyId = '" . $PartyId . "' and outward.ArticleId = '" . $articleArray['ArticleId'] . "')) ) as dd where SortDate > '2021-12-31' order by dd.SortDate asc");
+
+                $articleId = $articleArray['ArticleId'];
+                $partyId = $PartyId;
+                $dateThreshold = '2021-12-31';
+
+                $articleId = $articleArray['ArticleId'];
+                $partyId = $PartyId;
+                $dateThreshold = '2021-12-31';
+
+                $allRecords = DB::select("
+    SELECT NoPacks, type, SortDate
+    FROM (
+        SELECT osr.NoPacks, 2 AS type, osrn.CreatedDate AS SortDate
+        FROM outletsalesreturn osr
+        INNER JOIN outletsalesreturnnumber osrn ON osr.SalesReturnNumber = osrn.Id
+        WHERE osr.ArticleId = ? AND osr.OutletPartyId = ?
+        
+        UNION
+        
+        SELECT o.NoPacks, 1 AS type, onum.CreatedDate AS SortDate
+        FROM outlet o
+        INNER JOIN outletnumber onum ON o.OutletNumberId = onum.Id
+        WHERE o.ArticleId = ? AND onum.PartyId = ?
+        
+        UNION
+        
+        SELECT o.NoPacks, 0 AS type, to1.ReceivedDate AS SortDate
+        FROM outward o
+        INNER JOIN transportoutlet to1 ON o.OutwardNumberId = to1.OutwardNumberId
+        INNER JOIN outwardnumber on1 ON o.OutwardNumberId = on1.Id
+        WHERE o.ArticleId = ? AND to1.TransportStatus = 1 AND o.PartyId = ?
+        
+        UNION
+        
+        SELECT sr.NoPacks, 3 AS type, srn.CreatedDate AS SortDate
+        FROM outward o
+        INNER JOIN salesreturn sr ON sr.OutwardId = o.Id
+        INNER JOIN salesreturnnumber srn ON srn.Id = sr.SalesReturnNumber
+        WHERE o.PartyId = ? AND o.ArticleId = ?
+    ) AS dd
+    WHERE SortDate > ?
+    ORDER BY dd.SortDate ASC
+", [
+                    $articleId,
+                    $partyId,
+                    $articleId,
+                    $partyId,
+                    $articleId,
+                    $partyId,
+                    $partyId,
+                    $articleId,
+                    $dateThreshold
+                ]);
+
                 // } else {
                 // $allRecords = DB::select('(select `outletsalesreturn`.`NoPacks` as `NoPacks`, 2 as type, `outletsalesreturnnumber`.`CreatedDate` as `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletsalesreturn`.`OutletPartyId` = ' . $PartyId . ')) union (select `outlet`.`NoPacks` as `NoPacks`, 1 as type, `outletnumber`.`CreatedDate` as `SortDate` from `outlet` inner join `outletnumber` on `outlet`.`OutletNumberId` = `outletnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletnumber`.`PartyId` = ' . $PartyId . ')) union (select `outward`.`NoPacks` as `NoPacks`, 0 as type, `outwardnumber`.`created_at` as `SortDate` from `outward` inner join `transportoutlet` on `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId` inner join `outwardnumber` on `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `transportoutlet`.`TransportStatus` = 1 and `outward`.`PartyId` = ' . $PartyId . ')) union (select `salesreturn`.`NoPacks` as `NoPacks`, 3 as type ,`salesreturnnumber`.`CreatedDate` as `SortDate` from `outward` inner join `salesreturn` on `salesreturn`.`OutwardId` = `outward`.`Id` inner join `salesreturnnumber` on `salesreturnnumber`.`Id` = `salesreturn`.`SalesReturnNumber` where (`outward`.`PartyId` = ' . $PartyId . ' and `outward`.`ArticleId` = ' . $articleArray['ArticleId'] . ')) order by `SortDate` asc');
                 // $allRecords = DB::select("select * from (select outletsalesreturn.NoPacks as NoPacks, 2 as type, outletsalesreturnnumber.CreatedDate as SortDate from outletsalesreturn inner join outletsalesreturnnumber on outletsalesreturn.SalesReturnNumber = outletsalesreturnnumber.Id where (ArticleId = '" . $articleArray['ArticleId'] . "' and outletsalesreturn.OutletPartyId = '" . $PartyId . "') union (select outlet.NoPacks as NoPacks, 1 as type, outletnumber.CreatedDate as SortDate from outlet inner join outletnumber on outlet.OutletNumberId = outletnumber.Id where (ArticleId = '" . $articleArray['ArticleId'] . "' and outletnumber.PartyId = '" . $PartyId . "')) union (select outward.NoPacks as NoPacks, 0 as type, transportoutlet.ReceivedDate as SortDate from outward inner join transportoutlet on outward.OutwardNumberId = transportoutlet.OutwardNumberId inner join outwardnumber on outward.OutwardNumberId = outwardnumber.Id where (ArticleId = '" . $articleArray['ArticleId'] . "' and transportoutlet.TransportStatus = 1 and outward.PartyId = '" . $PartyId . "')) union (select salesreturn.NoPacks as NoPacks, 3 as type, salesreturnnumber.CreatedDate as SortDate from outward inner join salesreturn on salesreturn.OutwardId = outward.Id inner join salesreturnnumber on salesreturnnumber.Id = salesreturn.SalesReturnNumber where (outward.PartyId = '" . $PartyId . "' and outward.ArticleId = '" . $articleArray['ArticleId'] . "')) ) as dd");
@@ -1297,70 +1390,79 @@ class ReportController extends Controller
                     if ($outletArticle) {
                         $outletArticleColors = json_decode($outletArticle->ArticleColor);
                     } else {
-                        $outletArticleColors  = json_decode($articlesColors[0]->ArticleColor);
+                        $outletArticleColors = json_decode($articlesColors[0]->ArticleColor);
                     }
-                    $outletArticleColors =  (array)$outletArticleColors;
+                    $outletArticleColors = (array) $outletArticleColors;
                     if (count($outletArticleColors) > 0) {
                         $SalesNoPacks = [];
                         foreach ($outletArticleColors as $makearray) {
                             array_push($SalesNoPacks, 0);
                         }
                         // Initialize the array to hold sales packs
-$SalesNoPacks = [];
+                        $SalesNoPacks = [];
 
-$getTransportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')
-    ->where('ArticleId', $articleArray['ArticleId'])
-    ->where('OutwardId', 0)
-    ->where('PartyId', $PartyId)
-    ->get();
+                        // $getTransportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')
+                        //     ->where('ArticleId', $articleArray['ArticleId'])
+                        //     ->where('OutwardId', 0)
+                        //     ->where('PartyId', $PartyId)
+                        //     ->get();
 
-// Check if there are any results
-if (count($getTransportOutwardpacks) != 0) {
-    $outletArticle = Outletimport::where('ArticleId', $articleArray['ArticleId'])
-        ->where('PartyId', $PartyId)
-        ->first();
+                        $getTransportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')
+                            ->where([
+                                'ArticleId' => $articleArray['ArticleId'],
+                                'OutwardId' => 0,
+                                'PartyId' => $PartyId
+                            ])
+                            ->get();
 
-    if ($outletArticle) {
-        $outletArticleColors = json_decode($outletArticle->ArticleColor, true);
-    } else {
-        $article = Article::select('ArticleColor')->where('Id',  $articleArray['ArticleId'])->first();
-        $outletArticleColors = json_decode($article['ArticleColor'], true);
-    }
 
-    // Initialize SalesNoPacks array with 0 for each color ID
-    foreach ($outletArticleColors as $outletArticleColor) {
-        $SalesNoPacks[$outletArticleColor['Id']] = 0;
-    }
+                        // Check if there are any results
+                        if (count($getTransportOutwardpacks) != 0) {
+                            $outletArticle = Outletimport::where('ArticleId', $articleArray['ArticleId'])
+                                ->where('PartyId', $PartyId)
+                                ->first();
 
-    foreach ($getTransportOutwardpacks as $getTransportOutwardpack) {
-        $colorId = $getTransportOutwardpack->ColorId;
-        if (!isset($SalesNoPacks[$colorId])) {
-            // Corrected the subtraction here
-            $SalesNoPacks[$colorId] -= $getTransportOutwardpack->NoPacks;
-        }
-    }
-}
+                            if ($outletArticle) {
+                                $outletArticleColors = json_decode($outletArticle->ArticleColor, true);
+                            } else {
+                                $article = Article::select('ArticleColor')->where('Id', $articleArray['ArticleId'])->first();
+                                $outletArticleColors = json_decode($article['ArticleColor'], true);
+                            }
 
-$newimplodeSalesNoPacks = implode(",", $SalesNoPacks);
-$objectArticle->STOCKS =  $newimplodeSalesNoPacks;
+                            // Initialize SalesNoPacks array with 0 for each color ID
+                            foreach ($outletArticleColors as $outletArticleColor) {
+                                $SalesNoPacks[$outletArticleColor['Id']] = 0;
+                            }
 
-if (array_sum($SalesNoPacks) <= 0) {
-    $objectArticle->TotalPieces = 0;
-    $objectArticle->salespacks = 0;
-} else {
-    $objectArticle->TotalPieces = array_sum($SalesNoPacks);
-    $objectArticle->salespacks = array_sum($SalesNoPacks);
-}
+                            foreach ($getTransportOutwardpacks as $getTransportOutwardpack) {
+                                $colorId = $getTransportOutwardpack->ColorId;
+                                if (!isset($SalesNoPacks[$colorId])) {
+                                    // Corrected the subtraction here
+                                    $SalesNoPacks[$colorId] -= $getTransportOutwardpack->NoPacks;
+                                }
+                            }
+                        }
 
-// Now you can use the $objectArticle with the corrected values.
+                        $newimplodeSalesNoPacks = implode(",", $SalesNoPacks);
+                        $objectArticle->STOCKS = $newimplodeSalesNoPacks;
 
-                       
+                        if (array_sum($SalesNoPacks) <= 0) {
+                            $objectArticle->TotalPieces = 0;
+                            $objectArticle->salespacks = 0;
+                        } else {
+                            $objectArticle->TotalPieces = array_sum($SalesNoPacks);
+                            $objectArticle->salespacks = array_sum($SalesNoPacks);
+                        }
+
+                        // Now you can use the $objectArticle with the corrected values.
+
+
                     } else {
-                        $transportOutwardpacks =  TransportOutwardpacks::select('NoPacks')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
+                        $transportOutwardpacks = TransportOutwardpacks::select('NoPacks')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
                         $TotalTransportOutwardpacks = 0;
                         if (count($transportOutwardpacks) != 0) {
                             $collectionTransportOutwardpacks = collect($transportOutwardpacks);
-                            $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
+                            $getTransportOutwardpacks = $collectionTransportOutwardpacks->unique()->values()->all();
                             foreach ($getTransportOutwardpacks as $getTransportOutwardpack) {
                                 $TotalTransportOutwardpacks = $TotalTransportOutwardpacks + $getTransportOutwardpack->NoPacks;
                             }
@@ -1381,11 +1483,11 @@ if (array_sum($SalesNoPacks) <= 0) {
                         foreach (explode(",", $allRecords[0]->NoPacks) as $makearray) {
                             array_push($SalesNoPacks, 0);
                         }
-                        $transportOutwardpacks =  TransportOutwardpacks::select('NoPacks', 'ColorId')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
+                        $transportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
                         $TotalTransportOutwardpacks = 0;
                         if (count($transportOutwardpacks) != 0) {
                             $collectionTransportOutwardpacks = collect($transportOutwardpacks);
-                            $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
+                            $getTransportOutwardpacks = $collectionTransportOutwardpacks->unique()->values()->all();
                             foreach ($getTransportOutwardpacks as $getTransportOutwardpack) {
                                 $outletArticle = Outletimport::where('ArticleId', $articleArray['ArticleId'])->where('PartyId', $PartyId)->first();
                                 if ($outletArticle) {
@@ -1406,7 +1508,9 @@ if (array_sum($SalesNoPacks) <= 0) {
                                 }
                             }
                         }
-                        foreach ($allRecords as  $allRecord) {
+            
+
+                        foreach ($allRecords as $allRecord) {
                             for ($i = 0; $i < count(explode(",", $allRecord->NoPacks)); $i++) {
                                 $noPacks = explode(",", $allRecord->NoPacks);
                                 if ($allRecord->type == 0) {
@@ -1421,47 +1525,82 @@ if (array_sum($SalesNoPacks) <= 0) {
                             }
                         }
                         $newimplodeSalesNoPacks = implode(",", $SalesNoPacks);
-                        $objectArticle->STOCKS =  $newimplodeSalesNoPacks;
+                        $objectArticle->STOCKS = $newimplodeSalesNoPacks;
                         if (array_sum($SalesNoPacks) <= 0) {
                             unset($articles[$key]);
                         } else {
                             $objectArticle->TotalPieces = array_sum($SalesNoPacks);
                         }
                     } else {
-                        $transportOutwardpacks =  TransportOutwardpacks::select('NoPacks')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
-                        $TotalTransportOutwardpacks = 0;
-                        if (count($transportOutwardpacks) != 0) {
-                            $collectionTransportOutwardpacks = collect($transportOutwardpacks);
-                            $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
-                            foreach ($getTransportOutwardpacks as $getTransportOutwardpack) {
-                                $TotalTransportOutwardpacks = $TotalTransportOutwardpacks + $getTransportOutwardpack->NoPacks;
-                            }
-                        }
+                        // $transportOutwardpacks = TransportOutwardpacks::select('NoPacks')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
+                        // $TotalTransportOutwardpacks = 0;
+                        // if (count($transportOutwardpacks) != 0) {
+                        //     $collectionTransportOutwardpacks = collect($transportOutwardpacks);
+                        //     $getTransportOutwardpacks = $collectionTransportOutwardpacks->unique()->values()->all();
+                        //     foreach ($getTransportOutwardpacks as $getTransportOutwardpack) {
+                        //         $TotalTransportOutwardpacks = $TotalTransportOutwardpacks + $getTransportOutwardpack->NoPacks;
+                        //     }
+                        // }
+                        // $TotalInwardPacks = $TotalTransportOutwardpacks;
+                        // $TotalOutwardPacks = 0;
+                        // foreach ($allRecords as $allRecord) {
+                        //     if ($allRecord->type == 0) {
+                        //         $TotalInwardPacks = $TotalInwardPacks + (int) $allRecord->NoPacks;
+                        //     } elseif ($allRecord->type == 1) {
+                        //         $TotalOutwardPacks = $TotalOutwardPacks + (int) $allRecord->NoPacks;
+                        //     } elseif ($allRecord->type == 2) {
+                        //         $TotalInwardPacks = $TotalInwardPacks + (int) $allRecord->NoPacks;
+                        //     } elseif ($allRecord->type == 3) {
+                        //         $TotalOutwardPacks = $TotalOutwardPacks + (int) $allRecord->NoPacks;
+                        //     }
+                        // }
+                        // $totalStock = $TotalInwardPacks - $TotalOutwardPacks;
+                        // $objectArticle->STOCKS = $totalStock;
+                        // if ($totalStock <= 0) {
+                        //     unset($articles[$key]);
+                        // } else {
+                        //     $objectArticle->TotalPieces = $totalStock;
+                        // }
+
+                        $transportOutwardpacks = TransportOutwardpacks::select('NoPacks')
+                            ->where('ArticleId', $articleArray['ArticleId'])
+                            ->where('OutwardId', 0)
+                            ->where('PartyId', $PartyId)
+                            ->get();
+
+                        $TotalTransportOutwardpacks = $transportOutwardpacks->sum('NoPacks');
+
                         $TotalInwardPacks = $TotalTransportOutwardpacks;
                         $TotalOutwardPacks = 0;
-                        foreach ($allRecords as  $allRecord) {
-                            if ($allRecord->type == 0) {
-                                $TotalInwardPacks = $TotalInwardPacks + (int)$allRecord->NoPacks;
-                            } elseif ($allRecord->type == 1) {
-                                $TotalOutwardPacks = $TotalOutwardPacks + (int)$allRecord->NoPacks;
-                            } elseif ($allRecord->type == 2) {
-                                $TotalInwardPacks = $TotalInwardPacks + (int)$allRecord->NoPacks;
-                            } elseif ($allRecord->type == 3) {
-                                $TotalOutwardPacks = $TotalOutwardPacks + (int)$allRecord->NoPacks;
+
+                        foreach ($allRecords as $allRecord) {
+                            switch ($allRecord->type) {
+                                case 0:
+                                case 2:
+                                    $TotalInwardPacks += (int) $allRecord->NoPacks;
+                                    break;
+                                case 1:
+                                case 3:
+                                    $TotalOutwardPacks += (int) $allRecord->NoPacks;
+                                    break;
                             }
                         }
+
                         $totalStock = $TotalInwardPacks - $TotalOutwardPacks;
-                        $objectArticle->STOCKS = $totalStock;
-                        if ($totalStock <= 0) {
-                            unset($articles[$key]);
-                        } else {
+
+                        if ($totalStock > 0) {
+                            $objectArticle->STOCKS = $totalStock;
                             $objectArticle->TotalPieces = $totalStock;
+                        } else {
+                            unset($articles[$key]);
                         }
+
+
                     }
                 }
             }
             $partyName = Party::select('Name')->where('Id', $PartyId)->first();
-            
+
             return array("data" => array_values($articles), 'PartyName' => $partyName->Name);
         }
 
@@ -1470,7 +1609,7 @@ if (array_sum($SalesNoPacks) <= 0) {
     // {
 
     //     if($PartyId == 4){
-           
+
     //         $articlesArray = DB::select('(select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutlet` right join `outward` on `transportoutlet`.`OutwardNumberId` = `outward`.`OutwardNumberId` inner join `article` on `article`.`Id` = `outward`.`ArticleId`  where `transportoutlet`.`TransportStatus` = 1 )  union (select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutwardpacks` inner join `article` on `article`.`Id` = `transportoutwardpacks`.`ArticleId` where `transportoutwardpacks`.`OutwardId` = 0 ) order by `ArticleId` asc');
     //         $collectionArticles = collect($articlesArray);
     //         $articles  = $collectionArticles->unique()->values()->all();
@@ -1862,12 +2001,12 @@ if (array_sum($SalesNoPacks) <= 0) {
     //             }
     //         }
     //         $partyName = Party::select('Name')->where('Id', $PartyId)->first();
-            
+
     //         return array("data" => array_values($articles), 'PartyName' => $partyName->Name);
     //     }
 
     // }
-    
+
     public function teststockopenflag()
     {
         $colorflag = DB::select("SELECT a.Id, a.ArticleNumber, mn.NoPacks as SalesNoPacks FROM mixnopacks mn left join `article` a on mn.ArticleId=a.Id where a.ArticleOpenFlag='1'");
@@ -2005,7 +2144,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                         foreach ($outwardorder as $key => $vl) {
                             $OwNoPacksPCS = 0;
                             $OwNoPacks = explode(",", $vl->NoPacks);
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             foreach ($ArticleColor as $key => $vl) {
                                 if ($ColorId == $vl["Id"]) {
                                     $object->OwNoPacks = $OwNoPacks[$key];
@@ -2021,7 +2160,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                         foreach ($stocktransfer_shortage as $key => $vl) {
                             $STShortageNoPacksPCS = 0;
                             $STShortageNoPacks = explode(",", $vl->NoPacks);
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             foreach ($ArticleColor as $key => $vl) {
                                 if ($ColorId == $vl["Id"]) {
                                     $object->STShortageNoPacks = $STShortageNoPacks[$key];
@@ -2037,7 +2176,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                         foreach ($stocktransfer_cons as $key => $vl) {
                             $STConNoPacksPCS = 0;
                             $STConNoPacks = explode(",", $vl->ConsumedNoPacks);
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             foreach ($ArticleColor as $key => $vl) {
                                 if ($ColorId == $vl["Id"]) {
                                     $object->STConNoPacks = $STConNoPacks[$key];
@@ -2053,7 +2192,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                         foreach ($stocktransfer_prod as $key => $vl) {
                             $STProNoPacksPCS = 0;
                             $STProNoPacks = explode(",", $vl->TransferNoPacks);
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             foreach ($ArticleColor as $key => $vl) {
                                 if ($ColorId == $vl["Id"]) {
                                     $object->STProNoPacks = $STProNoPacks[$key];
@@ -2069,7 +2208,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                         foreach ($salesreturnorder as $key => $vl) {
                             $SRNoPacksPCS = 0;
                             $SRNoPacks = explode(",", $vl->NoPacks);
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             foreach ($ArticleColor as $key => $vl) {
                                 if ($ColorId == $vl["Id"]) {
                                     $object->SRNoPacks = $SRNoPacks[$key];
@@ -2086,7 +2225,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                             $PRNoPacksPCS = 0;
                             $PRNoPacks = explode(",", $vl->NoPacks);
 
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             foreach ($ArticleColor as $key => $vl) {
                                 if ($ColorId == $vl["Id"]) {
                                     $object->PRNoPacks = $PRNoPacks[$key];
@@ -2105,7 +2244,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                             $SoOutwardNoPacksPCS = "";
                             $SoNoPacks = explode(",", $vl->NoPacks);
                             $SoOutwardNoPacks = explode(",", $vl->OutwardNoPacks);
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             foreach ($ArticleColor as $key => $vl) {
                                 if ($ColorId == $vl["Id"]) {
                                     $object->SoNoPacks = $SoNoPacks[$key];
@@ -2125,7 +2264,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                 } else {
                     if ($outwardorder) {
                         foreach ($outwardorder as $key => $vl) {
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             $object->OwNoPacks = $vl->NoPacks;
                             $OwNoPacksPCS = $vl->NoPacks;
                             if ($OwNoPacksPCS != 0) {
@@ -2135,7 +2274,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                     }
                     if ($stocktransfer_shortage) {
                         foreach ($stocktransfer_shortage as $key => $vl) {
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             $STShortageNoPacksPCS = $vl->NoPacks;
                             if ($STShortageNoPacksPCS != 0) {
                                 $historyofsale[] = array("date" => $object->StocktransferDate, "particulars" => array("status" => 7, "partyname" => '', "type" => "ST"), "ordertype" => "Shortage", "orderno" => $object->StocktransferNumber, "challanno" => $object->StocktransferNumberId, "quantity" => $STShortageNoPacksPCS, "rate" => "", "amount" => "", "closingquantity" => "");
@@ -2144,7 +2283,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                     }
                     if ($stocktransfer_cons) {
                         foreach ($stocktransfer_cons as $key => $vl) {
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             $STConNoPacksPCS = $vl->ConsumedNoPacks;
                             if ($STConNoPacksPCS != 0) {
                                 $historyofsale[] = array("date" => $object->StocktransferDate, "particulars" => array("status" => 5, "partyname" => '', "type" => "S"), "ordertype" => "Stocktransfer Consumed", "orderno" => $object->StocktransferNumber, "challanno" => $object->StocktransferNumberId, "quantity" => $STConNoPacksPCS, "rate" => "", "amount" => "", "closingquantity" => "");
@@ -2153,7 +2292,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                     }
                     if ($stocktransfer_prod) {
                         foreach ($stocktransfer_prod as $key => $vl) {
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             $STProNoPacksPCS = $vl->TransferNoPacks;
                             if ($STProNoPacksPCS != 0) {
                                 $historyofsale[] = array("date" => $object->StocktransferDate, "particulars" => array("status" => 6, "partyname" => '', "type" => "S"), "ordertype" => "Stocktransfer Production", "orderno" => $object->StocktransferNumber, "challanno" => $object->StocktransferNumberId, "quantity" => $STProNoPacksPCS, "rate" => "", "amount" => "", "closingquantity" => "");
@@ -2162,7 +2301,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                     }
                     if ($salesreturnorder) {
                         foreach ($salesreturnorder as $key => $vl) {
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             $SRNoPacksPCS = $vl->NoPacks;
                             if ($SRNoPacksPCS != 0) {
                                 $historyofsale[] = array("date" => $object->SalesReturnDate, "particulars" => array("status" => 3, "partyname" => $object->PartyName, "type" => "P"), "ordertype" => "SalesReturn", "orderno" => $object->SalesReturnNumber, "challanno" => $object->SalesReturnNumberId, "quantity" => $SRNoPacksPCS, "rate" => "", "amount" => "", "closingquantity" => "");
@@ -2171,7 +2310,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                     }
                     if ($purchasereturnorder) {
                         foreach ($purchasereturnorder as $key => $vl) {
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             $PRNoPacksPCS = $vl->NoPacks;
 
                             if ($PRNoPacksPCS != 0) {
@@ -2182,7 +2321,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                     if ($salesorderpending) {
                         $salespending = array();
                         foreach ($salesorderpending as $key => $vl) {
-                            $object = (object)$vl;
+                            $object = (object) $vl;
                             $object->SoNoPacks = $vl->NoPacks;
                             $object->SoOutwardNoPacks = $vl->OutwardNoPacks;
 
@@ -2221,11 +2360,11 @@ if (array_sum($SalesNoPacks) <= 0) {
                         if ($ordertype != "Sales" && $ordertype2 != "Sales") {
                             $var = $element1['date'];
                             $date = str_replace('/', '-', $var);
-                            $f1 =  date('Y-m-d', strtotime($date));
+                            $f1 = date('Y-m-d', strtotime($date));
 
                             $var2 = $element2['date'];
                             $date2 = str_replace('/', '-', $var2);
-                            $f2 =  date('Y-m-d', strtotime($date2));
+                            $f2 = date('Y-m-d', strtotime($date2));
 
                             $datetime1 = strtotime($f1);
                             $datetime2 = strtotime($f2);
@@ -2238,7 +2377,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                         $quantityval = "";
                         $quantity = 0;
                         $ordertype = $vl['ordertype'];
-                        $object = (object)$vl;
+                        $object = (object) $vl;
                         if ($ordertype == "Purchase" || $ordertype == "Opening Stock") {
                             $quantityval = $object->quantity;
                             $count = $count + $quantityval;
@@ -2248,13 +2387,13 @@ if (array_sum($SalesNoPacks) <= 0) {
                                 $object->rate = number_format($object->rate, 2);
                             }
                         } else if ($ordertype == "Outward") {
-                            $quantity = (int)$object->quantity;
+                            $quantity = (int) $object->quantity;
                             $count = $count - $quantity;
                             $grandtotaloutwardquantity = $grandtotaloutwardquantity + $quantity;
                             $object->closingquantity = $count;
                             $object->rate = number_format($object->rate, 2);
                         } else if ($ordertype == "Shortage") {
-                            $quantity = (int)$object->quantity;
+                            $quantity = (int) $object->quantity;
                             $count = $count - $quantity;
                             $object->closingquantity = $count;
                             if ($object->rate) {
@@ -2269,7 +2408,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                                 $object->rate = number_format($object->rate, 2);
                             }
                         } else if ($ordertype == "Stocktransfer Consumed") {
-                            $quantity = (int)$object->quantity;
+                            $quantity = (int) $object->quantity;
                             $count = $count - $quantity;
                             $grandtotaloutwardquantity = $grandtotaloutwardquantity + $quantity;
                             $object->closingquantity = $count;
@@ -2277,15 +2416,15 @@ if (array_sum($SalesNoPacks) <= 0) {
                                 $object->rate = number_format($object->rate, 2);
                             }
                         } else if ($ordertype == "Opening Stock") {
-                            $count = $count + (int)$object->quantity;
+                            $count = $count + (int) $object->quantity;
                             $object->closingquantity = $count;
                         } else if ($ordertype == "SalesReturn") {
-                            $count = $count + (int)$object->quantity;
-                            $grandtotalinwardquantity = $grandtotalinwardquantity + (int)$object->quantity;
+                            $count = $count + (int) $object->quantity;
+                            $grandtotalinwardquantity = $grandtotalinwardquantity + (int) $object->quantity;
                             $object->closingquantity = $count;
                         } else if ($ordertype == "PurchaseReturn") {
-                            $count = $count - (int)$object->quantity;
-                            $grandtotaloutwardquantity = $grandtotaloutwardquantity + (int)$object->quantity;
+                            $count = $count - (int) $object->quantity;
+                            $grandtotaloutwardquantity = $grandtotaloutwardquantity + (int) $object->quantity;
                             $object->closingquantity = $count;
                         } else if ($ordertype == "Sales") {
                             foreach ($object->particulars['salespending'] as &$val) {
@@ -2325,7 +2464,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                     $RejectedArticleSizeSet = "";
                 }
                 foreach ($articleRejected as $key => $vl) {
-                    $object = (object)$vl;
+                    $object = (object) $vl;
                     $object->ArticleColor = $RejectedArticleColorSet;
                     $object->ArticleSize = $RejectedArticleSizeSet;
                 }
@@ -2346,11 +2485,11 @@ if (array_sum($SalesNoPacks) <= 0) {
                     $CancelledArticleSizeSet = rtrim($CancelledArticleSizeSet, ',');
                 } else {
                     $CancelledArticleColorSet = "";
-                    $CancelledArticleSizeSet =  "";
+                    $CancelledArticleSizeSet = "";
                 }
                 foreach ($articleCancelled as $key => $vl) {
                     $acNoPacks = explode(",", $vl->NoPacks);
-                    $object = (object)$vl;
+                    $object = (object) $vl;
                     $object->ArticleSize = $CancelledArticleSizeSet;
                     $object->ArticleColor = $CancelledArticleColorSet;
                     if ($Podata[0]->Colorflag == 1) {
@@ -2379,7 +2518,7 @@ if (array_sum($SalesNoPacks) <= 0) {
             unset($article->ReceivedDate);
         }
         $collectionArticles = collect($articlesArray);
-        $articles  = $collectionArticles->unique()->values()->all();
+        $articles = $collectionArticles->unique()->values()->all();
         foreach ($articles as $key => $article) {
             // opening stock
             $beforeInwardss = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join outward o on o.Id=trop.OutwardId) as dd where dd.CreatedDate < '" . $startdate . "' and dd.ArticleId='" . $article->ArticleId . "' and dd.PartyId='" . $PartyId . "'");
@@ -2393,7 +2532,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($beforeInward->NoPacks, ',') != false) {
                     $inwardPacks = $inwardPacks + array_sum(explode(',', $beforeInward->NoPacks));
                 } else {
-                    $inwardPacks = $inwardPacks + (int)$beforeInward->NoPacks;
+                    $inwardPacks = $inwardPacks + (int) $beforeInward->NoPacks;
                 }
                 $articleOpeningStock = $articleOpeningStock + $inwardPacks;
             }
@@ -2402,7 +2541,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($beforeImport->NoPacks, ',') != false) {
                     $importPacks = $importPacks + array_sum(explode(',', $beforeImport->NoPacks));
                 } else {
-                    $importPacks = $importPacks + (int)$beforeImport->NoPacks;
+                    $importPacks = $importPacks + (int) $beforeImport->NoPacks;
                 }
                 $articleOpeningStock = $articleOpeningStock + $importPacks;
             }
@@ -2412,7 +2551,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($beforeOutward->NoPacks, ',') != false) {
                     $outwardPacks = $outwardPacks + array_sum(explode(',', $beforeOutward->NoPacks));
                 } else {
-                    $outwardPacks = $outwardPacks + (int)$beforeOutward->NoPacks;
+                    $outwardPacks = $outwardPacks + (int) $beforeOutward->NoPacks;
                 }
                 $articleOpeningStock = $articleOpeningStock - $outwardPacks;
             }
@@ -2421,7 +2560,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($beforePurchaseReturn->NoPacks, ',') != false) {
                     $PRPacks = $PRPacks + array_sum(explode(',', $beforePurchaseReturn->NoPacks));
                 } else {
-                    $PRPacks = $PRPacks + (int)$beforePurchaseReturn->NoPacks;
+                    $PRPacks = $PRPacks + (int) $beforePurchaseReturn->NoPacks;
                 }
                 $articleOpeningStock = $articleOpeningStock - $PRPacks;
             }
@@ -2430,17 +2569,17 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($beforeSalesReturn->NoPacks, ',') != false) {
                     $SRPacks = $SRPacks + array_sum(explode(',', $beforeSalesReturn->NoPacks));
                 } else {
-                    $SRPacks = $SRPacks + (int)$beforeSalesReturn->NoPacks;
+                    $SRPacks = $SRPacks + (int) $beforeSalesReturn->NoPacks;
                 }
                 $articleOpeningStock = $articleOpeningStock + $SRPacks;
             }
             // end opening stock
             $objectArticle = $article;
-            $articleArray = (array)$article;
+            $articleArray = (array) $article;
             // start range stock
             $articleDetailss = DB::select("select a.ArticleNumber, c.Title as Category, rs.SeriesName as SeriesName, sc.Name as SubCategory from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId inner join category c on c.Id=a.CategoryId left join subcategory sc on sc.Id=a.SubCategoryId left join rangeseries rs on rs.Id=a.SeriesId where trop.ArticleId='" . $article->ArticleId . "' and trop.PartyId='" . $PartyId . "'");
             $collectionArticle = collect($articleDetailss);
-            $articleDetails  = $collectionArticle->unique()->values()->all();
+            $articleDetails = $collectionArticle->unique()->values()->all();
             foreach ($articleDetails as $articleDetail) {
                 $objectArticle->ArticleNumber = $articleDetail->ArticleNumber;
                 $objectArticle->Title = $articleDetail->Category;
@@ -2461,42 +2600,42 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($Inward->NoPacks, ',') != false) {
                     $inwardPacks = $inwardPacks + array_sum(explode(',', $Inward->NoPacks));
                 } else {
-                    $inwardPacks = $inwardPacks + (int)$Inward->NoPacks;
+                    $inwardPacks = $inwardPacks + (int) $Inward->NoPacks;
                 }
             }
             foreach ($Imports as $Import) {
                 if (strpos($Import->NoPacks, ',') != false) {
                     $importPacks = $importPacks + array_sum(explode(',', $Import->NoPacks));
                 } else {
-                    $importPacks = $importPacks + (int)$Import->NoPacks;
+                    $importPacks = $importPacks + (int) $Import->NoPacks;
                 }
             }
             foreach ($Outwards as $Outward) {
                 if (strpos($Outward->NoPacks, ',') != false) {
                     $outwardPacks = $outwardPacks + array_sum(explode(',', $Outward->NoPacks));
                 } else {
-                    $outwardPacks = $outwardPacks + (int)$Outward->NoPacks;
+                    $outwardPacks = $outwardPacks + (int) $Outward->NoPacks;
                 }
             }
             foreach ($PurchaseReturns as $PurchaseReturn) {
                 if (strpos($PurchaseReturn->NoPacks, ',') != false) {
                     $purchasereturnPacks = $purchasereturnPacks + array_sum(explode(',', $PurchaseReturn->NoPacks));
                 } else {
-                    $purchasereturnPacks = $purchasereturnPacks + (int)$PurchaseReturn->NoPacks;
+                    $purchasereturnPacks = $purchasereturnPacks + (int) $PurchaseReturn->NoPacks;
                 }
             }
             foreach ($SalesReturns as $SalesReturn) {
                 if (strpos($SalesReturn->NoPacks, ',') != false) {
                     $salesreturnPacks = $salesreturnPacks + array_sum(explode(',', $SalesReturn->NoPacks));
                 } else {
-                    $salesreturnPacks = $salesreturnPacks + (int)$SalesReturn->NoPacks;
+                    $salesreturnPacks = $salesreturnPacks + (int) $SalesReturn->NoPacks;
                 }
             }
             $objectArticle->OpeningStock = $articleOpeningStock;
-            $objectArticle->totalInward  = $inwardPacks + $importPacks + $salesreturnPacks;
+            $objectArticle->totalInward = $inwardPacks + $importPacks + $salesreturnPacks;
             $objectArticle->totalPurchase = $inwardPacks;
             $objectArticle->TransportOutwardpacks = $importPacks;
-            $objectArticle->totalOutward  = $outwardPacks + $purchasereturnPacks;
+            $objectArticle->totalOutward = $outwardPacks + $purchasereturnPacks;
             $objectArticle->totalSalesReturn = $salesreturnPacks;
             $objectArticle->totalPurchaseReturn = $purchasereturnPacks;
             $objectArticle->closing = ($objectArticle->OpeningStock + $objectArticle->totalInward) - ($objectArticle->totalOutward);
@@ -2515,14 +2654,14 @@ if (array_sum($SalesNoPacks) <= 0) {
             if (strpos($vnd->NoPacks, ',') !== false) {
                 $totalpacks = array_sum(explode(',', $vnd->NoPacks));
                 $vnd->Quantity = $totalpacks;
-                $vnd->BillAmount = $totalpacks *  (int)$vnd->Rate;
+                $vnd->BillAmount = $totalpacks * (int) $vnd->Rate;
             } else {
                 $vnd->Quantity = $vnd->NoPacks;
-                $vnd->BillAmount = (int)$vnd->NoPacks *  (int)$vnd->Rate;
+                $vnd->BillAmount = (int) $vnd->NoPacks * (int) $vnd->Rate;
             }
             if (!is_null($vnd->PartyId)) {
                 if ($vnd->PartyId != 0) {
-                    $vnd->Outlet =  $vnd->OutletName;
+                    $vnd->Outlet = $vnd->OutletName;
                 } else {
                     $vnd->Outlet = 'DIRECT';
                 }
@@ -2545,10 +2684,10 @@ if (array_sum($SalesNoPacks) <= 0) {
             if (strpos($vnd->NoPacks, ',') !== false) {
                 $totalpacks = array_sum(explode(',', $vnd->NoPacks));
                 $vnd->Quantity = $totalpacks;
-                $vnd->BillAmount = $totalpacks *  (int)$vnd->Rate;
+                $vnd->BillAmount = $totalpacks * (int) $vnd->Rate;
             } else {
-                $vnd->Quantity = (int)$vnd->NoPacks;
-                $vnd->BillAmount = (int)$vnd->NoPacks *  (int)$vnd->Rate;
+                $vnd->Quantity = (int) $vnd->NoPacks;
+                $vnd->BillAmount = (int) $vnd->NoPacks * (int) $vnd->Rate;
             }
         }
         return array(
@@ -2581,21 +2720,21 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($openInward->NoPacks, ',') != false) {
                     $inwardOpenStock = $inwardOpenStock + array_sum(explode(',', $openInward->NoPacks));
                 } else {
-                    $inwardOpenStock = $inwardOpenStock + (int)$openInward->NoPacks;
+                    $inwardOpenStock = $inwardOpenStock + (int) $openInward->NoPacks;
                 }
             }
             foreach ($openSalesReturns as $openSalesReturn) {
                 if (strpos($openSalesReturn->NoPacks, ',') != false) {
                     $salesReturnOpenStock = $salesReturnOpenStock + array_sum(explode(',', $openSalesReturn->NoPacks));
                 } else {
-                    $salesReturnOpenStock = $salesReturnOpenStock + (int)$openSalesReturn->NoPacks;
+                    $salesReturnOpenStock = $salesReturnOpenStock + (int) $openSalesReturn->NoPacks;
                 }
             }
             foreach ($openPros as $openPro) {
                 if (strpos($openPro->NoPacks, ',') != false) {
                     $proOpenStock = $proOpenStock + array_sum(explode(',', $openPro->NoPacks));
                 } else {
-                    $proOpenStock = $proOpenStock + (int)$openPro->NoPacks;
+                    $proOpenStock = $proOpenStock + (int) $openPro->NoPacks;
                 }
             }
             //end adition open stock
@@ -2608,28 +2747,28 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($openOutward->NoPacks, ',') != false) {
                     $outwardOpenStock = $outwardOpenStock + array_sum(explode(',', $openOutward->NoPacks));
                 } else {
-                    $outwardOpenStock = $outwardOpenStock + (int)$openOutward->NoPacks;
+                    $outwardOpenStock = $outwardOpenStock + (int) $openOutward->NoPacks;
                 }
             }
             foreach ($openPurchaseReturns as $openPurchaseReturn) {
                 if (strpos($openPurchaseReturn->NoPacks, ',') != false) {
                     $purchaseReturnOpenStock = $purchaseReturnOpenStock + array_sum(explode(',', $openPurchaseReturn->NoPacks));
                 } else {
-                    $purchaseReturnOpenStock = $purchaseReturnOpenStock + (int)$openPurchaseReturn->NoPacks;
+                    $purchaseReturnOpenStock = $purchaseReturnOpenStock + (int) $openPurchaseReturn->NoPacks;
                 }
             }
             foreach ($openCons as $openCon) {
                 if (strpos($openCon->NoPacks, ',') != false) {
                     $conOpenStock = $conOpenStock + array_sum(explode(',', $openCon->NoPacks));
                 } else {
-                    $conOpenStock = $conOpenStock + (int)$openCon->NoPacks;
+                    $conOpenStock = $conOpenStock + (int) $openCon->NoPacks;
                 }
             }
             foreach ($openShortages as $openShortage) {
                 if (strpos($openShortage->NoPacks, ',') != false) {
                     $shortageOpenStock = $shortageOpenStock + array_sum(explode(',', $openShortage->NoPacks));
                 } else {
-                    $shortageOpenStock = $shortageOpenStock + (int)$openShortage->NoPacks;
+                    $shortageOpenStock = $shortageOpenStock + (int) $openShortage->NoPacks;
                 }
             }
             //end subtraction open stock
@@ -2655,21 +2794,21 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($closeInward->NoPacks, ',') != false) {
                     $inwardCloseStock = $inwardCloseStock + array_sum(explode(',', $closeInward->NoPacks));
                 } else {
-                    $inwardCloseStock = $inwardCloseStock + (int)$closeInward->NoPacks;
+                    $inwardCloseStock = $inwardCloseStock + (int) $closeInward->NoPacks;
                 }
             }
             foreach ($closeSalesReturns as $closeSalesReturn) {
                 if (strpos($closeSalesReturn->NoPacks, ',') != false) {
                     $salesReturnCloseStock = $salesReturnCloseStock + array_sum(explode(',', $closeSalesReturn->NoPacks));
                 } else {
-                    $salesReturnCloseStock = $salesReturnCloseStock + (int)$closeSalesReturn->NoPacks;
+                    $salesReturnCloseStock = $salesReturnCloseStock + (int) $closeSalesReturn->NoPacks;
                 }
             }
             foreach ($closePros as $closePro) {
                 if (strpos($closePro->NoPacks, ',') != false) {
                     $proCloseStock = $proCloseStock + array_sum(explode(',', $closePro->NoPacks));
                 } else {
-                    $proCloseStock = $proCloseStock + (int)$closePro->NoPacks;
+                    $proCloseStock = $proCloseStock + (int) $closePro->NoPacks;
                 }
             }
             //end adition close stock
@@ -2682,28 +2821,28 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($closeOutward->NoPacks, ',') != false) {
                     $outwardCloseStock = $outwardCloseStock + array_sum(explode(',', $closeOutward->NoPacks));
                 } else {
-                    $outwardCloseStock = $outwardCloseStock + (int)$closeOutward->NoPacks;
+                    $outwardCloseStock = $outwardCloseStock + (int) $closeOutward->NoPacks;
                 }
             }
             foreach ($closePurchaseReturns as $closePurchaseReturn) {
                 if (strpos($closePurchaseReturn->NoPacks, ',') != false) {
                     $purchaseReturnCloseStock = $purchaseReturnCloseStock + array_sum(explode(',', $closePurchaseReturn->NoPacks));
                 } else {
-                    $purchaseReturnCloseStock = $purchaseReturnCloseStock + (int)$closePurchaseReturn->NoPacks;
+                    $purchaseReturnCloseStock = $purchaseReturnCloseStock + (int) $closePurchaseReturn->NoPacks;
                 }
             }
             foreach ($closeCons as $closeCon) {
                 if (strpos($closeCon->NoPacks, ',') != false) {
                     $conCloseStock = $conCloseStock + array_sum(explode(',', $closeCon->NoPacks));
                 } else {
-                    $conCloseStock = $conCloseStock + (int)$closeCon->NoPacks;
+                    $conCloseStock = $conCloseStock + (int) $closeCon->NoPacks;
                 }
             }
             foreach ($closeShortages as $closeShortage) {
                 if (strpos($closeShortage->NoPacks, ',') != false) {
                     $shortageCloseStock = $shortageCloseStock + array_sum(explode(',', $closeShortage->NoPacks));
                 } else {
-                    $shortageCloseStock = $shortageCloseStock + (int)$closeShortage->NoPacks;
+                    $shortageCloseStock = $shortageCloseStock + (int) $closeShortage->NoPacks;
                 }
             }
             //end subtraction close stock
@@ -2712,12 +2851,12 @@ if (array_sum($SalesNoPacks) <= 0) {
             //end close stock
         }
         $catCount = Category::count();
-        for ($i = 0; $i <= (int)$catCount - 1; $i++) {
+        for ($i = 0; $i <= (int) $catCount - 1; $i++) {
             foreach ($CatOpeningStock[$i] as $key => $value) {
                 $openStock = $openStock + $value;
             }
         }
-        for ($i = 0; $i <= (int)$catCount - 1; $i++) {
+        for ($i = 0; $i <= (int) $catCount - 1; $i++) {
             foreach ($CatClosingStock[$i] as $key => $value) {
                 $closeStock = $closeStock + $value;
             }
@@ -2744,7 +2883,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($inward->NoPacks, ',') != false) {
                     $grnPacks = $grnPacks + array_sum(explode(',', $inward->NoPacks));
                 } else {
-                    $grnPacks = $grnPacks + (int)$inward->NoPacks;
+                    $grnPacks = $grnPacks + (int) $inward->NoPacks;
                 }
             }
             $maintotalInwardSalesNoPacks = $maintotalInwardSalesNoPacks + $grnPacks;
@@ -2765,7 +2904,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($purchaseReturn->ReturnNoPacks, ',') != false) {
                     $prPacks = $prPacks + array_sum(explode(',', $purchaseReturn->ReturnNoPacks));
                 } else {
-                    $prPacks = $prPacks + (int)$purchaseReturn->ReturnNoPacks;
+                    $prPacks = $prPacks + (int) $purchaseReturn->ReturnNoPacks;
                 }
             }
             $maintotalPurchaseReturnNoPacks = $maintotalPurchaseReturnNoPacks + $prPacks;
@@ -2789,7 +2928,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($outward->NoPacks, ',') != false) {
                     $outwardPacks = $outwardPacks + array_sum(explode(',', $outward->NoPacks));
                 } else {
-                    $outwardPacks = $outwardPacks + (int)$outward->NoPacks;
+                    $outwardPacks = $outwardPacks + (int) $outward->NoPacks;
                 }
             }
             $maintotalOutwardNoPacks = $maintotalOutwardNoPacks + $outwardPacks;
@@ -2808,7 +2947,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($salesReturn->NoPacks, ',') != false) {
                     $salesreturnPacks = $salesreturnPacks + array_sum(explode(',', $salesReturn->NoPacks));
                 } else {
-                    $salesreturnPacks = $salesreturnPacks + (int)$salesReturn->NoPacks;
+                    $salesreturnPacks = $salesreturnPacks + (int) $salesReturn->NoPacks;
                 }
             }
             $maintotalSalesReturnNoPacks = $maintotalSalesReturnNoPacks + $salesreturnPacks;
@@ -2833,7 +2972,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                 if (strpos($inwardRecord->SalesNoPacks, ',')) {
                     $InwardPacks = $InwardPacks + array_sum(explode(',', $inwardRecord->SalesNoPacks));
                 } else {
-                    $InwardPacks = $InwardPacks + (int)$inwardRecord->SalesNoPacks;
+                    $InwardPacks = $InwardPacks + (int) $inwardRecord->SalesNoPacks;
                 }
             }
             if (strpos($InwardPacks, ',') != false) {
@@ -2896,8 +3035,8 @@ if (array_sum($SalesNoPacks) <= 0) {
             'openingCatWise' => $CatOpeningStock,
             'closingCatWise' => $CatClosingStock,
             'Categories' => $categories,
-            'AllData' => ['inwardRecords' => array_values($maininwardRecords), 'totalInwardSalesNoPacks' => $maintotalInwardSalesNoPacks,  'outwardRecords' => array_values($mainoutwardRecords), 'totalOutwardNoPacks' => $maintotalOutwardNoPacks, 'purchaseReturnRecords' => array_values($mainpurchaseReturnRecords), 'totalPurchaseReturnNoPacks' => $maintotalPurchaseReturnNoPacks, 'salesReturnRecords' => array_values($mainsalesReturnRecords), 'totalSalesReturnNoPacks' => $maintotalSalesReturnNoPacks],
-            'AllDataCat' => ['inwardCategoryWise' => $inwardCategoryWise,  'outwardCategoryWise' => $outwardCategoryWise,  'purchaseReturnCategoryWise' => $purchaseReturnCategoryWise, 'salesReturnCategoryWise' => $salesReturnCategoryWise]
+            'AllData' => ['inwardRecords' => array_values($maininwardRecords), 'totalInwardSalesNoPacks' => $maintotalInwardSalesNoPacks, 'outwardRecords' => array_values($mainoutwardRecords), 'totalOutwardNoPacks' => $maintotalOutwardNoPacks, 'purchaseReturnRecords' => array_values($mainpurchaseReturnRecords), 'totalPurchaseReturnNoPacks' => $maintotalPurchaseReturnNoPacks, 'salesReturnRecords' => array_values($mainsalesReturnRecords), 'totalSalesReturnNoPacks' => $maintotalSalesReturnNoPacks],
+            'AllDataCat' => ['inwardCategoryWise' => $inwardCategoryWise, 'outwardCategoryWise' => $outwardCategoryWise, 'purchaseReturnCategoryWise' => $purchaseReturnCategoryWise, 'salesReturnCategoryWise' => $salesReturnCategoryWise]
         ];
     }
     public function GetOutletDailyReports($RangeDate, $PartyId)
@@ -2939,7 +3078,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
             } else {
 
-                $totalInwardPacks = $totalInwardPacks + (int)$beforeInward->NoPacks;
+                $totalInwardPacks = $totalInwardPacks + (int) $beforeInward->NoPacks;
 
             }
 
@@ -2953,7 +3092,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
             } else {
 
-                $totalImportPacks = $totalImportPacks + (int)$beforeImport->NoPacks;
+                $totalImportPacks = $totalImportPacks + (int) $beforeImport->NoPacks;
 
             }
 
@@ -2967,7 +3106,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
             } else {
 
-                $totalOutwardPacks = $totalOutwardPacks + (int)$beforeOutward->NoPacks;
+                $totalOutwardPacks = $totalOutwardPacks + (int) $beforeOutward->NoPacks;
 
             }
 
@@ -2981,7 +3120,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
             } else {
 
-                $totalSalesReturnPacks = $totalSalesReturnPacks + (int)$beforeSalesReturn->NoPacks;
+                $totalSalesReturnPacks = $totalSalesReturnPacks + (int) $beforeSalesReturn->NoPacks;
 
             }
 
@@ -2995,7 +3134,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
             } else {
 
-                $totalPurchaseReturnPacks = $totalPurchaseReturnPacks + (int)$beforePurchaseReturn->NoPacks;
+                $totalPurchaseReturnPacks = $totalPurchaseReturnPacks + (int) $beforePurchaseReturn->NoPacks;
 
             }
 
@@ -3043,7 +3182,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $innwardOpeningStock = $innwardOpeningStock + (int)$CatWisebeforeInward->NoPacks;
+                    $innwardOpeningStock = $innwardOpeningStock + (int) $CatWisebeforeInward->NoPacks;
 
                 }
 
@@ -3067,7 +3206,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $importOpeningStock = $importOpeningStock + (int)$beforeImport->NoPacks;
+                    $importOpeningStock = $importOpeningStock + (int) $beforeImport->NoPacks;
 
                 }
 
@@ -3081,7 +3220,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $outwardOpeningStock = $outwardOpeningStock + (int)$beforeOutward->NoPacks;
+                    $outwardOpeningStock = $outwardOpeningStock + (int) $beforeOutward->NoPacks;
 
                 }
 
@@ -3095,7 +3234,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $purchaseReturnOpeningStock = $purchaseReturnOpeningStock + (int)$beforePurchaseReturn->NoPacks;
+                    $purchaseReturnOpeningStock = $purchaseReturnOpeningStock + (int) $beforePurchaseReturn->NoPacks;
 
                 }
 
@@ -3109,7 +3248,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $salesReturnOpeningStock = $salesReturnOpeningStock + (int)$beforeSalesReturn->NoPacks;
+                    $salesReturnOpeningStock = $salesReturnOpeningStock + (int) $beforeSalesReturn->NoPacks;
 
                 }
 
@@ -3169,7 +3308,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $outwardJhcplPacks = $outwardJhcplPacks + (int)$jhcplOutward->NoPacks;
+                    $outwardJhcplPacks = $outwardJhcplPacks + (int) $jhcplOutward->NoPacks;
 
                 }
 
@@ -3199,7 +3338,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $catInwardPacks = $catInwardPacks + (int)$inwardRecord->NoPacks;
+                    $catInwardPacks = $catInwardPacks + (int) $inwardRecord->NoPacks;
 
                 }
 
@@ -3233,7 +3372,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $catImportPacks = $catImportPacks + (int)$catImportRecord->NoPacks;
+                    $catImportPacks = $catImportPacks + (int) $catImportRecord->NoPacks;
 
                 }
 
@@ -3267,7 +3406,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $catOutwardPacks = $catOutwardPacks + (int)$catOutwardRecord->NoPacks;
+                    $catOutwardPacks = $catOutwardPacks + (int) $catOutwardRecord->NoPacks;
 
                 }
 
@@ -3301,7 +3440,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $catPurchaseReturnNoPacks = $catPurchaseReturnNoPacks + (int)$catPurchaseReturnRecord->NoPacks;
+                    $catPurchaseReturnNoPacks = $catPurchaseReturnNoPacks + (int) $catPurchaseReturnRecord->NoPacks;
 
                 }
 
@@ -3333,7 +3472,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $catSalesReturnNoPacks = $catSalesReturnNoPacks + (int)$catSalesreturnRecord->NoPacks;
+                    $catSalesReturnNoPacks = $catSalesReturnNoPacks + (int) $catSalesreturnRecord->NoPacks;
 
                 }
 
@@ -3381,7 +3520,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $outwardJhcplPacks = $outwardJhcplPacks + (int)$jhcploutward->NoPacks;
+                    $outwardJhcplPacks = $outwardJhcplPacks + (int) $jhcploutward->NoPacks;
 
                 }
 
@@ -3419,7 +3558,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $InPacks = $InPacks + (int)$outward->NoPacks;
+                    $InPacks = $InPacks + (int) $outward->NoPacks;
 
                 }
 
@@ -3455,7 +3594,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $importNoPacks = $importNoPacks + (int)$import->NoPacks;
+                    $importNoPacks = $importNoPacks + (int) $import->NoPacks;
 
                 }
 
@@ -3491,7 +3630,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $outwardPacks = $outwardPacks + (int)$outward->NoPacks;
+                    $outwardPacks = $outwardPacks + (int) $outward->NoPacks;
 
                 }
 
@@ -3527,7 +3666,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $purchasereturnPacks = $purchasereturnPacks + (int)$purchaseReturn->NoPacks;
+                    $purchasereturnPacks = $purchasereturnPacks + (int) $purchaseReturn->NoPacks;
 
                 }
 
@@ -3557,7 +3696,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $salesreturnPacks = $salesreturnPacks + (int)$salesReturn->NoPacks;
+                    $salesreturnPacks = $salesreturnPacks + (int) $salesReturn->NoPacks;
 
                 }
 
@@ -3627,7 +3766,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
             } else {
 
-                $closingInwardPacks = $closingInwardPacks + (int)$afterInward->NoPacks;
+                $closingInwardPacks = $closingInwardPacks + (int) $afterInward->NoPacks;
 
             }
 
@@ -3643,7 +3782,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
             } else {
 
-                $closingImportPacks = $closingImportPacks + (int)$afterImport->NoPacks;
+                $closingImportPacks = $closingImportPacks + (int) $afterImport->NoPacks;
 
             }
 
@@ -3657,7 +3796,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
             } else {
 
-                $closingOutwardPacks = $closingOutwardPacks + (int)$afterOutward->NoPacks;
+                $closingOutwardPacks = $closingOutwardPacks + (int) $afterOutward->NoPacks;
 
             }
 
@@ -3671,7 +3810,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
             } else {
 
-                $closingSalesReturnPacks = $closingSalesReturnPacks + (int)$afterSalesReturn->NoPacks;
+                $closingSalesReturnPacks = $closingSalesReturnPacks + (int) $afterSalesReturn->NoPacks;
 
             }
 
@@ -3685,7 +3824,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
             } else {
 
-                $closingPurchaseReturnPacks = $closingPurchaseReturnPacks + (int)$afterPurchaseReturn->NoPacks;
+                $closingPurchaseReturnPacks = $closingPurchaseReturnPacks + (int) $afterPurchaseReturn->NoPacks;
 
             }
 
@@ -3757,7 +3896,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $innwardClosingStock = $innwardClosingStock + (int)$CatWiseafterInward->NoPacks;
+                    $innwardClosingStock = $innwardClosingStock + (int) $CatWiseafterInward->NoPacks;
 
                 }
 
@@ -3771,7 +3910,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $importClosingStock = $importClosingStock + (int)$afterImport->NoPacks;
+                    $importClosingStock = $importClosingStock + (int) $afterImport->NoPacks;
 
                 }
 
@@ -3785,7 +3924,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $outwardClosingStock = $outwardClosingStock + (int)$afterOutward->NoPacks;
+                    $outwardClosingStock = $outwardClosingStock + (int) $afterOutward->NoPacks;
 
                 }
 
@@ -3799,7 +3938,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $purchaseReturnClosingStock = $purchaseReturnClosingStock + (int)$afterPurchaseReturn->NoPacks;
+                    $purchaseReturnClosingStock = $purchaseReturnClosingStock + (int) $afterPurchaseReturn->NoPacks;
 
                 }
 
@@ -3813,7 +3952,7 @@ if (array_sum($SalesNoPacks) <= 0) {
 
                 } else {
 
-                    $salesReturnClosingStock = $salesReturnClosingStock + (int)$afterSalesReturn->NoPacks;
+                    $salesReturnClosingStock = $salesReturnClosingStock + (int) $afterSalesReturn->NoPacks;
 
                 }
 
@@ -3833,39 +3972,51 @@ if (array_sum($SalesNoPacks) <= 0) {
 
             'orgOutletName' => $orgOutletName,
 
-            'outletOpeningCategorywise' => $CatOpeningStock, 'outletClosingCategorywise' => $CatClosingStock,
+            'outletOpeningCategorywise' => $CatOpeningStock,
+            'outletClosingCategorywise' => $CatClosingStock,
 
             'Categories' => $categories,
 
-            'outletOpeningStock' => $openingStock, 'outletClosingStock' => $closingStock,
+            'outletOpeningStock' => $openingStock,
+            'outletClosingStock' => $closingStock,
 
             'allOutletData' => [
 
-                'inwardData' => $mainOutletInwardRecords, 'totalInwardPacks' => $maintotalInwardNoPacks,
+                'inwardData' => $mainOutletInwardRecords,
+                'totalInwardPacks' => $maintotalInwardNoPacks,
 
-                'importData' => $mainImportRecords, 'totalImportPacks' => $mainTotalImportNoPacks,
+                'importData' => $mainImportRecords,
+                'totalImportPacks' => $mainTotalImportNoPacks,
 
-                'outwardData' => $mainOutwardRecords, 'totalOutwardPacks' => $mainTotalOutwardNoPacks,
+                'outwardData' => $mainOutwardRecords,
+                'totalOutwardPacks' => $mainTotalOutwardNoPacks,
 
                 'jhsploutwardData' => $mainJscplOutwardRecords,
 
-                'salesReturnData' => $salesReturnRecords, 'totalSalesReturnPacks' => $mainTotalSalesReturnNoPacks,
+                'salesReturnData' => $salesReturnRecords,
+                'totalSalesReturnPacks' => $mainTotalSalesReturnNoPacks,
 
-                'purchaseReturnData' => $purchasereturnRecords, 'totalPurchaseReturnPacks' => $mainTotalPurchaseReturnNoPacks
+                'purchaseReturnData' => $purchasereturnRecords,
+                'totalPurchaseReturnPacks' => $mainTotalPurchaseReturnNoPacks
 
             ],
 
             'allOutletDataCat' => [
 
-                'outletInwardCategoryWise' => $outletInwardCategoryWise, 'totalCatInwardPacks' => $totalCatInwardPacks + $totalCatJhcplOutwardPacks,
+                'outletInwardCategoryWise' => $outletInwardCategoryWise,
+                'totalCatInwardPacks' => $totalCatInwardPacks + $totalCatJhcplOutwardPacks,
 
-                'outletImportCategoryWise' => $outletImportCategoryWise, 'totalCatImportPacks' => $totalCatImportPacks,
+                'outletImportCategoryWise' => $outletImportCategoryWise,
+                'totalCatImportPacks' => $totalCatImportPacks,
 
-                'outletOutwardCategoryWise' => $outletOutwardCategoryWise, 'totalCatOutwardPacks' => $totalCatOutwardPacks + $totalCatJhcplOutwardPacks,
+                'outletOutwardCategoryWise' => $outletOutwardCategoryWise,
+                'totalCatOutwardPacks' => $totalCatOutwardPacks + $totalCatJhcplOutwardPacks,
 
-                'outletSalesReturnCategoryWise' => $outletSalesReturnCategoryWise, 'totalCatSRPacks' => $totalCatSRPacks,
+                'outletSalesReturnCategoryWise' => $outletSalesReturnCategoryWise,
+                'totalCatSRPacks' => $totalCatSRPacks,
 
-                'outletPurchaseReturnCategoryWise' => $outletPurchaseReturnCategoryWise, 'totalCatPRPacks' => $totalCatPRPacks,
+                'outletPurchaseReturnCategoryWise' => $outletPurchaseReturnCategoryWise,
+                'totalCatPRPacks' => $totalCatPRPacks,
 
             ]
 
@@ -3876,7 +4027,7 @@ if (array_sum($SalesNoPacks) <= 0) {
     public function getsoutletreport($RangeDate, $PartyId)
     {
 
-        if($PartyId == '4'){
+        if ($PartyId == '4') {
             // return 'DSFDSF';
             $categories = Category::get();
             $CatOpeningStock = [];
@@ -3903,21 +4054,21 @@ if (array_sum($SalesNoPacks) <= 0) {
                     if (strpos($openInward->NoPacks, ',') != false) {
                         $inwardOpenStock = $inwardOpenStock + array_sum(explode(',', $openInward->NoPacks));
                     } else {
-                        $inwardOpenStock = $inwardOpenStock + (int)$openInward->NoPacks;
+                        $inwardOpenStock = $inwardOpenStock + (int) $openInward->NoPacks;
                     }
                 }
                 foreach ($openSalesReturns as $openSalesReturn) {
                     if (strpos($openSalesReturn->NoPacks, ',') != false) {
                         $salesReturnOpenStock = $salesReturnOpenStock + array_sum(explode(',', $openSalesReturn->NoPacks));
                     } else {
-                        $salesReturnOpenStock = $salesReturnOpenStock + (int)$openSalesReturn->NoPacks;
+                        $salesReturnOpenStock = $salesReturnOpenStock + (int) $openSalesReturn->NoPacks;
                     }
                 }
                 foreach ($openPros as $openPro) {
                     if (strpos($openPro->NoPacks, ',') != false) {
                         $proOpenStock = $proOpenStock + array_sum(explode(',', $openPro->NoPacks));
                     } else {
-                        $proOpenStock = $proOpenStock + (int)$openPro->NoPacks;
+                        $proOpenStock = $proOpenStock + (int) $openPro->NoPacks;
                     }
                 }
                 //end adition open stock
@@ -3930,46 +4081,46 @@ if (array_sum($SalesNoPacks) <= 0) {
                     if (strpos($openOutward->NoPacks, ',') != false) {
                         $outwardOpenStock = $outwardOpenStock + array_sum(explode(',', $openOutward->NoPacks));
                     } else {
-                        $outwardOpenStock = $outwardOpenStock + (int)$openOutward->NoPacks;
+                        $outwardOpenStock = $outwardOpenStock + (int) $openOutward->NoPacks;
                     }
                 }
                 foreach ($openPurchaseReturns as $openPurchaseReturn) {
                     if (strpos($openPurchaseReturn->NoPacks, ',') != false) {
                         $purchaseReturnOpenStock = $purchaseReturnOpenStock + array_sum(explode(',', $openPurchaseReturn->NoPacks));
                     } else {
-                        $purchaseReturnOpenStock = $purchaseReturnOpenStock + (int)$openPurchaseReturn->NoPacks;
+                        $purchaseReturnOpenStock = $purchaseReturnOpenStock + (int) $openPurchaseReturn->NoPacks;
                     }
                 }
                 foreach ($openCons as $openCon) {
                     if (strpos($openCon->NoPacks, ',') != false) {
                         $conOpenStock = $conOpenStock + array_sum(explode(',', $openCon->NoPacks));
                     } else {
-                        $conOpenStock = $conOpenStock + (int)$openCon->NoPacks;
+                        $conOpenStock = $conOpenStock + (int) $openCon->NoPacks;
                     }
                 }
                 foreach ($openShortages as $openShortage) {
                     if (strpos($openShortage->NoPacks, ',') != false) {
                         $shortageOpenStock = $shortageOpenStock + array_sum(explode(',', $openShortage->NoPacks));
                     } else {
-                        $shortageOpenStock = $shortageOpenStock + (int)$openShortage->NoPacks;
+                        $shortageOpenStock = $shortageOpenStock + (int) $openShortage->NoPacks;
                     }
                 }
                 //end subtraction open stock
                 $catOpenStock = ($catOpenStock + $inwardOpenStock + $proOpenStock + $salesReturnOpenStock) - ($outwardOpenStock + $purchaseReturnOpenStock + $conOpenStock + $shortageOpenStock);
                 array_push($CatOpeningStocks, [$category->Title => $catOpenStock]);
-                
-                
-                    $mainOpeningd = '0';
-                    $styles = DB::select("SELECT COUNT(`Id`) AS total_sum FROM article WHERE CategoryId = '" . $category->Id ."'");
-                    if($styles > 0){
-                        $mainOpeningd = $styles[0]->total_sum;
-                    }
 
-                array_push($CatOpeningStock, [ "title" => $category->Title, "stock" => $catOpenStock, "style" => $mainOpeningd]);
+
+                $mainOpeningd = '0';
+                $styles = DB::select("SELECT COUNT(`Id`) AS total_sum FROM article WHERE CategoryId = '" . $category->Id . "'");
+                if ($styles > 0) {
+                    $mainOpeningd = $styles[0]->total_sum;
+                }
+
+                array_push($CatOpeningStock, ["title" => $category->Title, "stock" => $catOpenStock, "style" => $mainOpeningd]);
                 $styleSum = array_sum(array_column($CatOpeningStock, 'style'));
 
                 //end open stock
-    
+
                 //start close stock
                 $catCloseStock = 0;
                 $closeStock = 0;
@@ -3988,21 +4139,21 @@ if (array_sum($SalesNoPacks) <= 0) {
                     if (strpos($closeInward->NoPacks, ',') != false) {
                         $inwardCloseStock = $inwardCloseStock + array_sum(explode(',', $closeInward->NoPacks));
                     } else {
-                        $inwardCloseStock = $inwardCloseStock + (int)$closeInward->NoPacks;
+                        $inwardCloseStock = $inwardCloseStock + (int) $closeInward->NoPacks;
                     }
                 }
                 foreach ($closeSalesReturns as $closeSalesReturn) {
                     if (strpos($closeSalesReturn->NoPacks, ',') != false) {
                         $salesReturnCloseStock = $salesReturnCloseStock + array_sum(explode(',', $closeSalesReturn->NoPacks));
                     } else {
-                        $salesReturnCloseStock = $salesReturnCloseStock + (int)$closeSalesReturn->NoPacks;
+                        $salesReturnCloseStock = $salesReturnCloseStock + (int) $closeSalesReturn->NoPacks;
                     }
                 }
                 foreach ($closePros as $closePro) {
                     if (strpos($closePro->NoPacks, ',') != false) {
                         $proCloseStock = $proCloseStock + array_sum(explode(',', $closePro->NoPacks));
                     } else {
-                        $proCloseStock = $proCloseStock + (int)$closePro->NoPacks;
+                        $proCloseStock = $proCloseStock + (int) $closePro->NoPacks;
                     }
                 }
                 //end adition close stock
@@ -4015,61 +4166,61 @@ if (array_sum($SalesNoPacks) <= 0) {
                     if (strpos($closeOutward->NoPacks, ',') != false) {
                         $outwardCloseStock = $outwardCloseStock + array_sum(explode(',', $closeOutward->NoPacks));
                     } else {
-                        $outwardCloseStock = $outwardCloseStock + (int)$closeOutward->NoPacks;
+                        $outwardCloseStock = $outwardCloseStock + (int) $closeOutward->NoPacks;
                     }
                 }
                 foreach ($closePurchaseReturns as $closePurchaseReturn) {
                     if (strpos($closePurchaseReturn->NoPacks, ',') != false) {
                         $purchaseReturnCloseStock = $purchaseReturnCloseStock + array_sum(explode(',', $closePurchaseReturn->NoPacks));
                     } else {
-                        $purchaseReturnCloseStock = $purchaseReturnCloseStock + (int)$closePurchaseReturn->NoPacks;
+                        $purchaseReturnCloseStock = $purchaseReturnCloseStock + (int) $closePurchaseReturn->NoPacks;
                     }
                 }
                 foreach ($closeCons as $closeCon) {
                     if (strpos($closeCon->NoPacks, ',') != false) {
                         $conCloseStock = $conCloseStock + array_sum(explode(',', $closeCon->NoPacks));
                     } else {
-                        $conCloseStock = $conCloseStock + (int)$closeCon->NoPacks;
+                        $conCloseStock = $conCloseStock + (int) $closeCon->NoPacks;
                     }
                 }
                 foreach ($closeShortages as $closeShortage) {
                     if (strpos($closeShortage->NoPacks, ',') != false) {
                         $shortageCloseStock = $shortageCloseStock + array_sum(explode(',', $closeShortage->NoPacks));
                     } else {
-                        $shortageCloseStock = $shortageCloseStock + (int)$closeShortage->NoPacks;
+                        $shortageCloseStock = $shortageCloseStock + (int) $closeShortage->NoPacks;
                     }
                 }
                 //end subtraction close stock
                 $catCloseStock = ($inwardCloseStock + $proCloseStock + $salesReturnCloseStock) - ($outwardCloseStock + $purchaseReturnCloseStock + $conCloseStock + $shortageCloseStock);
-                
 
-                
-                        $mainClosingd = 0;
-                        $styles = DB::select("SELECT COUNT(`Id`) AS total_sum FROM article WHERE CategoryId = '" . $category->Id ."'");
-                        if($styles > 0){
-                            $mainClosingd = $styles[0]->total_sum;
-                        }else{
-                            $mainClosingd = '0';
-                        }
 
-                array_push($CatClosingStock, [ "title" => $category->Title, "stock" => $catCloseStock, "style" => $mainClosingd]);
+
+                $mainClosingd = 0;
+                $styles = DB::select("SELECT COUNT(`Id`) AS total_sum FROM article WHERE CategoryId = '" . $category->Id . "'");
+                if ($styles > 0) {
+                    $mainClosingd = $styles[0]->total_sum;
+                } else {
+                    $mainClosingd = '0';
+                }
+
+                array_push($CatClosingStock, ["title" => $category->Title, "stock" => $catCloseStock, "style" => $mainClosingd]);
 
                 array_push($CatClosingStocks, [$category->Title => $catCloseStock]);
                 //end close stock
             }
             $catCount = Category::count();
-            for ($i = 0; $i <= (int)$catCount - 1; $i++) {
+            for ($i = 0; $i <= (int) $catCount - 1; $i++) {
                 foreach ($CatOpeningStocks[$i] as $key => $value) {
                     $openStock = $openStock + $value;
                 }
             }
-            for ($i = 0; $i <= (int)$catCount - 1; $i++) {
+            for ($i = 0; $i <= (int) $catCount - 1; $i++) {
                 foreach ($CatClosingStocks[$i] as $key => $value) {
                     $closeStock = $closeStock + $value;
                 }
             }
-    
-    
+
+
             //start daily stock
             $maininwardRecordss = DB::select("select * from (select ig.Id as GRNId, concat(ig.GRN,'/', fn.StartYear,'-',fn.EndYear) as GRNnumber, DATE_FORMAT(i.created_at ,'%Y-%m-%d') as CreatedAt, DATE_FORMAT(i.created_at ,'%d-%m-%Y') as CreatedDate from inwardgrn ig inner join inward i on ig.Id=i.GRN inner join financialyear fn on fn.Id=ig.FinancialYearId) as dd where dd.CreatedAt = '" . $RangeDate . "'");
             $collectioncateInwa = collect($maininwardRecordss);
@@ -4090,7 +4241,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                     if (strpos($inward->NoPacks, ',') != false) {
                         $grnPacks = $grnPacks + array_sum(explode(',', $inward->NoPacks));
                     } else {
-                        $grnPacks = $grnPacks + (int)$inward->NoPacks;
+                        $grnPacks = $grnPacks + (int) $inward->NoPacks;
                     }
                 }
                 $maintotalInwardSalesNoPacks = $maintotalInwardSalesNoPacks + $grnPacks;
@@ -4104,14 +4255,14 @@ if (array_sum($SalesNoPacks) <= 0) {
             $maintotalPurchaseReturnNoPacks = 0;
             // foreach ($mainpurchaseReturnRecords as $mainpurchaseReturnRecord) {
             foreach ($mainpurchaseReturnRecords as $key => $mainpurchaseReturnRecord) {
-    
+
                 $purchaseReturns = DB::select("select ReturnNoPacks from purchasereturn where PurchaseReturnNumber=" . $mainpurchaseReturnRecord->PrnId);
                 $prPacks = 0;
                 foreach ($purchaseReturns as $purchaseReturn) {
                     if (strpos($purchaseReturn->ReturnNoPacks, ',') != false) {
                         $prPacks = $prPacks + array_sum(explode(',', $purchaseReturn->ReturnNoPacks));
                     } else {
-                        $prPacks = $prPacks + (int)$purchaseReturn->ReturnNoPacks;
+                        $prPacks = $prPacks + (int) $purchaseReturn->ReturnNoPacks;
                     }
                 }
                 $maintotalPurchaseReturnNoPacks = $maintotalPurchaseReturnNoPacks + $prPacks;
@@ -4135,7 +4286,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                     if (strpos($outward->NoPacks, ',') != false) {
                         $outwardPacks = $outwardPacks + array_sum(explode(',', $outward->NoPacks));
                     } else {
-                        $outwardPacks = $outwardPacks + (int)$outward->NoPacks;
+                        $outwardPacks = $outwardPacks + (int) $outward->NoPacks;
                     }
                 }
                 $maintotalOutwardNoPacks = $maintotalOutwardNoPacks + $outwardPacks;
@@ -4154,7 +4305,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                     if (strpos($salesReturn->NoPacks, ',') != false) {
                         $salesreturnPacks = $salesreturnPacks + array_sum(explode(',', $salesReturn->NoPacks));
                     } else {
-                        $salesreturnPacks = $salesreturnPacks + (int)$salesReturn->NoPacks;
+                        $salesreturnPacks = $salesreturnPacks + (int) $salesReturn->NoPacks;
                     }
                 }
                 $maintotalSalesReturnNoPacks = $maintotalSalesReturnNoPacks + $salesreturnPacks;
@@ -4179,7 +4330,7 @@ if (array_sum($SalesNoPacks) <= 0) {
                     if (strpos($inwardRecord->SalesNoPacks, ',')) {
                         $InwardPacks = $InwardPacks + array_sum(explode(',', $inwardRecord->SalesNoPacks));
                     } else {
-                        $InwardPacks = $InwardPacks + (int)$inwardRecord->SalesNoPacks;
+                        $InwardPacks = $InwardPacks + (int) $inwardRecord->SalesNoPacks;
                     }
                 }
                 if (strpos($InwardPacks, ',') != false) {
@@ -4244,559 +4395,572 @@ if (array_sum($SalesNoPacks) <= 0) {
                 'outletClosingCategorywise' => $CatClosingStock,
                 'Categories' => $categories,
                 'TotalStyle' => $styleSum,
-                'AllData' => ['inwardRecords' => array_values($maininwardRecords), 'totalInwardSalesNoPacks' => $maintotalInwardSalesNoPacks,  'outwardRecords' => array_values($mainoutwardRecords), 'totalOutwardNoPacks' => $maintotalOutwardNoPacks, 'purchaseReturnRecords' => array_values($mainpurchaseReturnRecords), 'totalPurchaseReturnNoPacks' => $maintotalPurchaseReturnNoPacks, 'salesReturnRecords' => array_values($mainsalesReturnRecords), 'totalSalesReturnNoPacks' => $maintotalSalesReturnNoPacks],
-                'AllDataCat' => ['inwardCategoryWise' => $inwardCategoryWise,  'outwardCategoryWise' => $outwardCategoryWise,  'purchaseReturnCategoryWise' => $purchaseReturnCategoryWise, 'salesReturnCategoryWise' => $salesReturnCategoryWise]
+                'AllData' => ['inwardRecords' => array_values($maininwardRecords), 'totalInwardSalesNoPacks' => $maintotalInwardSalesNoPacks, 'outwardRecords' => array_values($mainoutwardRecords), 'totalOutwardNoPacks' => $maintotalOutwardNoPacks, 'purchaseReturnRecords' => array_values($mainpurchaseReturnRecords), 'totalPurchaseReturnNoPacks' => $maintotalPurchaseReturnNoPacks, 'salesReturnRecords' => array_values($mainsalesReturnRecords), 'totalSalesReturnNoPacks' => $maintotalSalesReturnNoPacks],
+                'AllDataCat' => ['inwardCategoryWise' => $inwardCategoryWise, 'outwardCategoryWise' => $outwardCategoryWise, 'purchaseReturnCategoryWise' => $purchaseReturnCategoryWise, 'salesReturnCategoryWise' => $salesReturnCategoryWise]
             ];
-        }else{  
-                 
-                $orgOutlet = Party::select('Name')->where('Id', $PartyId)->first();
-                $orgOutletName = $orgOutlet->Name;
-                // opening stock
-                $beforeInwards = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId inner join outward o on o.Id=trop.OutwardId) as dd where dd.CreatedDate < '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
-                $beforeImports = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, trop.OutwardId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId) as dd where dd.OutwardId=0 and dd.CreatedDate < '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
-                $beforeOutwards = DB::select("select * from (select o.NoPacks, o.ArticleId, otn.PartyId, a.CategoryId, DATE_FORMAT(o.created_at,'%Y-%m-%d') as OutletDate from outlet o inner join article a on a.Id=o.ArticleId inner join outletnumber otn on otn.Id=o.OutletNumberId) as dd where dd.OutletDate < '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
-                $beforePurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate < '" . $RangeDate . "' and dd.CreatedDate > '2021-12-31' and dd.PartyId='" . $PartyId . "'");
-                $beforeSalesReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, sr.OutletPartyId as PartyId from outletsalesreturn sr inner join article a on a.Id=sr.ArticleId inner join outletsalesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate < '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
-                
+        } else {
 
-                $openingStock = 0;
-                $totalInwardPacks = 0;
-                $totalImportPacks = 0;
-                $totalOutwardPacks = 0;
-                $totalSalesReturnPacks = 0;
-                $totalPurchaseReturnPacks = 0;
-                foreach ($beforeInwards as $beforeInward) {
-                    if (strpos($beforeInward->NoPacks, ',') != false) {
-                        $totalInwardPacks = $totalInwardPacks + array_sum(explode(',', $beforeInward->NoPacks));
+            $orgOutlet = Party::select('Name')->where('Id', $PartyId)->first();
+            $orgOutletName = $orgOutlet->Name;
+            // opening stock
+            $beforeInwards = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId inner join outward o on o.Id=trop.OutwardId) as dd where dd.CreatedDate < '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
+            $beforeImports = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, trop.OutwardId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId) as dd where dd.OutwardId=0 and dd.CreatedDate < '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
+            $beforeOutwards = DB::select("select * from (select o.NoPacks, o.ArticleId, otn.PartyId, a.CategoryId, DATE_FORMAT(o.created_at,'%Y-%m-%d') as OutletDate from outlet o inner join article a on a.Id=o.ArticleId inner join outletnumber otn on otn.Id=o.OutletNumberId) as dd where dd.OutletDate < '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
+            $beforePurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate < '" . $RangeDate . "' and dd.CreatedDate > '2021-12-31' and dd.PartyId='" . $PartyId . "'");
+            $beforeSalesReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, sr.OutletPartyId as PartyId from outletsalesreturn sr inner join article a on a.Id=sr.ArticleId inner join outletsalesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate < '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
+
+
+            $openingStock = 0;
+            $totalInwardPacks = 0;
+            $totalImportPacks = 0;
+            $totalOutwardPacks = 0;
+            $totalSalesReturnPacks = 0;
+            $totalPurchaseReturnPacks = 0;
+            foreach ($beforeInwards as $beforeInward) {
+                if (strpos($beforeInward->NoPacks, ',') != false) {
+                    $totalInwardPacks = $totalInwardPacks + array_sum(explode(',', $beforeInward->NoPacks));
+                } else {
+                    $totalInwardPacks = $totalInwardPacks + (int) $beforeInward->NoPacks;
+                }
+            }
+            foreach ($beforeImports as $beforeImport) {
+                if (strpos($beforeImport->NoPacks, ',') != false) {
+                    $totalImportPacks = $totalImportPacks + array_sum(explode(',', $beforeImport->NoPacks));
+                } else {
+                    $totalImportPacks = $totalImportPacks + (int) $beforeImport->NoPacks;
+                }
+            }
+            foreach ($beforeOutwards as $beforeOutward) {
+                if (strpos($beforeOutward->NoPacks, ',') != false) {
+                    $totalOutwardPacks = $totalOutwardPacks + array_sum(explode(',', $beforeOutward->NoPacks));
+                } else {
+                    $totalOutwardPacks = $totalOutwardPacks + (int) $beforeOutward->NoPacks;
+                }
+            }
+            foreach ($beforeSalesReturns as $beforeSalesReturn) {
+                if (strpos($beforeSalesReturn->NoPacks, ',') != false) {
+                    $totalSalesReturnPacks = $totalSalesReturnPacks + array_sum(explode(',', $beforeSalesReturn->NoPacks));
+                } else {
+                    $totalSalesReturnPacks = $totalSalesReturnPacks + (int) $beforeSalesReturn->NoPacks;
+                }
+            }
+            foreach ($beforePurchaseReturns as $beforePurchaseReturn) {
+                if (strpos($beforePurchaseReturn->NoPacks, ',') != false) {
+                    $totalPurchaseReturnPacks = $totalPurchaseReturnPacks + array_sum(explode(',', $beforePurchaseReturn->NoPacks));
+                } else {
+                    $totalPurchaseReturnPacks = $totalPurchaseReturnPacks + (int) $beforePurchaseReturn->NoPacks;
+                }
+            }
+            $openingStock = $openingStock + $totalInwardPacks + $totalImportPacks + $totalSalesReturnPacks - $totalOutwardPacks - $totalPurchaseReturnPacks;
+            // end opening stock
+            // category wise opening stock
+            $categories = Category::get();
+            $CatOpeningStock = [];
+            foreach ($categories as $category) {
+                $beforeInwardss = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId inner join outward o on o.Id=trop.OutwardId) as dd where dd.CreatedDate < '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "'");
+                $beforeImports = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, trop.OutwardId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId) as dd where dd.OutwardId=0 and dd.CreatedDate < '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
+                $beforeOutwards = DB::select("select * from (select o.NoPacks, o.ArticleId, otn.PartyId, a.CategoryId, DATE_FORMAT(o.created_at,'%Y-%m-%d') as OutletDate from outlet o inner join article a on a.Id=o.ArticleId inner join outletnumber otn on otn.Id=o.OutletNumberId) as dd where dd.OutletDate < '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
+                $beforePurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber inner join article a on a.Id=sr.ArticleId) as dd where dd.CreatedDate < '" . $RangeDate . "' and dd.CreatedDate > '2021-12-31' and dd.PartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "'");
+                $beforeSalesReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, sr.OutletPartyId as PartyId from outletsalesreturn sr inner join article a on a.Id=sr.ArticleId inner join outletsalesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate < '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
+
+
+
+                $innwardOpeningStock = 0;
+                $totalInnwardOpeningStock = 0;
+                $importOpeningStock = 0;
+                $outwardOpeningStock = 0;
+                $purchaseReturnOpeningStock = 0;
+                $salesReturnOpeningStock = 0;
+                foreach ($beforeInwardss as $CatWisebeforeInward) {
+                    if (strpos($CatWisebeforeInward->NoPacks, ',') != false) {
+                        $innwardOpeningStock = $innwardOpeningStock + array_sum(explode(',', $CatWisebeforeInward->NoPacks));
                     } else {
-                        $totalInwardPacks = $totalInwardPacks + (int)$beforeInward->NoPacks;
+                        $innwardOpeningStock = $innwardOpeningStock + (int) $CatWisebeforeInward->NoPacks;
                     }
+                }
+                if (strpos($innwardOpeningStock, ',') != false) {
+                    $totalInnwardOpeningStock = $totalInnwardOpeningStock + array_sum(explode(',', $innwardOpeningStock));
+                } else {
+                    $totalInnwardOpeningStock = $totalInnwardOpeningStock + $innwardOpeningStock;
                 }
                 foreach ($beforeImports as $beforeImport) {
                     if (strpos($beforeImport->NoPacks, ',') != false) {
-                        $totalImportPacks = $totalImportPacks + array_sum(explode(',', $beforeImport->NoPacks));
+                        $importOpeningStock = $importOpeningStock + array_sum(explode(',', $beforeImport->NoPacks));
                     } else {
-                        $totalImportPacks = $totalImportPacks + (int)$beforeImport->NoPacks;
+                        $importOpeningStock = $importOpeningStock + (int) $beforeImport->NoPacks;
                     }
                 }
                 foreach ($beforeOutwards as $beforeOutward) {
                     if (strpos($beforeOutward->NoPacks, ',') != false) {
-                        $totalOutwardPacks = $totalOutwardPacks + array_sum(explode(',', $beforeOutward->NoPacks));
+                        $outwardOpeningStock = $outwardOpeningStock + array_sum(explode(',', $beforeOutward->NoPacks));
                     } else {
-                        $totalOutwardPacks = $totalOutwardPacks + (int)$beforeOutward->NoPacks;
-                    }
-                }
-                foreach ($beforeSalesReturns as $beforeSalesReturn) {
-                    if (strpos($beforeSalesReturn->NoPacks, ',') != false) {
-                        $totalSalesReturnPacks = $totalSalesReturnPacks + array_sum(explode(',', $beforeSalesReturn->NoPacks));
-                    } else {
-                        $totalSalesReturnPacks = $totalSalesReturnPacks + (int)$beforeSalesReturn->NoPacks;
+                        $outwardOpeningStock = $outwardOpeningStock + (int) $beforeOutward->NoPacks;
                     }
                 }
                 foreach ($beforePurchaseReturns as $beforePurchaseReturn) {
                     if (strpos($beforePurchaseReturn->NoPacks, ',') != false) {
-                        $totalPurchaseReturnPacks = $totalPurchaseReturnPacks + array_sum(explode(',', $beforePurchaseReturn->NoPacks));
+                        $purchaseReturnOpeningStock = $purchaseReturnOpeningStock + array_sum(explode(',', $beforePurchaseReturn->NoPacks));
                     } else {
-                        $totalPurchaseReturnPacks = $totalPurchaseReturnPacks + (int)$beforePurchaseReturn->NoPacks;
+                        $purchaseReturnOpeningStock = $purchaseReturnOpeningStock + (int) $beforePurchaseReturn->NoPacks;
                     }
                 }
-                $openingStock = $openingStock + $totalInwardPacks + $totalImportPacks + $totalSalesReturnPacks - $totalOutwardPacks - $totalPurchaseReturnPacks;
-                // end opening stock
-                // category wise opening stock
-                $categories = Category::get();
-                $CatOpeningStock = [];
-                foreach ($categories as $category) {
-                    $beforeInwardss = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId inner join outward o on o.Id=trop.OutwardId) as dd where dd.CreatedDate < '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "'");
-                    $beforeImports = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, trop.OutwardId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId) as dd where dd.OutwardId=0 and dd.CreatedDate < '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
-                    $beforeOutwards = DB::select("select * from (select o.NoPacks, o.ArticleId, otn.PartyId, a.CategoryId, DATE_FORMAT(o.created_at,'%Y-%m-%d') as OutletDate from outlet o inner join article a on a.Id=o.ArticleId inner join outletnumber otn on otn.Id=o.OutletNumberId) as dd where dd.OutletDate < '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
-                    $beforePurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber inner join article a on a.Id=sr.ArticleId) as dd where dd.CreatedDate < '" . $RangeDate . "' and dd.CreatedDate > '2021-12-31' and dd.PartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "'");
-                    $beforeSalesReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, sr.OutletPartyId as PartyId from outletsalesreturn sr inner join article a on a.Id=sr.ArticleId inner join outletsalesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate < '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
-                    
-
-
-                    $innwardOpeningStock = 0;
-                    $totalInnwardOpeningStock = 0;
-                    $importOpeningStock = 0;
-                    $outwardOpeningStock = 0;
-                    $purchaseReturnOpeningStock = 0;
-                    $salesReturnOpeningStock = 0;
-                    foreach ($beforeInwardss as $CatWisebeforeInward) {
-                        if (strpos($CatWisebeforeInward->NoPacks, ',') != false) {
-                            $innwardOpeningStock = $innwardOpeningStock + array_sum(explode(',', $CatWisebeforeInward->NoPacks));
-                        } else {
-                            $innwardOpeningStock = $innwardOpeningStock + (int)$CatWisebeforeInward->NoPacks;
-                        }
-                    }
-                    if (strpos($innwardOpeningStock, ',') != false) {
-                        $totalInnwardOpeningStock = $totalInnwardOpeningStock + array_sum(explode(',', $innwardOpeningStock));
+                foreach ($beforeSalesReturns as $beforeSalesReturn) {
+                    if (strpos($beforeSalesReturn->NoPacks, ',') != false) {
+                        $salesReturnOpeningStock = $salesReturnOpeningStock + array_sum(explode(',', $beforeSalesReturn->NoPacks));
                     } else {
-                        $totalInnwardOpeningStock = $totalInnwardOpeningStock + $innwardOpeningStock;
+                        $salesReturnOpeningStock = $salesReturnOpeningStock + (int) $beforeSalesReturn->NoPacks;
                     }
-                    foreach ($beforeImports as $beforeImport) {
-                        if (strpos($beforeImport->NoPacks, ',') != false) {
-                            $importOpeningStock = $importOpeningStock + array_sum(explode(',', $beforeImport->NoPacks));
-                        } else {
-                            $importOpeningStock = $importOpeningStock + (int)$beforeImport->NoPacks;
-                        }
-                    }
-                    foreach ($beforeOutwards as $beforeOutward) {
-                        if (strpos($beforeOutward->NoPacks, ',') != false) {
-                            $outwardOpeningStock = $outwardOpeningStock + array_sum(explode(',', $beforeOutward->NoPacks));
-                        } else {
-                            $outwardOpeningStock = $outwardOpeningStock + (int)$beforeOutward->NoPacks;
-                        }
-                    }
-                    foreach ($beforePurchaseReturns as $beforePurchaseReturn) {
-                        if (strpos($beforePurchaseReturn->NoPacks, ',') != false) {
-                            $purchaseReturnOpeningStock = $purchaseReturnOpeningStock + array_sum(explode(',', $beforePurchaseReturn->NoPacks));
-                        } else {
-                            $purchaseReturnOpeningStock = $purchaseReturnOpeningStock + (int)$beforePurchaseReturn->NoPacks;
-                        }
-                    }
-                    foreach ($beforeSalesReturns as $beforeSalesReturn) {
-                        if (strpos($beforeSalesReturn->NoPacks, ',') != false) {
-                            $salesReturnOpeningStock = $salesReturnOpeningStock + array_sum(explode(',', $beforeSalesReturn->NoPacks));
-                        } else {
-                            $salesReturnOpeningStock = $salesReturnOpeningStock + (int)$beforeSalesReturn->NoPacks;
-                        }
-                    }
-                    $mainOpening = 0;
-                    $mainOpening = $mainOpening + $innwardOpeningStock + $importOpeningStock + $salesReturnOpeningStock - $outwardOpeningStock - $purchaseReturnOpeningStock;
-                    
-
-
-                    $mainOpeningd = '0';
-                    $styles = DB::select("SELECT COUNT(`Id`) AS total_sum FROM article WHERE CategoryId = '" . $category->Id ."'");
-                    if($styles > 0){
-                        $mainOpeningd = $styles[0]->total_sum;
-                    }
-                    array_push($CatOpeningStock, [ "title" => $category->Title, "stock" => $mainOpening, "style" => $mainOpeningd]);
-                    $styleSum = array_sum(array_column($CatOpeningStock, 'style'));
-                    // array_push($CatOpeningStock, [$category->Title => $mainOpening]);
                 }
-                // end category wise opening stock 
-                // start one day record cat wise
-                $TotalarticleOpeningStock = 0;
-                $categories = DB::select("select * from category");
-                $outletInwardCategoryWise = [];
-                $outletImportCategoryWise = [];
-                $outletOutwardCategoryWise = [];
-                $outletPurchaseReturnCategoryWise = [];
-                $outletSalesReturnCategoryWise = [];
-                $totalCatInwardPacks = 0;
-                $totalCatImportPacks = 0;
-                $totalCatOutwardPacks = 0;
-                $totalCatJhcplOutwardPacks = 0;
-                $totalCatPRPacks = 0;
-                $totalCatSRPacks = 0;
-                foreach ($categories as $category) {
-                    // JHCPL Outward
-                    $jhcplOutwards = DB::select("select * from (select p.Name as Party, 'DIRECT' as Outlet, o.NoPacks, a.CategoryId, otn.Id as OutletNumberId, otn.OutwardNumberId, otn.PartyId, concat(otn.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutletNumber, DATE_FORMAT(otn.OutletDate, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(otn.OutletDate, '%d-%m-%Y') as OutletDate from outward o inner join outletnumber otn on o.OutwardNumberId=otn.OutwardNumberId inner join party p on p.Id=otn.OutletPartyId inner join financialyear fn on fn.Id=otn.FinancialYearId inner join article a on a.Id=o.ArticleId) as dd where dd.PartyId='" . $PartyId . "' and dd.CreatedAt='" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "'");
-                    $outwardJhcplPacks = 0;
-                    foreach ($jhcplOutwards as $jhcplOutward) {
-                        if (strpos($jhcplOutward->NoPacks, ',') != false) {
-                            $outwardJhcplPacks = $outwardJhcplPacks + array_sum(explode(',', $jhcplOutward->NoPacks));
-                        } else {
-                            $outwardJhcplPacks = $outwardJhcplPacks + (int)$jhcplOutward->NoPacks;
-                        }
-                    }
-                    if (strpos($outwardJhcplPacks, ',') != false) {
-                        $totalCatJhcplOutwardPacks = $totalCatJhcplOutwardPacks + array_sum(explode(',', $outwardJhcplPacks));
-                    } else {
-                        $totalCatJhcplOutwardPacks = $totalCatJhcplOutwardPacks + $outwardJhcplPacks;
-                    }
-                    // end
-                    $catInwardRec = DB::select("select * from (select c.Id as CategoryId, trop.NoPacks, trop.PartyId, DATE_FORMAT(trop.CreatedDate, '%Y-%m-%d') as ReceivedAt, DATE_FORMAT(trop.CreatedDate, '%d-%m-%Y') as ReceivedDate from outwardnumber own inner join outward o on o.OutwardNumberId=own.Id inner join transportoutwardpacks trop on trop.OutwardId=o.Id left join article a on a.Id=trop.ArticleId inner join category c on c.Id=a.CategoryId) as dd where dd.ReceivedAt='" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "' ");
-                    $catInwardPacks = 0;
-                    foreach ($catInwardRec as $inwardRecord) {
-                        if (strpos($inwardRecord->NoPacks, ',')) {
-                            $catInwardPacks = $catInwardPacks + array_sum(explode(',', $inwardRecord->NoPacks));
-                        } else {
-                            $catInwardPacks = $catInwardPacks + (int)$inwardRecord->NoPacks;
-                        }
-                    }
-                    if (strpos($catInwardPacks, ',') != false) {
-                        $totalCatInwardPacks = $totalCatInwardPacks + array_sum(explode(',', $catInwardPacks));
-                    } else {
-                        $totalCatInwardPacks = $totalCatInwardPacks + $catInwardPacks;
-                    }
-                    array_push($outletInwardCategoryWise, [$category->Title => $catInwardPacks + $outwardJhcplPacks]);
-                    $catImportRec = DB::select("select * from (select trop.NoPacks, trop.Id, c.Id as CategoryId, trop.ArticleId, trop.PartyId, trop.OutwardId, DATE_FORMAT(trop.CreatedDate, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(trop.CreatedDate, '%d-%m-%Y') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId inner join category c on c.Id=a.CategoryId) as dd where dd.CreatedAt='" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' and dd.OutwardId=0 and dd.CategoryId='" . $category->Id . "' ");
-                    $collectioncateImports = collect($catImportRec);
-                    $catImportRecords = $collectioncateImports->unique()->values()->all();
-                    $catImportPacks = 0;
-                    foreach ($catImportRecords as $catImportRecord) {
-                        if (strpos($catImportRecord->NoPacks, ',')) {
-                            $catImportPacks = $catImportPacks + array_sum(explode(',', $catImportRecord->NoPacks));
-                        } else {
-                            $catImportPacks = $catImportPacks + (int)$catImportRecord->NoPacks;
-                        }
-                    }
-                    if (strpos($catImportPacks, ',') != false) {
-                        $totalCatImportPacks = $totalCatImportPacks + array_sum(explode(',', $catImportPacks));
-                    } else {
-                        $totalCatImportPacks = $totalCatImportPacks + $catImportPacks;
-                    }
-                    array_push($outletImportCategoryWise, [$category->Title => $catImportPacks]);
+                $mainOpening = 0;
+                $mainOpening = $mainOpening + $innwardOpeningStock + $importOpeningStock + $salesReturnOpeningStock - $outwardOpeningStock - $purchaseReturnOpeningStock;
 
 
-                    $catOutwardRec = DB::select("select dd.* from (select otn.Id as OutletNumberId, ot.NoPacks, c.Id as CategoryId, otn.PartyId, concat(otn.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutletNumber, DATE_FORMAT(ot.created_at, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(ot.created_at, '%d-%m-%Y') as OutletDate from outlet ot inner join outletnumber otn on otn.Id=ot.OutletNumberId inner join article a on a.Id=ot.ArticleId inner join category c on c.Id=a.CategoryId inner join financialyear fn on fn.Id=otn.FinancialYearId) as dd where dd.PartyId='" . $PartyId . "' and dd.CreatedAt='" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' ");
-                    $catOutwardPacks = 0;
-                    foreach ($catOutwardRec as $catOutwardRecord) {
-                        if (strpos($catOutwardRecord->NoPacks, ',')) {
-                            $catOutwardPacks = $catOutwardPacks + array_sum(explode(',', $catOutwardRecord->NoPacks));
-                        } else {
-                            $catOutwardPacks = $catOutwardPacks + (int)$catOutwardRecord->NoPacks;
-                        }
-                    }
-                    if (strpos($catOutwardPacks, ',') != false) {
-                        $totalCatOutwardPacks = $totalCatOutwardPacks + array_sum(explode(',', $catOutwardPacks));
-                    } else {
-                        $totalCatOutwardPacks = $totalCatOutwardPacks + $catOutwardPacks;
-                    }
-                    array_push($outletOutwardCategoryWise, [$category->Title => $catOutwardPacks + $outwardJhcplPacks]);
-                    $catpurchasereturnRecordsss = DB::select("select * from (select srn.Id as SalesReturnNumberId, sr.NoPacks, c.Id as CategoryId, p.Name as PartyName, srn.PartyId, DATE_FORMAT(srn.CreatedDate, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(sr.CreatedDate, '%d-%m-%Y') as CreatedDate from salesreturnnumber srn inner join salesreturn sr on sr.SalesReturnNumber=srn.Id inner join article a on a.Id=sr.ArticleId inner join category c on c.Id=a.CategoryId inner join party p on p.Id=srn.PartyId inner join financialyear fn on fn.Id=srn.FinancialYearId) as dd where dd.CreatedAt='" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "' ");
-                    $catPurchaseReturnNoPacks = 0;
-                    $carpurchasereturnRecordsssssss = collect($catpurchasereturnRecordsss);
-                    $catPurchaseReturnRecords = $carpurchasereturnRecordsssssss->unique()->values()->all();
-                    foreach ($catPurchaseReturnRecords as $catPurchaseReturnRecord) {
-                        if (strpos($catPurchaseReturnRecord->NoPacks, ',')) {
-                            $catPurchaseReturnNoPacks = $catPurchaseReturnNoPacks + array_sum(explode(',', $catPurchaseReturnRecord->NoPacks));
-                        } else {
-                            $catPurchaseReturnNoPacks = $catPurchaseReturnNoPacks + (int)$catPurchaseReturnRecord->NoPacks;
-                        }
-                    }
-                    if (strpos($catPurchaseReturnNoPacks, ',') != false) {
-                        $totalCatPRPacks = $totalCatPRPacks + array_sum(explode(',', $catPurchaseReturnNoPacks));
-                    } else {
-                        $totalCatPRPacks = $totalCatPRPacks + $catPurchaseReturnNoPacks;
-                    }
-                    array_push($outletPurchaseReturnCategoryWise, [$category->Title => $catPurchaseReturnNoPacks]);
 
-                    $catSalesreturnRecords = DB::select("select * from (select srn.Id as SalesReturnNumberId, c.Id as CategoryId, sr.NoPacks, concat(srn.SalesReturnNumber,'/', fn.StartYear, '-', fn.EndYear) as SalesReturnNumber, srn.OutletPartyId, DATE_FORMAT(srn.CreatedDate ,'%Y-%m-%d') as CreatedAt , DATE_FORMAT(srn.CreatedDate ,'%d/%m%/%Y') as CreatedDate, p.Name as PartyName from outletsalesreturnnumber srn inner join outletsalesreturn sr on sr.SalesReturnNumber=srn.Id inner join article a on a.Id=sr.ArticleId inner join category c on c.Id=a.CategoryId inner join party p on srn.PartyId=p.Id inner join financialyear fn on fn.Id=srn.FinancialYearId) as dd where dd.CreatedAt ='" . $RangeDate . "' and dd.OutletPartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "' ");
-                    $catSalesReturnNoPacks = 0;
-                    foreach ($catSalesreturnRecords as $catSalesreturnRecord) {
-                        if (strpos($catSalesreturnRecord->NoPacks, ',')) {
-                            $catSalesReturnNoPacks = $catSalesReturnNoPacks + array_sum(explode(',', $catSalesreturnRecord->NoPacks));
-                        } else {
-                            $catSalesReturnNoPacks = $catSalesReturnNoPacks + (int)$catSalesreturnRecord->NoPacks;
-                        }
-                    }
-                    if (strpos($catSalesReturnNoPacks, ',') != false) {
-                        $totalCatSRPacks = $totalCatSRPacks + array_sum(explode(',', $catSalesReturnNoPacks));
-                    } else {
-                        $totalCatSRPacks = $totalCatSRPacks + $catSalesReturnNoPacks;
-                    }
-                    array_push($outletSalesReturnCategoryWise, [$category->Title => $catSalesReturnNoPacks]);
+                $mainOpeningd = '0';
+                $styles = DB::select("SELECT COUNT(`Id`) AS total_sum FROM article WHERE CategoryId = '" . $category->Id . "'");
+                if ($styles > 0) {
+                    $mainOpeningd = $styles[0]->total_sum;
                 }
-                // end one day record cat wise
-                // start one day stock
+                array_push($CatOpeningStock, ["title" => $category->Title, "stock" => $mainOpening, "style" => $mainOpeningd]);
+                $styleSum = array_sum(array_column($CatOpeningStock, 'style'));
+                // array_push($CatOpeningStock, [$category->Title => $mainOpening]);
+            }
+            // end category wise opening stock 
+            // start one day record cat wise
+            $TotalarticleOpeningStock = 0;
+            $categories = DB::select("select * from category");
+            $outletInwardCategoryWise = [];
+            $outletImportCategoryWise = [];
+            $outletOutwardCategoryWise = [];
+            $outletPurchaseReturnCategoryWise = [];
+            $outletSalesReturnCategoryWise = [];
+            $totalCatInwardPacks = 0;
+            $totalCatImportPacks = 0;
+            $totalCatOutwardPacks = 0;
+            $totalCatJhcplOutwardPacks = 0;
+            $totalCatPRPacks = 0;
+            $totalCatSRPacks = 0;
+            foreach ($categories as $category) {
                 // JHCPL Outward
-                $jhcplOutwards = DB::select("select * from (select p.Name as Party, 'DIRECT' as Outlet, otn.Id as OutletNumberId, otn.OutwardNumberId, otn.PartyId, concat(otn.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutletNumber, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, DATE_FORMAT(otn.OutletDate, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(otn.OutletDate, '%d-%m-%Y') as OutletDate from outletnumber otn inner join outward o on o.OutwardNumberId=otn.OutwardNumberId inner join outwardnumber own on own.Id=o.OutwardNumberId inner join party p on p.Id=otn.OutletPartyId inner join financialyear fn on fn.Id=otn.FinancialYearId) as dd where dd.PartyId='" . $PartyId . "' and dd.CreatedAt='" . $RangeDate . "'");
-                $collectionJscplOutwards = collect($jhcplOutwards);
-                $mainJscplOutwardRecords = $collectionJscplOutwards->unique()->values()->all();
-                $mainTotalJscplOutwardNoPacks = 0;
-                foreach ($mainJscplOutwardRecords as $mainJscplOutwardRecord) {
-                    $jhcploutwards = DB::select("select *  from (select o.NoPacks, DATE_FORMAT(o.created_at,'%Y-%m-%d') as CreatedAt, o.OutwardNumberId from outward o) as dd where dd.CreatedAt='" . $RangeDate . "' and dd.OutwardNumberId='" . $mainJscplOutwardRecord->OutwardNumberId . "'");
-                    $outwardJhcplPacks = 0;
-                    foreach ($jhcploutwards as $jhcploutward) {
-                        if (strpos($jhcploutward->NoPacks, ',') != false) {
-                            $outwardJhcplPacks = $outwardJhcplPacks + array_sum(explode(',', $jhcploutward->NoPacks));
-                        } else {
-                            $outwardJhcplPacks = $outwardJhcplPacks + (int)$jhcploutward->NoPacks;
-                        }
+                $jhcplOutwards = DB::select("select * from (select p.Name as Party, 'DIRECT' as Outlet, o.NoPacks, a.CategoryId, otn.Id as OutletNumberId, otn.OutwardNumberId, otn.PartyId, concat(otn.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutletNumber, DATE_FORMAT(otn.OutletDate, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(otn.OutletDate, '%d-%m-%Y') as OutletDate from outward o inner join outletnumber otn on o.OutwardNumberId=otn.OutwardNumberId inner join party p on p.Id=otn.OutletPartyId inner join financialyear fn on fn.Id=otn.FinancialYearId inner join article a on a.Id=o.ArticleId) as dd where dd.PartyId='" . $PartyId . "' and dd.CreatedAt='" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "'");
+                $outwardJhcplPacks = 0;
+                foreach ($jhcplOutwards as $jhcplOutward) {
+                    if (strpos($jhcplOutward->NoPacks, ',') != false) {
+                        $outwardJhcplPacks = $outwardJhcplPacks + array_sum(explode(',', $jhcplOutward->NoPacks));
+                    } else {
+                        $outwardJhcplPacks = $outwardJhcplPacks + (int) $jhcplOutward->NoPacks;
                     }
-                    $mainTotalJscplOutwardNoPacks = $mainTotalJscplOutwardNoPacks + $outwardJhcplPacks;
-                    $mainJscplOutwardRecord->NoPacks = $outwardJhcplPacks;
+                }
+                if (strpos($outwardJhcplPacks, ',') != false) {
+                    $totalCatJhcplOutwardPacks = $totalCatJhcplOutwardPacks + array_sum(explode(',', $outwardJhcplPacks));
+                } else {
+                    $totalCatJhcplOutwardPacks = $totalCatJhcplOutwardPacks + $outwardJhcplPacks;
                 }
                 // end
-                $mainOutletInwardRecordss = DB::select("select dd.* from ( SELECT own.Id as OutwardNumberId, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, trop.PartyId, p.Name as Outlet, DATE_FORMAT(own.created_at ,'%Y-%m-%d') as CreatedAt, DATE_FORMAT(own.created_at,'%d-%m-%Y') as ReceivedDate from outwardnumber own inner join outward o on o.OutwardNumberId=own.Id inner join transportoutwardpacks trop on trop.OutwardId=o.Id inner join financialyear fn on fn.Id=own.FinancialYearId inner join party p on p.Id=trop.PartyId) as dd WHERE dd.CreatedAt='" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
-                $collectionInwards = collect($mainOutletInwardRecordss);
-                $mainOutletInwardRecords = $collectionInwards->unique()->values()->all();
-                $maintotalInwardNoPacks = 0;
-                $maintotalInwardNoPackss = 0;
-                foreach ($mainOutletInwardRecords as $mainOutletInwardRecord) {
-                    $outwards = DB::select("select NoPacks from outward where OutwardNumberId = " . $mainOutletInwardRecord->OutwardNumberId);
-                    $InPacks = 0;
-                    foreach ($outwards as $outward) {
-                        if (strpos($outward->NoPacks, ',') != false) {
-                            $InPacks = $InPacks + array_sum(explode(',', $outward->NoPacks));
-                        } else {
-                            $InPacks = $InPacks + (int)$outward->NoPacks;
-                        }
+                $catInwardRec = DB::select("select * from (select c.Id as CategoryId, trop.NoPacks, trop.PartyId, DATE_FORMAT(trop.CreatedDate, '%Y-%m-%d') as ReceivedAt, DATE_FORMAT(trop.CreatedDate, '%d-%m-%Y') as ReceivedDate from outwardnumber own inner join outward o on o.OutwardNumberId=own.Id inner join transportoutwardpacks trop on trop.OutwardId=o.Id left join article a on a.Id=trop.ArticleId inner join category c on c.Id=a.CategoryId) as dd where dd.ReceivedAt='" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "' ");
+                $catInwardPacks = 0;
+                foreach ($catInwardRec as $inwardRecord) {
+                    if (strpos($inwardRecord->NoPacks, ',')) {
+                        $catInwardPacks = $catInwardPacks + array_sum(explode(',', $inwardRecord->NoPacks));
+                    } else {
+                        $catInwardPacks = $catInwardPacks + (int) $inwardRecord->NoPacks;
                     }
-                    $maintotalInwardNoPackss = $maintotalInwardNoPackss + $InPacks;
-                    $mainOutletInwardRecord->NoPacks = $InPacks;
                 }
-                $maintotalInwardNoPacks = $maintotalInwardNoPacks + $maintotalInwardNoPackss + $mainTotalJscplOutwardNoPacks;
-                $ImportRec = DB::select("select * from (select trop.Id, a.ArticleNumber, p.Name as Outlet, trop.ArticleId, trop.PartyId, trop.OutwardId, DATE_FORMAT(trop.CreatedDate, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(trop.CreatedDate, '%d-%m-%Y') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId inner join party p on p.Id=trop.PartyId) as dd where dd.CreatedAt='" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' and dd.OutwardId=0");
-                $collectionImports = collect($ImportRec);
-                $mainImportRecords = $collectionImports->unique()->values()->all();
-                $mainTotalImportNoPacks = 0;
-                foreach ($mainImportRecords as $mainImportRecord) {
-                    $imports = DB::select("select NoPacks from transportoutwardpacks where Id=" . $mainImportRecord->Id);
-                    $importNoPacks = 0;
-                    foreach ($imports as $import) {
-                        if (strpos($import->NoPacks, ',') != false) {
-                            $importNoPacks = $importNoPacks + array_sum(explode(',', $import->NoPacks));
-                        } else {
-                            $importNoPacks = $importNoPacks + (int)$import->NoPacks;
-                        }
+                if (strpos($catInwardPacks, ',') != false) {
+                    $totalCatInwardPacks = $totalCatInwardPacks + array_sum(explode(',', $catInwardPacks));
+                } else {
+                    $totalCatInwardPacks = $totalCatInwardPacks + $catInwardPacks;
+                }
+                array_push($outletInwardCategoryWise, [$category->Title => $catInwardPacks + $outwardJhcplPacks]);
+                $catImportRec = DB::select("select * from (select trop.NoPacks, trop.Id, c.Id as CategoryId, trop.ArticleId, trop.PartyId, trop.OutwardId, DATE_FORMAT(trop.CreatedDate, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(trop.CreatedDate, '%d-%m-%Y') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId inner join category c on c.Id=a.CategoryId) as dd where dd.CreatedAt='" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' and dd.OutwardId=0 and dd.CategoryId='" . $category->Id . "' ");
+                $collectioncateImports = collect($catImportRec);
+                $catImportRecords = $collectioncateImports->unique()->values()->all();
+                $catImportPacks = 0;
+                foreach ($catImportRecords as $catImportRecord) {
+                    if (strpos($catImportRecord->NoPacks, ',')) {
+                        $catImportPacks = $catImportPacks + array_sum(explode(',', $catImportRecord->NoPacks));
+                    } else {
+                        $catImportPacks = $catImportPacks + (int) $catImportRecord->NoPacks;
                     }
-                    $mainTotalImportNoPacks = $mainTotalImportNoPacks + $importNoPacks;
-                    $mainImportRecord->NoPacks = $importNoPacks;
                 }
-                $OutwardRec = DB::select("select dd.* from (select p.Name as Outlet, pp.Name as Party, otn.Id as OutletNumberId, otn.PartyId, concat(otn.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutletNumber, DATE_FORMAT(ot.created_at, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(ot.created_at, '%d-%m-%Y') as OutletDate from outletnumber otn inner join outlet ot on ot.OutletNumberId=otn.Id inner join financialyear fn on fn.Id=otn.FinancialYearId inner join party p on p.Id=otn.PartyId inner join party pp on pp.Id=otn.OutletPartyId) as dd where dd.PartyId='" . $PartyId . "' and dd.CreatedAt='" . $RangeDate . "' ");
-                $collectionOutwards = collect($OutwardRec);
-                $mainOutwardRecords = $collectionOutwards->unique()->values()->all();
-                $mainTotalOutwardNoPacks = 0;
-                $mainTotalOutwardNoPackss = 0;
-                foreach ($mainOutwardRecords as $mainOutwardRecord) {
-                    $outwards = DB::select("select *  from (select o.NoPacks, DATE_FORMAT(o.created_at,'%Y-%m-%d') as CreatedAt, o.OutletNumberId from outlet o) as dd where dd.CreatedAt='" . $RangeDate . "' and dd.OutletNumberId='" . $mainOutwardRecord->OutletNumberId . "'");
-                    $outwardPacks = 0;
-                    foreach ($outwards as $outward) {
-                        if (strpos($outward->NoPacks, ',') != false) {
-                            $outwardPacks = $outwardPacks + array_sum(explode(',', $outward->NoPacks));
-                        } else {
-                            $outwardPacks = $outwardPacks + (int)$outward->NoPacks;
-                        }
+                if (strpos($catImportPacks, ',') != false) {
+                    $totalCatImportPacks = $totalCatImportPacks + array_sum(explode(',', $catImportPacks));
+                } else {
+                    $totalCatImportPacks = $totalCatImportPacks + $catImportPacks;
+                }
+                array_push($outletImportCategoryWise, [$category->Title => $catImportPacks]);
+
+
+                $catOutwardRec = DB::select("select dd.* from (select otn.Id as OutletNumberId, ot.NoPacks, c.Id as CategoryId, otn.PartyId, concat(otn.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutletNumber, DATE_FORMAT(ot.created_at, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(ot.created_at, '%d-%m-%Y') as OutletDate from outlet ot inner join outletnumber otn on otn.Id=ot.OutletNumberId inner join article a on a.Id=ot.ArticleId inner join category c on c.Id=a.CategoryId inner join financialyear fn on fn.Id=otn.FinancialYearId) as dd where dd.PartyId='" . $PartyId . "' and dd.CreatedAt='" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' ");
+                $catOutwardPacks = 0;
+                foreach ($catOutwardRec as $catOutwardRecord) {
+                    if (strpos($catOutwardRecord->NoPacks, ',')) {
+                        $catOutwardPacks = $catOutwardPacks + array_sum(explode(',', $catOutwardRecord->NoPacks));
+                    } else {
+                        $catOutwardPacks = $catOutwardPacks + (int) $catOutwardRecord->NoPacks;
                     }
-                    $mainTotalOutwardNoPackss = $mainTotalOutwardNoPackss + $outwardPacks;
-                    $mainOutwardRecord->NoPacks = $outwardPacks;
                 }
-                $mainTotalOutwardNoPacks = $mainTotalOutwardNoPackss + $mainTotalJscplOutwardNoPacks;
-                $purchasereturnRecordsss = DB::select("select * from (select srn.Id as SalesReturnNumberId,p.Name as Outlet, srn.PartyId,concat(srn.SalesReturnNumber,'/', fn.StartYear, '-', fn.EndYear) as SalesReturnNumber, DATE_FORMAT(srn.CreatedDate, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(srn.CreatedDate, '%d-%m-%Y') as CreatedDate from salesreturnnumber srn inner join party p on p.Id=srn.PartyId inner join financialyear fn on fn.Id=srn.FinancialYearId) as dd where dd.CreatedAt='" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' ");
-                $mainTotalPurchaseReturnNoPacks = 0;
-                $purchasereturnRecordsssssss = collect($purchasereturnRecordsss);
-                $purchasereturnRecords = $purchasereturnRecordsssssss->unique()->values()->all();
-                foreach ($purchasereturnRecords as $purchasereturnRecord) {
-                    $purchaseReturns = DB::select("select NoPacks from salesreturn where SalesReturnNumber=" . $purchasereturnRecord->SalesReturnNumberId);
-                    $purchasereturnPacks = 0;
-                    foreach ($purchaseReturns as $purchaseReturn) {
-                        if (strpos($purchaseReturn->NoPacks, ',') != false) {
-                            $purchasereturnPacks = $purchasereturnPacks + array_sum(explode(',', $purchaseReturn->NoPacks));
-                        } else {
-                            $purchasereturnPacks = $purchasereturnPacks + (int)$purchaseReturn->NoPacks;
-                        }
+                if (strpos($catOutwardPacks, ',') != false) {
+                    $totalCatOutwardPacks = $totalCatOutwardPacks + array_sum(explode(',', $catOutwardPacks));
+                } else {
+                    $totalCatOutwardPacks = $totalCatOutwardPacks + $catOutwardPacks;
+                }
+                array_push($outletOutwardCategoryWise, [$category->Title => $catOutwardPacks + $outwardJhcplPacks]);
+                $catpurchasereturnRecordsss = DB::select("select * from (select srn.Id as SalesReturnNumberId, sr.NoPacks, c.Id as CategoryId, p.Name as PartyName, srn.PartyId, DATE_FORMAT(srn.CreatedDate, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(sr.CreatedDate, '%d-%m-%Y') as CreatedDate from salesreturnnumber srn inner join salesreturn sr on sr.SalesReturnNumber=srn.Id inner join article a on a.Id=sr.ArticleId inner join category c on c.Id=a.CategoryId inner join party p on p.Id=srn.PartyId inner join financialyear fn on fn.Id=srn.FinancialYearId) as dd where dd.CreatedAt='" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "' ");
+                $catPurchaseReturnNoPacks = 0;
+                $carpurchasereturnRecordsssssss = collect($catpurchasereturnRecordsss);
+                $catPurchaseReturnRecords = $carpurchasereturnRecordsssssss->unique()->values()->all();
+                foreach ($catPurchaseReturnRecords as $catPurchaseReturnRecord) {
+                    if (strpos($catPurchaseReturnRecord->NoPacks, ',')) {
+                        $catPurchaseReturnNoPacks = $catPurchaseReturnNoPacks + array_sum(explode(',', $catPurchaseReturnRecord->NoPacks));
+                    } else {
+                        $catPurchaseReturnNoPacks = $catPurchaseReturnNoPacks + (int) $catPurchaseReturnRecord->NoPacks;
                     }
-                    $mainTotalPurchaseReturnNoPacks = $mainTotalPurchaseReturnNoPacks + $purchasereturnPacks;
-                    $purchasereturnRecord->NoPacks = $purchasereturnPacks;
                 }
-                $salesReturnRecords = DB::select("select * from (select srn.Id as SalesReturnNumberId ,concat(srn.SalesReturnNumber,'/', fn.StartYear, '-', fn.EndYear) as SalesReturnNumber, srn.OutletPartyId, DATE_FORMAT(srn.CreatedDate ,'%Y-%m-%d') as CreatedAt , DATE_FORMAT(srn.CreatedDate ,'%d/%m%/%Y') as CreatedDate, p.Name as Outlet, pp.Name as Party from outletsalesreturnnumber srn inner join party p on srn.OutletPartyId=p.Id inner join party pp on pp.Id=srn.PartyId inner join financialyear fn on fn.Id=srn.FinancialYearId) as dd where dd.CreatedAt ='" . $RangeDate . "' and dd.OutletPartyId='" . $PartyId . "' ");
-                $mainTotalSalesReturnNoPacks = 0;
-                foreach ($salesReturnRecords as $salesReturnRecord) {
-                    $salesReturns = DB::select("select NoPacks from outletsalesreturn where SalesReturnNumber=" . $salesReturnRecord->SalesReturnNumberId);
-                    $salesreturnPacks = 0;
-                    foreach ($salesReturns as $salesReturn) {
-                        if (strpos($salesReturn->NoPacks, ',') != false) {
-                            $salesreturnPacks = $salesreturnPacks + array_sum(explode(',', $salesReturn->NoPacks));
-                        } else {
-                            $salesreturnPacks = $salesreturnPacks + (int)$salesReturn->NoPacks;
-                        }
+                if (strpos($catPurchaseReturnNoPacks, ',') != false) {
+                    $totalCatPRPacks = $totalCatPRPacks + array_sum(explode(',', $catPurchaseReturnNoPacks));
+                } else {
+                    $totalCatPRPacks = $totalCatPRPacks + $catPurchaseReturnNoPacks;
+                }
+                array_push($outletPurchaseReturnCategoryWise, [$category->Title => $catPurchaseReturnNoPacks]);
+
+                $catSalesreturnRecords = DB::select("select * from (select srn.Id as SalesReturnNumberId, c.Id as CategoryId, sr.NoPacks, concat(srn.SalesReturnNumber,'/', fn.StartYear, '-', fn.EndYear) as SalesReturnNumber, srn.OutletPartyId, DATE_FORMAT(srn.CreatedDate ,'%Y-%m-%d') as CreatedAt , DATE_FORMAT(srn.CreatedDate ,'%d/%m%/%Y') as CreatedDate, p.Name as PartyName from outletsalesreturnnumber srn inner join outletsalesreturn sr on sr.SalesReturnNumber=srn.Id inner join article a on a.Id=sr.ArticleId inner join category c on c.Id=a.CategoryId inner join party p on srn.PartyId=p.Id inner join financialyear fn on fn.Id=srn.FinancialYearId) as dd where dd.CreatedAt ='" . $RangeDate . "' and dd.OutletPartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "' ");
+                $catSalesReturnNoPacks = 0;
+                foreach ($catSalesreturnRecords as $catSalesreturnRecord) {
+                    if (strpos($catSalesreturnRecord->NoPacks, ',')) {
+                        $catSalesReturnNoPacks = $catSalesReturnNoPacks + array_sum(explode(',', $catSalesreturnRecord->NoPacks));
+                    } else {
+                        $catSalesReturnNoPacks = $catSalesReturnNoPacks + (int) $catSalesreturnRecord->NoPacks;
                     }
-                    $mainTotalSalesReturnNoPacks = $mainTotalSalesReturnNoPacks + $salesreturnPacks;
-                    $salesReturnRecord->NoPacks = $salesreturnPacks;
                 }
-                // end one day stock
-                // start closing stock
-                $afterInwards = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId inner join outward o on o.Id=trop.OutwardId) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
-                $afterImports = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, trop.OutwardId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId) as dd where dd.OutwardId=0 and dd.CreatedDate <= '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
-                $afterOutwards = DB::select("select * from (select o.NoPacks, o.ArticleId, otn.PartyId, a.CategoryId, DATE_FORMAT(o.created_at,'%Y-%m-%d') as OutletDate from outlet o inner join article a on a.Id=o.ArticleId inner join outletnumber otn on otn.Id=o.OutletNumberId) as dd where dd.OutletDate <= '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
-                //  if ($PartyId == 3) {
-                //  $afterPurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join article a on a.Id=sr.ArticleId inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.CreatedDate >= '2022-01-01' and dd.PartyId='" . $PartyId . "'");
-                //  } else {
-                //      $afterPurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join article a on a.Id=sr.ArticleId inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
-                //  }
-                $afterPurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.CreatedDate > '2021-12-31' and dd.PartyId='" . $PartyId . "' ");
+                if (strpos($catSalesReturnNoPacks, ',') != false) {
+                    $totalCatSRPacks = $totalCatSRPacks + array_sum(explode(',', $catSalesReturnNoPacks));
+                } else {
+                    $totalCatSRPacks = $totalCatSRPacks + $catSalesReturnNoPacks;
+                }
+                array_push($outletSalesReturnCategoryWise, [$category->Title => $catSalesReturnNoPacks]);
+            }
+            // end one day record cat wise
+            // start one day stock
+            // JHCPL Outward
+            $jhcplOutwards = DB::select("select * from (select p.Name as Party, 'DIRECT' as Outlet, otn.Id as OutletNumberId, otn.OutwardNumberId, otn.PartyId, concat(otn.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutletNumber, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, DATE_FORMAT(otn.OutletDate, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(otn.OutletDate, '%d-%m-%Y') as OutletDate from outletnumber otn inner join outward o on o.OutwardNumberId=otn.OutwardNumberId inner join outwardnumber own on own.Id=o.OutwardNumberId inner join party p on p.Id=otn.OutletPartyId inner join financialyear fn on fn.Id=otn.FinancialYearId) as dd where dd.PartyId='" . $PartyId . "' and dd.CreatedAt='" . $RangeDate . "'");
+            $collectionJscplOutwards = collect($jhcplOutwards);
+            $mainJscplOutwardRecords = $collectionJscplOutwards->unique()->values()->all();
+            $mainTotalJscplOutwardNoPacks = 0;
+            foreach ($mainJscplOutwardRecords as $mainJscplOutwardRecord) {
+                $jhcploutwards = DB::select("select *  from (select o.NoPacks, DATE_FORMAT(o.created_at,'%Y-%m-%d') as CreatedAt, o.OutwardNumberId from outward o) as dd where dd.CreatedAt='" . $RangeDate . "' and dd.OutwardNumberId='" . $mainJscplOutwardRecord->OutwardNumberId . "'");
+                $outwardJhcplPacks = 0;
+                foreach ($jhcploutwards as $jhcploutward) {
+                    if (strpos($jhcploutward->NoPacks, ',') != false) {
+                        $outwardJhcplPacks = $outwardJhcplPacks + array_sum(explode(',', $jhcploutward->NoPacks));
+                    } else {
+                        $outwardJhcplPacks = $outwardJhcplPacks + (int) $jhcploutward->NoPacks;
+                    }
+                }
+                $mainTotalJscplOutwardNoPacks = $mainTotalJscplOutwardNoPacks + $outwardJhcplPacks;
+                $mainJscplOutwardRecord->NoPacks = $outwardJhcplPacks;
+            }
+            // end
+            $mainOutletInwardRecordss = DB::select("select dd.* from ( SELECT own.Id as OutwardNumberId, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, trop.PartyId, p.Name as Outlet, DATE_FORMAT(own.created_at ,'%Y-%m-%d') as CreatedAt, DATE_FORMAT(own.created_at,'%d-%m-%Y') as ReceivedDate from outwardnumber own inner join outward o on o.OutwardNumberId=own.Id inner join transportoutwardpacks trop on trop.OutwardId=o.Id inner join financialyear fn on fn.Id=own.FinancialYearId inner join party p on p.Id=trop.PartyId) as dd WHERE dd.CreatedAt='" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
+            $collectionInwards = collect($mainOutletInwardRecordss);
+            $mainOutletInwardRecords = $collectionInwards->unique()->values()->all();
+            $maintotalInwardNoPacks = 0;
+            $maintotalInwardNoPackss = 0;
+            foreach ($mainOutletInwardRecords as $mainOutletInwardRecord) {
+                $outwards = DB::select("select NoPacks from outward where OutwardNumberId = " . $mainOutletInwardRecord->OutwardNumberId);
+                $InPacks = 0;
+                foreach ($outwards as $outward) {
+                    if (strpos($outward->NoPacks, ',') != false) {
+                        $InPacks = $InPacks + array_sum(explode(',', $outward->NoPacks));
+                    } else {
+                        $InPacks = $InPacks + (int) $outward->NoPacks;
+                    }
+                }
+                $maintotalInwardNoPackss = $maintotalInwardNoPackss + $InPacks;
+                $mainOutletInwardRecord->NoPacks = $InPacks;
+            }
+            $maintotalInwardNoPacks = $maintotalInwardNoPacks + $maintotalInwardNoPackss + $mainTotalJscplOutwardNoPacks;
+            $ImportRec = DB::select("select * from (select trop.Id, a.ArticleNumber, p.Name as Outlet, trop.ArticleId, trop.PartyId, trop.OutwardId, DATE_FORMAT(trop.CreatedDate, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(trop.CreatedDate, '%d-%m-%Y') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId inner join party p on p.Id=trop.PartyId) as dd where dd.CreatedAt='" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' and dd.OutwardId=0");
+            $collectionImports = collect($ImportRec);
+            $mainImportRecords = $collectionImports->unique()->values()->all();
+            $mainTotalImportNoPacks = 0;
+            foreach ($mainImportRecords as $mainImportRecord) {
+                $imports = DB::select("select NoPacks from transportoutwardpacks where Id=" . $mainImportRecord->Id);
+                $importNoPacks = 0;
+                foreach ($imports as $import) {
+                    if (strpos($import->NoPacks, ',') != false) {
+                        $importNoPacks = $importNoPacks + array_sum(explode(',', $import->NoPacks));
+                    } else {
+                        $importNoPacks = $importNoPacks + (int) $import->NoPacks;
+                    }
+                }
+                $mainTotalImportNoPacks = $mainTotalImportNoPacks + $importNoPacks;
+                $mainImportRecord->NoPacks = $importNoPacks;
+            }
+            $OutwardRec = DB::select("select dd.* from (select p.Name as Outlet, pp.Name as Party, otn.Id as OutletNumberId, otn.PartyId, concat(otn.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutletNumber, DATE_FORMAT(ot.created_at, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(ot.created_at, '%d-%m-%Y') as OutletDate from outletnumber otn inner join outlet ot on ot.OutletNumberId=otn.Id inner join financialyear fn on fn.Id=otn.FinancialYearId inner join party p on p.Id=otn.PartyId inner join party pp on pp.Id=otn.OutletPartyId) as dd where dd.PartyId='" . $PartyId . "' and dd.CreatedAt='" . $RangeDate . "' ");
+            $collectionOutwards = collect($OutwardRec);
+            $mainOutwardRecords = $collectionOutwards->unique()->values()->all();
+            $mainTotalOutwardNoPacks = 0;
+            $mainTotalOutwardNoPackss = 0;
+            foreach ($mainOutwardRecords as $mainOutwardRecord) {
+                $outwards = DB::select("select *  from (select o.NoPacks, DATE_FORMAT(o.created_at,'%Y-%m-%d') as CreatedAt, o.OutletNumberId from outlet o) as dd where dd.CreatedAt='" . $RangeDate . "' and dd.OutletNumberId='" . $mainOutwardRecord->OutletNumberId . "'");
+                $outwardPacks = 0;
+                foreach ($outwards as $outward) {
+                    if (strpos($outward->NoPacks, ',') != false) {
+                        $outwardPacks = $outwardPacks + array_sum(explode(',', $outward->NoPacks));
+                    } else {
+                        $outwardPacks = $outwardPacks + (int) $outward->NoPacks;
+                    }
+                }
+                $mainTotalOutwardNoPackss = $mainTotalOutwardNoPackss + $outwardPacks;
+                $mainOutwardRecord->NoPacks = $outwardPacks;
+            }
+            $mainTotalOutwardNoPacks = $mainTotalOutwardNoPackss + $mainTotalJscplOutwardNoPacks;
+            $purchasereturnRecordsss = DB::select("select * from (select srn.Id as SalesReturnNumberId,p.Name as Outlet, srn.PartyId,concat(srn.SalesReturnNumber,'/', fn.StartYear, '-', fn.EndYear) as SalesReturnNumber, DATE_FORMAT(srn.CreatedDate, '%Y-%m-%d') as CreatedAt, DATE_FORMAT(srn.CreatedDate, '%d-%m-%Y') as CreatedDate from salesreturnnumber srn inner join party p on p.Id=srn.PartyId inner join financialyear fn on fn.Id=srn.FinancialYearId) as dd where dd.CreatedAt='" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' ");
+            $mainTotalPurchaseReturnNoPacks = 0;
+            $purchasereturnRecordsssssss = collect($purchasereturnRecordsss);
+            $purchasereturnRecords = $purchasereturnRecordsssssss->unique()->values()->all();
+            foreach ($purchasereturnRecords as $purchasereturnRecord) {
+                $purchaseReturns = DB::select("select NoPacks from salesreturn where SalesReturnNumber=" . $purchasereturnRecord->SalesReturnNumberId);
+                $purchasereturnPacks = 0;
+                foreach ($purchaseReturns as $purchaseReturn) {
+                    if (strpos($purchaseReturn->NoPacks, ',') != false) {
+                        $purchasereturnPacks = $purchasereturnPacks + array_sum(explode(',', $purchaseReturn->NoPacks));
+                    } else {
+                        $purchasereturnPacks = $purchasereturnPacks + (int) $purchaseReturn->NoPacks;
+                    }
+                }
+                $mainTotalPurchaseReturnNoPacks = $mainTotalPurchaseReturnNoPacks + $purchasereturnPacks;
+                $purchasereturnRecord->NoPacks = $purchasereturnPacks;
+            }
+            $salesReturnRecords = DB::select("select * from (select srn.Id as SalesReturnNumberId ,concat(srn.SalesReturnNumber,'/', fn.StartYear, '-', fn.EndYear) as SalesReturnNumber, srn.OutletPartyId, DATE_FORMAT(srn.CreatedDate ,'%Y-%m-%d') as CreatedAt , DATE_FORMAT(srn.CreatedDate ,'%d/%m%/%Y') as CreatedDate, p.Name as Outlet, pp.Name as Party from outletsalesreturnnumber srn inner join party p on srn.OutletPartyId=p.Id inner join party pp on pp.Id=srn.PartyId inner join financialyear fn on fn.Id=srn.FinancialYearId) as dd where dd.CreatedAt ='" . $RangeDate . "' and dd.OutletPartyId='" . $PartyId . "' ");
+            $mainTotalSalesReturnNoPacks = 0;
+            foreach ($salesReturnRecords as $salesReturnRecord) {
+                $salesReturns = DB::select("select NoPacks from outletsalesreturn where SalesReturnNumber=" . $salesReturnRecord->SalesReturnNumberId);
+                $salesreturnPacks = 0;
+                foreach ($salesReturns as $salesReturn) {
+                    if (strpos($salesReturn->NoPacks, ',') != false) {
+                        $salesreturnPacks = $salesreturnPacks + array_sum(explode(',', $salesReturn->NoPacks));
+                    } else {
+                        $salesreturnPacks = $salesreturnPacks + (int) $salesReturn->NoPacks;
+                    }
+                }
+                $mainTotalSalesReturnNoPacks = $mainTotalSalesReturnNoPacks + $salesreturnPacks;
+                $salesReturnRecord->NoPacks = $salesreturnPacks;
+            }
+            // end one day stock
+            // start closing stock
+            $afterInwards = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId inner join outward o on o.Id=trop.OutwardId) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
+            $afterImports = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, trop.OutwardId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId) as dd where dd.OutwardId=0 and dd.CreatedDate <= '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
+            $afterOutwards = DB::select("select * from (select o.NoPacks, o.ArticleId, otn.PartyId, a.CategoryId, DATE_FORMAT(o.created_at,'%Y-%m-%d') as OutletDate from outlet o inner join article a on a.Id=o.ArticleId inner join outletnumber otn on otn.Id=o.OutletNumberId) as dd where dd.OutletDate <= '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
+            //  if ($PartyId == 3) {
+            //  $afterPurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join article a on a.Id=sr.ArticleId inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.CreatedDate >= '2022-01-01' and dd.PartyId='" . $PartyId . "'");
+            //  } else {
+            //      $afterPurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join article a on a.Id=sr.ArticleId inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
+            //  }
+            $afterPurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.CreatedDate > '2021-12-31' and dd.PartyId='" . $PartyId . "' ");
+
+            // $afterPurchaseReturns = DB::select("SELECT salesreturn.ArticleId, article.CategoryId, salesreturnnumber.PartyId, salesreturn.NoPacks, DATE_FORMAT(salesreturn.CreatedDate, '%Y-%m-%d') as CreatedDate
+            //     FROM salesreturn inner join salesreturnnumber on salesreturnnumber.Id=salesreturn.SalesReturnNumber inner join article on article.Id=salesreturn.ArticleId
+            //     WHERE EXISTS
+            //       (SELECT *
+            //        FROM   transportoutwardpacks
+            //        WHERE  transportoutwardpacks.ArticleId = salesreturn.ArticleId and salesreturnnumber.PartyId='" . $PartyId . "' and CreatedDate <= '" . $RangeDate . "')");
+            $afterSalesReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, sr.OutletPartyId as PartyId from outletsalesreturn sr inner join article a on a.Id=sr.ArticleId inner join outletsalesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
+            $closingStock = 0;
+            $closingInwardPacks = 0;
+            $closingImportPacks = 0;
+            $closingOutwardPacks = 0;
+            $closingSalesReturnPacks = 0;
+            $closingPurchaseReturnPacks = 0;
+            foreach ($afterInwards as $afterInward) {
+                if (strpos($afterInward->NoPacks, ',') != false) {
+                    $closingInwardPacks = $closingInwardPacks + array_sum(explode(',', $afterInward->NoPacks));
+                } else {
+                    $closingInwardPacks = $closingInwardPacks + (int) $afterInward->NoPacks;
+                }
+            }
+
+            foreach ($afterImports as $afterImport) {
+                if (strpos($afterImport->NoPacks, ',') != false) {
+                    $closingImportPacks = $closingImportPacks + array_sum(explode(',', $afterImport->NoPacks));
+                } else {
+                    $closingImportPacks = $closingImportPacks + (int) $afterImport->NoPacks;
+                }
+            }
+            foreach ($afterOutwards as $afterOutward) {
+                if (strpos($afterOutward->NoPacks, ',') != false) {
+                    $closingOutwardPacks = $closingOutwardPacks + array_sum(explode(',', $afterOutward->NoPacks));
+                } else {
+                    $closingOutwardPacks = $closingOutwardPacks + (int) $afterOutward->NoPacks;
+                }
+            }
+            foreach ($afterSalesReturns as $afterSalesReturn) {
+                if (strpos($afterSalesReturn->NoPacks, ',') != false) {
+                    $closingSalesReturnPacks = $closingSalesReturnPacks + array_sum(explode(',', $afterSalesReturn->NoPacks));
+                } else {
+                    $closingSalesReturnPacks = $closingSalesReturnPacks + (int) $afterSalesReturn->NoPacks;
+                }
+            }
+            foreach ($afterPurchaseReturns as $afterPurchaseReturn) {
+                if (strpos($afterPurchaseReturn->NoPacks, ',') != false) {
+                    $closingPurchaseReturnPacks = $closingPurchaseReturnPacks + array_sum(explode(',', $afterPurchaseReturn->NoPacks));
+                } else {
+                    $closingPurchaseReturnPacks = $closingPurchaseReturnPacks + (int) $afterPurchaseReturn->NoPacks;
+                }
+            }
+            $closingStock = $closingStock + $closingInwardPacks + $closingImportPacks + $closingSalesReturnPacks - $closingOutwardPacks - $closingPurchaseReturnPacks;
+            // end closing stock
+            // category wise opening stock
+            $categories = Category::get();
+            $CatClosingStock = [];
+            foreach ($categories as $category) {
+                $afterInwardss = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId inner join outward o on o.Id=trop.OutwardId) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "'");
+                $afterImports = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, trop.OutwardId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId) as dd where dd.OutwardId=0 and dd.CreatedDate <= '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
+                $afterOutwards = DB::select("select * from (select o.NoPacks, o.ArticleId, otn.PartyId, a.CategoryId, DATE_FORMAT(o.created_at,'%Y-%m-%d') as OutletDate from outlet o inner join article a on a.Id=o.ArticleId inner join outletnumber otn on otn.Id=o.OutletNumberId) as dd where dd.OutletDate <= '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
+                // if ($PartyId == 3) {
+                // $afterPurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join article a on a.Id=sr.ArticleId inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.CreatedDate >= '2022-01-01' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
+                // } else {
+                //     $afterPurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join article a on a.Id=sr.ArticleId inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
+                // }
+                $afterPurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber inner join article a on a.Id=sr.ArticleId) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.CreatedDate > '2021-12-31' and dd.PartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "'");
 
                 // $afterPurchaseReturns = DB::select("SELECT salesreturn.ArticleId, article.CategoryId, salesreturnnumber.PartyId, salesreturn.NoPacks, DATE_FORMAT(salesreturn.CreatedDate, '%Y-%m-%d') as CreatedDate
-                //     FROM salesreturn inner join salesreturnnumber on salesreturnnumber.Id=salesreturn.SalesReturnNumber inner join article on article.Id=salesreturn.ArticleId
-                //     WHERE EXISTS
-                //       (SELECT *
-                //        FROM   transportoutwardpacks
-                //        WHERE  transportoutwardpacks.ArticleId = salesreturn.ArticleId and salesreturnnumber.PartyId='" . $PartyId . "' and CreatedDate <= '" . $RangeDate . "')");
-                $afterSalesReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, sr.OutletPartyId as PartyId from outletsalesreturn sr inner join article a on a.Id=sr.ArticleId inner join outletsalesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "'");
-                $closingStock = 0;
-                $closingInwardPacks = 0;
-                $closingImportPacks = 0;
-                $closingOutwardPacks = 0;
-                $closingSalesReturnPacks = 0;
-                $closingPurchaseReturnPacks = 0;
-                foreach ($afterInwards as $afterInward) {
-                    if (strpos($afterInward->NoPacks, ',') != false) {
-                        $closingInwardPacks = $closingInwardPacks + array_sum(explode(',', $afterInward->NoPacks));
+                // FROM salesreturn inner join salesreturnnumber on salesreturnnumber.Id=salesreturn.SalesReturnNumber inner join article on article.Id=salesreturn.ArticleId
+                // WHERE EXISTS
+                //   (SELECT *
+                //    FROM   transportoutwardpacks
+                //    WHERE  transportoutwardpacks.ArticleId = salesreturn.ArticleId and salesreturnnumber.PartyId='" . $PartyId . "' and CreatedDate <= '" . $RangeDate . "' and article.CategoryId='" . $category->Id . "')");
+                $afterSalesReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, sr.OutletPartyId as PartyId from outletsalesreturn sr inner join article a on a.Id=sr.ArticleId inner join outletsalesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
+                $innwardClosingStock = 0;
+                $totalInnwardClosingStock = 0;
+                $importClosingStock = 0;
+                $outwardClosingStock = 0;
+                $purchaseReturnClosingStock = 0;
+                $salesReturnClosingStock = 0;
+                foreach ($afterInwardss as $CatWiseafterInward) {
+                    if (strpos($CatWiseafterInward->NoPacks, ',') != false) {
+                        $innwardClosingStock = $innwardClosingStock + array_sum(explode(',', $CatWiseafterInward->NoPacks));
                     } else {
-                        $closingInwardPacks = $closingInwardPacks + (int)$afterInward->NoPacks;
+                        $innwardClosingStock = $innwardClosingStock + (int) $CatWiseafterInward->NoPacks;
                     }
                 }
-
                 foreach ($afterImports as $afterImport) {
                     if (strpos($afterImport->NoPacks, ',') != false) {
-                        $closingImportPacks = $closingImportPacks + array_sum(explode(',', $afterImport->NoPacks));
+                        $importClosingStock = $importClosingStock + array_sum(explode(',', $afterImport->NoPacks));
                     } else {
-                        $closingImportPacks = $closingImportPacks + (int)$afterImport->NoPacks;
+                        $importClosingStock = $importClosingStock + (int) $afterImport->NoPacks;
                     }
                 }
                 foreach ($afterOutwards as $afterOutward) {
                     if (strpos($afterOutward->NoPacks, ',') != false) {
-                        $closingOutwardPacks = $closingOutwardPacks + array_sum(explode(',', $afterOutward->NoPacks));
+                        $outwardClosingStock = $outwardClosingStock + array_sum(explode(',', $afterOutward->NoPacks));
                     } else {
-                        $closingOutwardPacks = $closingOutwardPacks + (int)$afterOutward->NoPacks;
-                    }
-                }
-                foreach ($afterSalesReturns as $afterSalesReturn) {
-                    if (strpos($afterSalesReturn->NoPacks, ',') != false) {
-                        $closingSalesReturnPacks = $closingSalesReturnPacks + array_sum(explode(',', $afterSalesReturn->NoPacks));
-                    } else {
-                        $closingSalesReturnPacks = $closingSalesReturnPacks + (int)$afterSalesReturn->NoPacks;
+                        $outwardClosingStock = $outwardClosingStock + (int) $afterOutward->NoPacks;
                     }
                 }
                 foreach ($afterPurchaseReturns as $afterPurchaseReturn) {
                     if (strpos($afterPurchaseReturn->NoPacks, ',') != false) {
-                        $closingPurchaseReturnPacks = $closingPurchaseReturnPacks + array_sum(explode(',', $afterPurchaseReturn->NoPacks));
+                        $purchaseReturnClosingStock = $purchaseReturnClosingStock + array_sum(explode(',', $afterPurchaseReturn->NoPacks));
                     } else {
-                        $closingPurchaseReturnPacks = $closingPurchaseReturnPacks + (int)$afterPurchaseReturn->NoPacks;
+                        $purchaseReturnClosingStock = $purchaseReturnClosingStock + (int) $afterPurchaseReturn->NoPacks;
                     }
                 }
-                $closingStock = $closingStock + $closingInwardPacks + $closingImportPacks + $closingSalesReturnPacks - $closingOutwardPacks - $closingPurchaseReturnPacks;
-                // end closing stock
-                // category wise opening stock
-                $categories = Category::get();
-                $CatClosingStock = [];
-                foreach ($categories as $category) {
-                    $afterInwardss = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId inner join outward o on o.Id=trop.OutwardId) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.PartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "'");
-                    $afterImports = DB::select("select * from (select trop.NoPacks, trop.PartyId, trop.ArticleId, a.CategoryId, trop.OutwardId, DATE_FORMAT(trop.CreatedDate,'%Y-%m-%d') as CreatedDate from transportoutwardpacks trop inner join article a on a.Id=trop.ArticleId) as dd where dd.OutwardId=0 and dd.CreatedDate <= '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
-                    $afterOutwards = DB::select("select * from (select o.NoPacks, o.ArticleId, otn.PartyId, a.CategoryId, DATE_FORMAT(o.created_at,'%Y-%m-%d') as OutletDate from outlet o inner join article a on a.Id=o.ArticleId inner join outletnumber otn on otn.Id=o.OutletNumberId) as dd where dd.OutletDate <= '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
-                    // if ($PartyId == 3) {
-                    // $afterPurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join article a on a.Id=sr.ArticleId inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.CreatedDate >= '2022-01-01' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
-                    // } else {
-                    //     $afterPurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join article a on a.Id=sr.ArticleId inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
-                    // }
-                    $afterPurchaseReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, srn.PartyId from salesreturn sr inner join salesreturnnumber srn on srn.Id=sr.SalesReturnNumber inner join article a on a.Id=sr.ArticleId) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.CreatedDate > '2021-12-31' and dd.PartyId='" . $PartyId . "' and dd.CategoryId='" . $category->Id . "'");
-
-                    // $afterPurchaseReturns = DB::select("SELECT salesreturn.ArticleId, article.CategoryId, salesreturnnumber.PartyId, salesreturn.NoPacks, DATE_FORMAT(salesreturn.CreatedDate, '%Y-%m-%d') as CreatedDate
-                    // FROM salesreturn inner join salesreturnnumber on salesreturnnumber.Id=salesreturn.SalesReturnNumber inner join article on article.Id=salesreturn.ArticleId
-                    // WHERE EXISTS
-                    //   (SELECT *
-                    //    FROM   transportoutwardpacks
-                    //    WHERE  transportoutwardpacks.ArticleId = salesreturn.ArticleId and salesreturnnumber.PartyId='" . $PartyId . "' and CreatedDate <= '" . $RangeDate . "' and article.CategoryId='" . $category->Id . "')");
-                    $afterSalesReturns = DB::select("select * from (select sr.NoPacks, sr.ArticleId, a.CategoryId, DATE_FORMAT(sr.CreatedDate,'%Y-%m-%d') as CreatedDate, sr.OutletPartyId as PartyId from outletsalesreturn sr inner join article a on a.Id=sr.ArticleId inner join outletsalesreturnnumber srn on srn.Id=sr.SalesReturnNumber) as dd where dd.CreatedDate <= '" . $RangeDate . "' and dd.CategoryId='" . $category->Id . "' and dd.PartyId='" . $PartyId . "'");
-                    $innwardClosingStock = 0;
-                    $totalInnwardClosingStock = 0;
-                    $importClosingStock = 0;
-                    $outwardClosingStock = 0;
-                    $purchaseReturnClosingStock = 0;
-                    $salesReturnClosingStock = 0;
-                    foreach ($afterInwardss as $CatWiseafterInward) {
-                        if (strpos($CatWiseafterInward->NoPacks, ',') != false) {
-                            $innwardClosingStock = $innwardClosingStock + array_sum(explode(',', $CatWiseafterInward->NoPacks));
-                        } else {
-                            $innwardClosingStock = $innwardClosingStock + (int)$CatWiseafterInward->NoPacks;
-                        }
+                foreach ($afterSalesReturns as $afterSalesReturn) {
+                    if (strpos($afterSalesReturn->NoPacks, ',') != false) {
+                        $salesReturnClosingStock = $salesReturnClosingStock + array_sum(explode(',', $afterSalesReturn->NoPacks));
+                    } else {
+                        $salesReturnClosingStock = $salesReturnClosingStock + (int) $afterSalesReturn->NoPacks;
                     }
-                    foreach ($afterImports as $afterImport) {
-                        if (strpos($afterImport->NoPacks, ',') != false) {
-                            $importClosingStock = $importClosingStock + array_sum(explode(',', $afterImport->NoPacks));
-                        } else {
-                            $importClosingStock = $importClosingStock + (int)$afterImport->NoPacks;
-                        }
-                    }
-                    foreach ($afterOutwards as $afterOutward) {
-                        if (strpos($afterOutward->NoPacks, ',') != false) {
-                            $outwardClosingStock = $outwardClosingStock + array_sum(explode(',', $afterOutward->NoPacks));
-                        } else {
-                            $outwardClosingStock = $outwardClosingStock + (int)$afterOutward->NoPacks;
-                        }
-                    }
-                    foreach ($afterPurchaseReturns as $afterPurchaseReturn) {
-                        if (strpos($afterPurchaseReturn->NoPacks, ',') != false) {
-                            $purchaseReturnClosingStock = $purchaseReturnClosingStock + array_sum(explode(',', $afterPurchaseReturn->NoPacks));
-                        } else {
-                            $purchaseReturnClosingStock = $purchaseReturnClosingStock + (int)$afterPurchaseReturn->NoPacks;
-                        }
-                    }
-                    foreach ($afterSalesReturns as $afterSalesReturn) {
-                        if (strpos($afterSalesReturn->NoPacks, ',') != false) {
-                            $salesReturnClosingStock = $salesReturnClosingStock + array_sum(explode(',', $afterSalesReturn->NoPacks));
-                        } else {
-                            $salesReturnClosingStock = $salesReturnClosingStock + (int)$afterSalesReturn->NoPacks;
-                        }
-                    }
-                    $mainClosing = 0;
-                    $mainClosing = $mainClosing + $innwardClosingStock + $importClosingStock + $salesReturnClosingStock - $outwardClosingStock - $purchaseReturnClosingStock;
-                    
-
-
-
-                    $mainClosingd = 0;
-                    $styles = DB::select("SELECT COUNT(`Id`) AS total_sum FROM article WHERE CategoryId = '" . $category->Id ."'");
-                    if($styles > 0){
-                        $mainClosingd = $styles[0]->total_sum;
-                    }else{
-                        $mainClosingd = '0';
-                    }
-
-                    array_push($CatClosingStock, [ "title" => $category->Title, "stock" => $mainClosing, "style" => $mainClosingd]);
-                    // array_push($CatClosingStock, [$category->Title => $mainClosing]);
                 }
-                // end category wise opening stock 
-                return [
-                    'orgOutletName' => $orgOutletName,
-                    'outletOpeningCategorywise' => $CatOpeningStock, 'outletClosingCategorywise' => $CatClosingStock,
-                    'Categories' => $categories,
-                    'outletOpeningStock' => $openingStock, 'TotalStyle' => $styleSum, 'outletClosingStock' => $closingStock,
-                    'allOutletData' => [
-                        'inwardData' => $mainOutletInwardRecords, 'totalInwardPacks' => $maintotalInwardNoPacks,
-                        'importData' => $mainImportRecords, 'totalImportPacks' => $mainTotalImportNoPacks,
-                        'outwardData' => $mainOutwardRecords, 'totalOutwardPacks' => $mainTotalOutwardNoPacks,
-                        'jhsploutwardData' => $mainJscplOutwardRecords,
-                        'salesReturnData' => $salesReturnRecords, 'totalSalesReturnPacks' => $mainTotalSalesReturnNoPacks,
-                        'purchaseReturnData' => $purchasereturnRecords, 'totalPurchaseReturnPacks' => $mainTotalPurchaseReturnNoPacks
-                    ],
-                    'allOutletDataCat' => [
-                        'outletInwardCategoryWise' => $outletInwardCategoryWise, 'totalCatInwardPacks' => $totalCatInwardPacks + $totalCatJhcplOutwardPacks,
-                        'outletImportCategoryWise' => $outletImportCategoryWise, 'totalCatImportPacks' => $totalCatImportPacks,
-                        'outletOutwardCategoryWise' => $outletOutwardCategoryWise, 'totalCatOutwardPacks' => $totalCatOutwardPacks + $totalCatJhcplOutwardPacks,
-                        'outletSalesReturnCategoryWise' => $outletSalesReturnCategoryWise, 'totalCatSRPacks' => $totalCatSRPacks,
-                        'outletPurchaseReturnCategoryWise' => $outletPurchaseReturnCategoryWise, 'totalCatPRPacks' => $totalCatPRPacks,
-                    ]
-                ];
+                $mainClosing = 0;
+                $mainClosing = $mainClosing + $innwardClosingStock + $importClosingStock + $salesReturnClosingStock - $outwardClosingStock - $purchaseReturnClosingStock;
+
+
+
+
+                $mainClosingd = 0;
+                $styles = DB::select("SELECT COUNT(`Id`) AS total_sum FROM article WHERE CategoryId = '" . $category->Id . "'");
+                if ($styles > 0) {
+                    $mainClosingd = $styles[0]->total_sum;
+                } else {
+                    $mainClosingd = '0';
+                }
+
+                array_push($CatClosingStock, ["title" => $category->Title, "stock" => $mainClosing, "style" => $mainClosingd]);
+                // array_push($CatClosingStock, [$category->Title => $mainClosing]);
             }
+            // end category wise opening stock 
+            return [
+                'orgOutletName' => $orgOutletName,
+                'outletOpeningCategorywise' => $CatOpeningStock,
+                'outletClosingCategorywise' => $CatClosingStock,
+                'Categories' => $categories,
+                'outletOpeningStock' => $openingStock,
+                'TotalStyle' => $styleSum,
+                'outletClosingStock' => $closingStock,
+                'allOutletData' => [
+                    'inwardData' => $mainOutletInwardRecords,
+                    'totalInwardPacks' => $maintotalInwardNoPacks,
+                    'importData' => $mainImportRecords,
+                    'totalImportPacks' => $mainTotalImportNoPacks,
+                    'outwardData' => $mainOutwardRecords,
+                    'totalOutwardPacks' => $mainTotalOutwardNoPacks,
+                    'jhsploutwardData' => $mainJscplOutwardRecords,
+                    'salesReturnData' => $salesReturnRecords,
+                    'totalSalesReturnPacks' => $mainTotalSalesReturnNoPacks,
+                    'purchaseReturnData' => $purchasereturnRecords,
+                    'totalPurchaseReturnPacks' => $mainTotalPurchaseReturnNoPacks
+                ],
+                'allOutletDataCat' => [
+                    'outletInwardCategoryWise' => $outletInwardCategoryWise,
+                    'totalCatInwardPacks' => $totalCatInwardPacks + $totalCatJhcplOutwardPacks,
+                    'outletImportCategoryWise' => $outletImportCategoryWise,
+                    'totalCatImportPacks' => $totalCatImportPacks,
+                    'outletOutwardCategoryWise' => $outletOutwardCategoryWise,
+                    'totalCatOutwardPacks' => $totalCatOutwardPacks + $totalCatJhcplOutwardPacks,
+                    'outletSalesReturnCategoryWise' => $outletSalesReturnCategoryWise,
+                    'totalCatSRPacks' => $totalCatSRPacks,
+                    'outletPurchaseReturnCategoryWise' => $outletPurchaseReturnCategoryWise,
+                    'totalCatPRPacks' => $totalCatPRPacks,
+                ]
+            ];
+        }
     }
 
     public function getOutwardAlldata(Request $request)
     {
         $data = $request->all();
-        $outlets  = $data['OutletRec'];
+        $outlets = $data['OutletRec'];
         $idsearch = "";
         $count = 0;
-        $countOutlets  = count($outlets);
+        $countOutlets = count($outlets);
         foreach ($outlets as $outlet) {
             if ($count + 1 == $countOutlets) {
                 $idsearch = $idsearch . "d.OPartyId=" . $outlet['Id'];
             } else {
                 $idsearch = $idsearch . "d.OPartyId=" . $outlet['Id'] . " " . "or ";
             }
-            $count = $count +  1;
+            $count = $count + 1;
         }
         if (count($data['OutletRec']) == 0) {
-            $vnddata =  DB::select("SELECT d.* from (SELECT o.Id ,DATE_FORMAT(o.created_at , '%Y-%m-%d') as CheckDate ,spuser.PartyId ,spuser.Name as OutletName ,  o.NoPacks , own.Id as OutwardNumberId , concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber ,concat(IFNULL(spuser.Name,suser.Name),son.SoNumber, '/',fn1.StartYear,'-',fn1.EndYear) as SoNumber , c.Title as Category ,sc.Name as SubCategory ,rs.SeriesName as Series ,a.ArticleNumber ,p.Name as PartyName,o.OutwardRate as Rate , own.Discount ,own.Remarks ,p.Country ,p.State,p.City , p.PinCode ,spuser.Name as SalesPerson FROM outward o inner join article a on a.Id=o.ArticleId inner join party p on p.Id=o.PartyId inner join category c on c.Id=a.CategoryId inner join  subcategory sc on sc.Id=a.SubCategoryId inner join rangeseries rs on rs.Id=a.SeriesId inner join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber son on son.Id=own.SoId left join party ps on ps.Id=son.PartyId left join users spuser on spuser.Id=ps.UserId inner join financialyear fn1 on fn1.Id=son.FinancialYearId inner join users suser on suser.Id=son.UserId inner join financialyear fn on fn.Id=own.FinancialYearId) as d where d.CheckDate >= '" . $data['RangeStartDate'] . "' and  d.CheckDate <= '" . $data['RangeEndDate'] . "'");
+            $vnddata = DB::select("SELECT d.* from (SELECT o.Id ,DATE_FORMAT(o.created_at , '%Y-%m-%d') as CheckDate ,spuser.PartyId ,spuser.Name as OutletName ,  o.NoPacks , own.Id as OutwardNumberId , concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber ,concat(IFNULL(spuser.Name,suser.Name),son.SoNumber, '/',fn1.StartYear,'-',fn1.EndYear) as SoNumber , c.Title as Category ,sc.Name as SubCategory ,rs.SeriesName as Series ,a.ArticleNumber ,p.Name as PartyName,o.OutwardRate as Rate , own.Discount ,own.Remarks ,p.Country ,p.State,p.City , p.PinCode ,spuser.Name as SalesPerson FROM outward o inner join article a on a.Id=o.ArticleId inner join party p on p.Id=o.PartyId inner join category c on c.Id=a.CategoryId inner join  subcategory sc on sc.Id=a.SubCategoryId inner join rangeseries rs on rs.Id=a.SeriesId inner join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber son on son.Id=own.SoId left join party ps on ps.Id=son.PartyId left join users spuser on spuser.Id=ps.UserId inner join financialyear fn1 on fn1.Id=son.FinancialYearId inner join users suser on suser.Id=son.UserId inner join financialyear fn on fn.Id=own.FinancialYearId) as d where d.CheckDate >= '" . $data['RangeStartDate'] . "' and  d.CheckDate <= '" . $data['RangeEndDate'] . "'");
         } else {
-            $vnddata =  DB::select("SELECT d.* from ((SELECT o.Id ,op.Id as OPartyId ,op.Name as Outlet , DATE_FORMAT(o.created_at , '%Y-%m-%d') as CheckDate ,op.Name as OutletName ,o.NoPacks ,otn.Id as OutletNumberId ,concat(otn.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber ,'' as SoNumber ,c.Title as Category, sc.Name as SubCategory ,rs.SeriesName as Series, a.ArticleNumber ,p.Name as PartyName ,o.ArticleRate as Rate ,otn.Discount,'' as Remarks,p.Country ,p.State ,p.City ,p.PinCode FROM outlet o inner join outletnumber otn on otn.Id=o.OutletNumberId left join party p on p.Id=otn.OutletPartyId left join party op on op.Id=otn.PartyId inner join financialyear fn on fn.Id=otn.FinancialYearId inner join article a on a.Id=o.ArticleId inner join category c on c.Id=a.CategoryId inner join subcategory sc on sc.Id=a.SubCategoryId inner join rangeseries rs on rs.Id=a.SeriesId) UNION (SELECT outward.Id ,p.Id as OPartyId ,p.Name as Outlet , DATE_FORMAT(oln.CreatedDate , '%Y-%m-%d') as  CheckDate ,p.Name as OutletName ,outward.NoPacks, oln.Id as OutletNumberId, concat(oln.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber ,'' as SoNumber ,c.Title as Category, sc.Name as SubCategory ,rs.SeriesName as Series, a.ArticleNumber ,pp.Name as PartyName ,outward.OutwardRate as Rate ,outwardnumber.Discount ,outwardnumber.Remarks,pp.Country ,pp.State ,pp.City ,pp.PinCode FROM outletnumber oln left join outwardnumber on oln.OutwardnumberId=outwardnumber.Id left join outward on outwardnumber.Id=outward.OutwardNumberId inner join article a on a.Id=outward.ArticleId  left join party p on p.Id=oln.PartyId left join party pp on pp.Id=oln.OutletPartyId inner join financialyear fn on fn.Id=oln.FinancialYearId inner join category c on c.Id=a.CategoryId inner join subcategory sc on sc.Id=a.SubCategoryId inner join rangeseries rs on rs.Id=a.SeriesId where oln.OutwardnumberId IS NOT NULL)) as d where (d.CheckDate >= '" . $data['RangeStartDate'] . "' and  d.CheckDate <= '" . $data['RangeEndDate'] . "') and " . $idsearch);
+            $vnddata = DB::select("SELECT d.* from ((SELECT o.Id ,op.Id as OPartyId ,op.Name as Outlet , DATE_FORMAT(o.created_at , '%Y-%m-%d') as CheckDate ,op.Name as OutletName ,o.NoPacks ,otn.Id as OutletNumberId ,concat(otn.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber ,'' as SoNumber ,c.Title as Category, sc.Name as SubCategory ,rs.SeriesName as Series, a.ArticleNumber ,p.Name as PartyName ,o.ArticleRate as Rate ,otn.Discount,'' as Remarks,p.Country ,p.State ,p.City ,p.PinCode FROM outlet o inner join outletnumber otn on otn.Id=o.OutletNumberId left join party p on p.Id=otn.OutletPartyId left join party op on op.Id=otn.PartyId inner join financialyear fn on fn.Id=otn.FinancialYearId inner join article a on a.Id=o.ArticleId inner join category c on c.Id=a.CategoryId inner join subcategory sc on sc.Id=a.SubCategoryId inner join rangeseries rs on rs.Id=a.SeriesId) UNION (SELECT outward.Id ,p.Id as OPartyId ,p.Name as Outlet , DATE_FORMAT(oln.CreatedDate , '%Y-%m-%d') as  CheckDate ,p.Name as OutletName ,outward.NoPacks, oln.Id as OutletNumberId, concat(oln.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber ,'' as SoNumber ,c.Title as Category, sc.Name as SubCategory ,rs.SeriesName as Series, a.ArticleNumber ,pp.Name as PartyName ,outward.OutwardRate as Rate ,outwardnumber.Discount ,outwardnumber.Remarks,pp.Country ,pp.State ,pp.City ,pp.PinCode FROM outletnumber oln left join outwardnumber on oln.OutwardnumberId=outwardnumber.Id left join outward on outwardnumber.Id=outward.OutwardNumberId inner join article a on a.Id=outward.ArticleId  left join party p on p.Id=oln.PartyId left join party pp on pp.Id=oln.OutletPartyId inner join financialyear fn on fn.Id=oln.FinancialYearId inner join category c on c.Id=a.CategoryId inner join subcategory sc on sc.Id=a.SubCategoryId inner join rangeseries rs on rs.Id=a.SeriesId where oln.OutwardnumberId IS NOT NULL)) as d where (d.CheckDate >= '" . $data['RangeStartDate'] . "' and  d.CheckDate <= '" . $data['RangeEndDate'] . "') and " . $idsearch);
         }
         foreach ($vnddata as $vnd) {
             if (strpos($vnd->NoPacks, ',') !== false) {
                 $totalpacks = array_sum(explode(',', $vnd->NoPacks));
                 $vnd->Quantity = $totalpacks;
-                $vnd->BillAmount = $totalpacks *  (int)$vnd->Rate;
+                $vnd->BillAmount = $totalpacks * (int) $vnd->Rate;
             } else {
                 $vnd->Quantity = $vnd->NoPacks;
-                $vnd->BillAmount = (int)$vnd->NoPacks *  (int)$vnd->Rate;
+                $vnd->BillAmount = (int) $vnd->NoPacks * (int) $vnd->Rate;
             }
             if (count($data['OutletRec']) == 0) {
                 if (!is_null($vnd->PartyId)) {
                     if ($vnd->PartyId != 0) {
-                        $vnd->Outlet =  $vnd->OutletName;
+                        $vnd->Outlet = $vnd->OutletName;
                     } else {
                         $vnd->Outlet = 'DIRECT';
                     }
@@ -4833,7 +4997,7 @@ if (array_sum($SalesNoPacks) <= 0) {
         $file = $request->file('fileoc');
         $outwardNumId = $request->outwardNumId;
         // OutwardNumber ::where('Id')
-        $outwardNumberRec =  DB::table('outwardnumber')->where('Id', $outwardNumId)->first();
+        $outwardNumberRec = DB::table('outwardnumber')->where('Id', $outwardNumId)->first();
         $string = Str::random(16);
         if ($outwardNumberRec->Pdf === null) {
 

@@ -572,7 +572,11 @@ class POController extends Controller
 
     public function podateremarkfromPO($id)
     {
-        return DB::select("SELECT pn.*, concat(pn.PurchaseNumber, '/',fn.StartYear,'-',fn.EndYear) as PO_Number_FinancialYear FROM `purchasenumber` pn inner join financialyear fn on fn.Id=pn.FinancialYearId where pn.Id = '" . $id . "'");
+        // return DB::select("SELECT pn.*, v.Name, CONCAT( pn.PurchaseNumber, '/', fn.StartYear, '-', fn.EndYear ) AS PO_Number_FinancialYear FROM `purchasenumber` pn INNER JOIN financialyear fn ON fn.Id = pn.FinancialYearId LEFT JOIN vendor v ON pn.VendorId = v.Id");
+
+        return DB::select("SELECT pn.*,  v.Name, concat(pn.PurchaseNumber, '/',fn.StartYear,'-',fn.EndYear) as PO_Number_FinancialYear FROM `purchasenumber` pn inner join financialyear fn on fn.Id=pn.FinancialYearId LEFT JOIN vendor v ON pn.VendorId = v.Id where pn.Id = '" . $id . "'");
+
+        // return DB::select("SELECT pn.*, concat(pn.PurchaseNumber, '/',fn.StartYear,'-',fn.EndYear) as PO_Number_FinancialYear FROM `purchasenumber` pn inner join financialyear fn on fn.Id=pn.FinancialYearId where pn.Id = '" . $id . "'");
     }
 
     public function GetArtical()

@@ -2,9 +2,9 @@ name: Laravel
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "staging" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "staging" ]
 
 jobs:
   laravel-tests:
@@ -26,7 +26,7 @@ jobs:
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.GIT_CPANEL_REACT_SERVER }}
-        username: ${{ secrets.GIT_CPANEL_REACT_LIVE_USER }}
-        password: ${{ secrets.GIT_CPANEL_REACT_LIVE_PWD }}
+        username: ${{ secrets.GIT_CPANEL_REACT_USER }}
+        password: ${{ secrets.GIT_CPANEL_REACT_PWD }}
     
        

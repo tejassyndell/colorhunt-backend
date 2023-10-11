@@ -117,7 +117,7 @@ class OutwardController extends Controller
     {
 
 
-        $registrationToken = 'ExponentPushToken[8ng1VCAIjR0lA3-C3YawfR]';
+        $registrationToken = "SELECT token FROM `party` WHERE token != '0';";
         $title = '$request->input()';
         $body = '$request-';
 
@@ -136,7 +136,7 @@ class OutwardController extends Controller
 
         try {
             $response = $this->sendPushNotifications([$message]);
-            \Log::info("Notification sent successfully: " . json_encode($response));
+            \Log::info("Notification sent unsuccessfully: " . json_encode($response));
             return response()->json(['message' => 'Notification sent successfully'], 200);
         } catch (\Exception $e) {
             \Log::error("Error sending notification: " . $e->getMessage());

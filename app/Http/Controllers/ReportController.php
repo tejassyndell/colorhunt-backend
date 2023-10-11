@@ -1257,41 +1257,44 @@ class ReportController extends Controller
 
                 $articleData = DB::select("
                 SELECT 
-                    c.Colorflag, 
-                    a.ArticleRatio, 
-                    a.ArticleOpenFlag, 
-                    c.Title, 
-                    b.Name AS BrandName, 
-                    sc.Name AS Subcategory, 
-                    rs.SeriesName, 
-                    rs.Series, 
-                    a.StyleDescription 
-                    FROM 
-                    article a
-                    INNER JOIN 
-                    category c ON a.CategoryId = c.Id
-                    LEFT JOIN 
-                    brand b ON b.Id = a.BrandId
-                    LEFT JOIN 
-                    subcategory sc ON sc.Id = a.SubCategoryId
-                    LEFT JOIN 
-                    rangeseries rs ON rs.Id = a.SeriesId
-                    WHERE 
-                    a.Id = :articleId
-                    ", ['articleId' => $articleId]);
+    c.Colorflag, 
+    a.ArticleRatio, 
+    a.ArticleOpenFlag, 
+    c.Title, 
+    b.Name AS BrandName, 
+    sc.Name AS Subcategory, 
+    rs.SeriesName, 
+    rs.Series, 
+    a.StyleDescription 
+FROM 
+    article a
+INNER JOIN 
+    category c ON a.CategoryId = c.Id
+LEFT JOIN 
+    brand b ON b.Id = a.BrandId
+LEFT JOIN 
+    subcategory sc ON sc.Id = a.SubCategoryId
+LEFT JOIN 
+    rangeseries rs ON rs.Id = a.SeriesId
+WHERE 
+    a.Id = :articleId
+
+", ['articleId' => $articleId]);
 
                 $articlesColors = DB::select("
-                    SELECT   
-                    GROUP_CONCAT(DISTINCT articlesize.ArticleSizeName ORDER BY articlesize.Id SEPARATOR ',') as ArticleSize , 
-                    GROUP_CONCAT(DISTINCT articlecolor.ArticleColorName ORDER BY articlecolor.Id SEPARATOR ',') as ArticleColor 
-                    FROM 
-                    article
-                    LEFT JOIN 
-                    articlecolor ON articlecolor.ArticleId = article.Id
-                    LEFT JOIN 
-                    articlesize ON articlesize.ArticleId = article.Id  
-                    WHERE 
-                    article.Id = :articleId", ['articleId' => $articleId]);
+    SELECT   
+        GROUP_CONCAT(DISTINCT articlesize.ArticleSizeName ORDER BY articlesize.Id SEPARATOR ',') as ArticleSize , 
+        GROUP_CONCAT(DISTINCT articlecolor.ArticleColorName ORDER BY articlecolor.Id SEPARATOR ',') as ArticleColor 
+    FROM 
+        article
+    LEFT JOIN 
+        articlecolor ON articlecolor.ArticleId = article.Id
+    LEFT JOIN 
+        articlesize ON articlesize.ArticleId = article.Id  
+    WHERE 
+        article.Id = :articleId
+", ['articleId' => $articleId]);
+
                 $articleData = (array) $articleData[0];
                 $objectArticle->Colorflag = $articleData['Colorflag'];
                 $objectArticle->ArticleRatio = $articleData['ArticleRatio'];
@@ -1334,37 +1337,39 @@ class ReportController extends Controller
                 $dateThreshold = '2021-12-31';
 
                 $allRecords = DB::select("
-            SELECT NoPacks, type, SortDate
-            FROM (
-            SELECT osr.NoPacks, 2 AS type, osrn.CreatedDate AS SortDate
-            FROM outletsalesreturn osr
-            INNER JOIN outletsalesreturnnumber osrn ON osr.SalesReturnNumber = osrn.Id
-            WHERE osr.ArticleId = ? AND osr.OutletPartyId = ?
-            UNION
+    SELECT NoPacks, type, SortDate
+    FROM (
+        SELECT osr.NoPacks, 2 AS type, osrn.CreatedDate AS SortDate
+        FROM outletsalesreturn osr
+        INNER JOIN outletsalesreturnnumber osrn ON osr.SalesReturnNumber = osrn.Id
+        WHERE osr.ArticleId = ? AND osr.OutletPartyId = ?
         
-            SELECT o.NoPacks, 1 AS type, onum.CreatedDate AS SortDate
-            FROM outlet o
-            INNER JOIN outletnumber onum ON o.OutletNumberId = onum.Id
-            WHERE o.ArticleId = ? AND onum.PartyId = ?
+        UNION
         
-            UNION
+        SELECT o.NoPacks, 1 AS type, onum.CreatedDate AS SortDate
+        FROM outlet o
+        INNER JOIN outletnumber onum ON o.OutletNumberId = onum.Id
+        WHERE o.ArticleId = ? AND onum.PartyId = ?
         
-            SELECT o.NoPacks, 0 AS type, to1.ReceivedDate AS SortDate
-            FROM outward o
-            INNER JOIN transportoutlet to1 ON o.OutwardNumberId = to1.OutwardNumberId
-            INNER JOIN outwardnumber on1 ON o.OutwardNumberId = on1.Id
-            WHERE o.ArticleId = ? AND to1.TransportStatus = 1 AND o.PartyId = ?
+        UNION
         
-            UNION
+        SELECT o.NoPacks, 0 AS type, to1.ReceivedDate AS SortDate
+        FROM outward o
+        INNER JOIN transportoutlet to1 ON o.OutwardNumberId = to1.OutwardNumberId
+        INNER JOIN outwardnumber on1 ON o.OutwardNumberId = on1.Id
+        WHERE o.ArticleId = ? AND to1.TransportStatus = 1 AND o.PartyId = ?
         
-            SELECT sr.NoPacks, 3 AS type, srn.CreatedDate AS SortDate
-            FROM outward o
-            INNER JOIN salesreturn sr ON sr.OutwardId = o.Id
-            INNER JOIN salesreturnnumber srn ON srn.Id = sr.SalesReturnNumber
-            WHERE o.PartyId = ? AND o.ArticleId = ?
-             ) AS dd
-             WHERE SortDate > ?
-             ORDER BY dd.SortDate ASC", [
+        UNION
+        
+        SELECT sr.NoPacks, 3 AS type, srn.CreatedDate AS SortDate
+        FROM outward o
+        INNER JOIN salesreturn sr ON sr.OutwardId = o.Id
+        INNER JOIN salesreturnnumber srn ON srn.Id = sr.SalesReturnNumber
+        WHERE o.PartyId = ? AND o.ArticleId = ?
+    ) AS dd
+    WHERE SortDate > ?
+    ORDER BY dd.SortDate ASC
+", [
                     $articleId,
                     $partyId,
                     $articleId,

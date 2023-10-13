@@ -783,7 +783,7 @@ class MasterController extends Controller
                 'Name' => $data['PartyName'],
                 'PhoneNumber' => $data['PartyContact'],
                 'Address' => $data['PartyAddress'],
-                'Aditional_phone_numbers' => ($data['Aditional_phone_numbers']), // Save additional phone numbers as a JSON array
+                'Additional_phone_numbers' => ($data['Additional_phone_numbers']), // Save additional phone numbers as a JSON array
                 'State' => $data['State'],
                 'City' => $data['City'],
                 'PinCode' => $data['PinCode'],
@@ -799,7 +799,7 @@ class MasterController extends Controller
                 'Name' => $data['Name'],
                 'Address' => $data['Address'],
                 'PhoneNumber' => $data['PhoneNumber'],
-                'Aditional_phone_numbers' =>($data['Aditional_phone_numbers']), // Save additional phone numbers as a JSON array
+                'Additional_phone_numbers' =>($data['Additional_phone_numbers']), // Save additional phone numbers as a JSON array
                 'State' => $data['State'],
                 'City' => $data['City'],
                 'PinCode' => $data['PinCode'],
@@ -1225,7 +1225,7 @@ class MasterController extends Controller
              //add aditional code
             //added aditional phone number field
             // Save additional phone numbers as a JSON array
-            'Aditional_phone_numbers' => ($data['Aditional_phone_numbers']), 
+            'Additional_phone_numbers' => ($data['Additional_phone_numbers']), 
             'ContactPerson' => $data['ContactPerson'],
             'State' => $data['State'],
             'City' => $data['City'],

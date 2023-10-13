@@ -26,6 +26,43 @@ class OutwardController extends Controller
         //
     }
 
+
+    private function isExpoPushToken($token)
+    {
+        // Add your validation logic here
+        // You may need to refer to Expo's documentation for the format of valid tokens
+        // Example: return preg_match('/^[0-9a-fA-F]{8,60}$/', $token);
+        return true; // Placeholder, replace with actual validation
+    }
+
+    private function sendPushNotifications($messages)
+    {
+        $ch = curl_init();
+        $headers = [
+            'Content-Type: application/json',
+            'Accept: application/json',
+        ];
+
+        $postData = json_encode($messages);
+
+        curl_setopt($ch, CURLOPT_URL, 'https://exp.host/--/api/v2/push/send');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $response = curl_exec($ch);
+        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        curl_close($ch);
+
+        if ($statusCode !== 200) {
+            throw new \Exception('Error sending notification');
+        }
+
+        return json_decode($response, true);
+    }
+
     public function GenerateOWNumber($UserId)
     {
         $array = array();
@@ -78,6 +115,46 @@ class OutwardController extends Controller
 
     public function AddOutward(Request $request)
     {
+
+
+        $registrationToken = "SELECT token FROM `party` WHERE token != '0';";
+        $title = '$request->input()';
+        $body = '$request-';
+
+        if (!$this->isExpoPushToken($registrationToken)) {
+            return response()->json(['error' => 'Invalid Expo Push Token'], 400);
+        }
+
+        $message = [
+            'to' => $registrationToken,
+            'sound' => 'default',
+            'title' => $title ?: 'Notification Title',
+            'body' => $body ?: 'Notification Body',
+            'priority' => 'high',
+            'data' => ['additionalData' => 'optional data'],
+        ];
+
+        try {
+            $response = $this->sendPushNotifications([$message]);
+            \Log::info("Notification sent unsuccessfully: " . json_encode($response));
+            return response()->json(['message' => 'Notification sent successfully'], 200);
+        } catch (\Exception $e) {
+            \Log::error("Error sending notification: " . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////
         $data = $request->all();
         $partyrecord  = Party::where('Id', $data['PartyId'])->first();
 

@@ -124,7 +124,7 @@ if (empty($q)) {
     return response()->json(['error' => 'Party not found'], 404);
 }
 
-$registrationToken = 'ExponentPushToken[PnYea1DuizHEifo_GqEyBb]';
+$registrationToken = $registrationToken = $q[0]->token;;
 $title = 'Outward';
 $body = 'Your order is now outward';
 
@@ -772,6 +772,45 @@ try {
 
     public function UpdateOutward(Request $request)
     {
+
+        $partyid = $request->PartyId;
+        
+
+        $q = DB::select("SELECT party.token , party.Name FROM party WHERE party.Id = ?", [$partyid]);
+    
+        
+        if (empty($q)) {
+            return response()->json(['error' => 'Party not found'], 404);
+        }
+        
+        $registrationToken = $registrationToken = $q[0]->token;;
+        $title = 'Outward';
+        $body = 'Your order is now outward';
+        
+        if (!$this->isExpoPushToken($registrationToken)) {
+            return response()->json(['error' => 'Invalid Expo Push Token'], 400);
+        }
+        
+        $message = [
+            'to' => $registrationToken,
+            'sound' => 'default',
+            'title' => $title ?: 'Notification Title',
+            'body' => $body ?: 'Notification Body',
+            'priority' => 'high',
+            'data' => ['additionalData' => 'optional data'],
+        ];
+        
+        try {
+            $response = $this->sendPushNotifications([$message]);
+            \Log::info("Notification sent successfully: " . json_encode($response));
+            return response()->json(['message' => 'Notification sent successfully'], 200);
+        } catch (\Exception $e) {
+            \Log::error("Error sending notification: " . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+
+        
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $data = $request->all();
         $dataresult = DB::select('SELECT c.Colorflag, o.NoPacks as OWNopacks, s.OutwardNoPacks FROM `outward` o inner join outwardnumber own on own.Id=o.OutwardNumberId inner join so s on s.SoNumberId=own.SoId left join po p on p.ArticleId=o.ArticleId left join article a on a.Id=o.ArticleId left join category c on c.Id=a.CategoryId where o.Id="' . $data['id'] . '" and s.ArticleId="' . $data['ArticleId'] . '"');
         $Colorflag = $dataresult[0]->Colorflag;

@@ -1255,43 +1255,40 @@ class ReportController extends Controller
 
                 $articleData = DB::select("
                 SELECT 
-    c.Colorflag, 
-    a.ArticleRatio, 
-    a.ArticleOpenFlag, 
-    c.Title, 
-    b.Name AS BrandName, 
-    sc.Name AS Subcategory, 
-    rs.SeriesName, 
-    rs.Series, 
-    a.StyleDescription 
-FROM 
-    article a
-INNER JOIN 
-    category c ON a.CategoryId = c.Id
-LEFT JOIN 
-    brand b ON b.Id = a.BrandId
-LEFT JOIN 
-    subcategory sc ON sc.Id = a.SubCategoryId
-LEFT JOIN 
-    rangeseries rs ON rs.Id = a.SeriesId
-WHERE 
-    a.Id = :articleId
-
-", ['articleId' => $articleId]);
+                c.Colorflag, 
+                a.ArticleRatio, 
+                a.ArticleOpenFlag, 
+                c.Title, 
+                b.Name AS BrandName, 
+                sc.Name AS Subcategory, 
+                rs.SeriesName, 
+                rs.Series, 
+                a.StyleDescription 
+            FROM 
+                article a
+            INNER JOIN 
+                category c ON a.CategoryId = c.Id
+            LEFT JOIN 
+                brand b ON b.Id = a.BrandId
+            LEFT JOIN 
+                subcategory sc ON sc.Id = a.SubCategoryId
+            LEFT JOIN 
+                rangeseries rs ON rs.Id = a.SeriesId
+            WHERE 
+                a.Id = :articleId", ['articleId' => $articleId]);
 
                 $articlesColors = DB::select("
-    SELECT   
-        GROUP_CONCAT(DISTINCT articlesize.ArticleSizeName ORDER BY articlesize.Id SEPARATOR ',') as ArticleSize , 
-        GROUP_CONCAT(DISTINCT articlecolor.ArticleColorName ORDER BY articlecolor.Id SEPARATOR ',') as ArticleColor 
-    FROM 
-        article
-    LEFT JOIN 
-        articlecolor ON articlecolor.ArticleId = article.Id
-    LEFT JOIN 
-        articlesize ON articlesize.ArticleId = article.Id  
-    WHERE 
-        article.Id = :articleId
-", ['articleId' => $articleId]);
+                SELECT
+                GROUP_CONCAT(articlesize.ArticleSizeName SEPARATOR ',') AS ArticleSize,
+                GROUP_CONCAT(articlecolor.ArticleColorName SEPARATOR ',') AS ArticleColor
+            FROM
+                article
+            INNER JOIN 
+                articlecolor ON articlecolor.ArticleId = article.Id
+            INNER JOIN 
+                articlesize ON articlesize.ArticleId = article.Id  
+            WHERE 
+                article.Id = :articleId", ['articleId' => $articleId]);
 
                 $articleData = (array) $articleData[0];
                 $objectArticle->Colorflag = $articleData['Colorflag'];

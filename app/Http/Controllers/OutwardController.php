@@ -118,38 +118,31 @@ class OutwardController extends Controller
 
         $partyid = $request->PartyId;
 
-$q = DB::select("SELECT party.token , party.Name FROM party WHERE party.Id = ?", [$partyid]);
+        // $registrationToken = "SELECT token FROM `party` WHERE token != '0';";
+        // $title = '$request->input()';
+        // $body = '$request-';
 
-if (empty($q)) {
-    return response()->json(['error' => 'Party not found'], 404);
-}
+        // if (!$this->isExpoPushToken($registrationToken)) {
+        //     return response()->json(['error' => 'Invalid Expo Push Token'], 400);
+        // }
 
-$registrationToken = $registrationToken = $q[0]->token;;
-$title = 'Outward';
-$body = 'Your order is now outward';
+        // $message = [
+        //     'to' => $registrationToken,
+        //     'sound' => 'default',
+        //     'title' => $title ?: 'Notification Title',
+        //     'body' => $body ?: 'Notification Body',
+        //     'priority' => 'high',
+        //     'data' => ['additionalData' => 'optional data'],
+        // ];
 
-if (!$this->isExpoPushToken($registrationToken)) {
-    return response()->json(['error' => 'Invalid Expo Push Token'], 400);
-}
-
-$message = [
-    'to' => $registrationToken,
-    'sound' => 'default',
-    'title' => $title ?: 'Notification Title',
-    'body' => $body ?: 'Notification Body',
-    'priority' => 'high',
-    'data' => ['additionalData' => 'optional data'],
-];
-
-try {
-    $response = $this->sendPushNotifications([$message]);
-    \Log::info("Notification sent successfully: " . json_encode($response));
-    return response()->json(['message' => 'Notification sent successfully'], 200);
-} catch (\Exception $e) {
-    \Log::error("Error sending notification: " . $e->getMessage());
-    return response()->json(['error' => 'Internal Server Error'], 500);
-}
-
+        // try {
+        //     $response = $this->sendPushNotifications([$message]);
+        //     \Log::info("Notification sent unsuccessfully: " . json_encode($response));
+        //     return response()->json(['message' => 'Notification sent successfully'], 200);
+        // } catch (\Exception $e) {
+        //     \Log::error("Error sending notification: " . $e->getMessage());
+        //     return response()->json(['error' => 'Internal Server Error'], 500);
+        // }
 
 
 

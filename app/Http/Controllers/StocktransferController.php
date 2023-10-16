@@ -434,81 +434,81 @@ class StocktransferController extends Controller
 
 
 
-    public function StockshortageListFromSTNO($STNO, Request $request)
-    {
-        
-        
-         $data = $request->all();
-        $search = $data["search"];
-        $startnumber = $data["start"];
-        $vnddataTotal = DB::select("select count(*) as Total from (SELECT s.Id , s.ArticleId, s.NoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stockshortage` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId =  '" . $STNO . "') as d");
-        $vnTotal = $vnddataTotal[0]->Total;
-        $length = $data["length"];
-        if ($search['value'] != null && strlen($search['value']) > 2) {
-            $searchstring = "where d.ConsumedArticle like '%" . $search['value'] . "%' OR d.TransferArticle like '%" . $search['value'] . "%' OR d.TransferCategory like '%" . $search['value'] . "%' OR d.ConsumeCategory like '%" . $search['value'] . "%' ";
-            $vnddataTotalFilter = DB::select("select count(*) as Total from (SELECT s.Id , s.ArticleId, s.NoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stockshortage` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId =  '" . $STNO . "') as d "  . $searchstring );
-            $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
-        } else {
-            $searchstring = "";
-            $vnddataTotalFilterValue = $vnTotal;
-        }
-        $column = $data["order"][0]["column"];
-        switch ($column) {
-            case 1:
-                $ordercolumn = "d.ConsumedArticle";
-                break;
-            case 2:
-                $ordercolumn = "d.ConsumeCategory";
-                break;
-            case 3:
-                $ordercolumn = "d.ConsumedNoPacks";
-                break;
-            case 4:
-                $ordercolumn = "d.TransferArticle";
-            break;
-            
-            case 5:
-                $ordercolumn = "d.TransferCategory";
-            break;
-            
-             case 6:
-                $ordercolumn = "d.PartyDiscount";
-            break;
-            
-            default:
-                $ordercolumn = "d.OutwardDate";
-                break;
-        }
-        $order = "";
-        if ($data["order"][0]["dir"]) {
-            $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
-        }
-        $vnddata = DB::select("select d.* from (SELECT s.Id , s.ArticleId, s.NoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stockshortage` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId =  '" . $STNO . "') as d " );
-    
-    
-
-        return array(
-            'datadraw' => $data["draw"],
-            'recordsTotal' => $vnTotal,
-            'recordsFiltered' => $vnddataTotalFilterValue,
-            'response' => 'success',
-            'startnumber' => $startnumber,
-            'search' => count($vnddata),
-            'data' => $vnddata,
-        );
-        
-        
-        
-        
-        // return DB::select("SELECT s.Id , s.ArticleId, s.NoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stockshortage` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId =  '" . $STNO . "'");
-    }
-
-
-    // public function StockshortageListFromSTNO($STNO)
+    // public function StockshortageListFromSTNO($STNO, Request $request)
     // {
         
-    //     return DB::select("SELECT s.Id , s.ArticleId, s.NoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stockshortage` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId =  '" . $STNO . "'");
+        
+    //      $data = $request->all();
+    //     $search = $data["search"];
+    //     $startnumber = $data["start"];
+    //     $vnddataTotal = DB::select("select count(*) as Total from (SELECT s.Id , s.ArticleId, s.NoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stockshortage` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId =  '" . $STNO . "') as d");
+    //     $vnTotal = $vnddataTotal[0]->Total;
+    //     $length = $data["length"];
+    //     if ($search['value'] != null && strlen($search['value']) > 2) {
+    //         $searchstring = "where d.ConsumedArticle like '%" . $search['value'] . "%' OR d.TransferArticle like '%" . $search['value'] . "%' OR d.TransferCategory like '%" . $search['value'] . "%' OR d.ConsumeCategory like '%" . $search['value'] . "%' ";
+    //         $vnddataTotalFilter = DB::select("select count(*) as Total from (SELECT s.Id , s.ArticleId, s.NoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stockshortage` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId =  '" . $STNO . "') as d "  . $searchstring );
+    //         $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
+    //     } else {
+    //         $searchstring = "";
+    //         $vnddataTotalFilterValue = $vnTotal;
+    //     }
+    //     $column = $data["order"][0]["column"];
+    //     switch ($column) {
+    //         case 1:
+    //             $ordercolumn = "d.ConsumedArticle";
+    //             break;
+    //         case 2:
+    //             $ordercolumn = "d.ConsumeCategory";
+    //             break;
+    //         case 3:
+    //             $ordercolumn = "d.ConsumedNoPacks";
+    //             break;
+    //         case 4:
+    //             $ordercolumn = "d.TransferArticle";
+    //         break;
+            
+    //         case 5:
+    //             $ordercolumn = "d.TransferCategory";
+    //         break;
+            
+    //          case 6:
+    //             $ordercolumn = "d.PartyDiscount";
+    //         break;
+            
+    //         default:
+    //             $ordercolumn = "d.OutwardDate";
+    //             break;
+    //     }
+    //     $order = "";
+    //     if ($data["order"][0]["dir"]) {
+    //         $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
+    //     }
+    //     $vnddata = DB::select("select d.* from (SELECT s.Id , s.ArticleId, s.NoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stockshortage` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId =  '" . $STNO . "') as d " );
+    
+    
+
+    //     return array(
+    //         'datadraw' => $data["draw"],
+    //         'recordsTotal' => $vnTotal,
+    //         'recordsFiltered' => $vnddataTotalFilterValue,
+    //         'response' => 'success',
+    //         'startnumber' => $startnumber,
+    //         'search' => count($vnddata),
+    //         'data' => $vnddata,
+    //     );
+        
+        
+        
+        
+    //     // return DB::select("SELECT s.Id , s.ArticleId, s.NoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stockshortage` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId =  '" . $STNO . "'");
     // }
+
+
+    public function StockshortageListFromSTNO($STNO)
+    {
+        
+        return DB::select("SELECT s.Id , s.ArticleId, s.NoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stockshortage` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId =  '" . $STNO . "'");
+    }
 
 
 
@@ -594,10 +594,75 @@ class StocktransferController extends Controller
 
 
 
-    // public function StocktransferDateFromSTNO($id)
+    // public function StocktransferDateFromSTNO($id, Request $request)
     // {
+        
+    //     // (SELECT stn.StocktransferNumber, stn.StocktransferDate, stn.Remarks, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear from stocktransfernumber stn inner join financialyear fn on fn.Id=stn.FinancialYearId  where stn.Id = '" . $id . "')
+        
+    //     $data = $request->all();
+    //     $search = $data["search"];
+    //     $startnumber = $data["start"];
+    //     $vnddataTotal = DB::select("select count(*) as Total from( SELECT stn.StocktransferNumber, stn.StocktransferDate, stn.Remarks, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear from stocktransfernumber stn inner join financialyear fn on fn.Id=stn.FinancialYearId  where stn.Id = '" . $id . "') as d");
+        
+        
+        
+    //     $vnTotal = $vnddataTotal[0]->Total;
+    //     $length = $data["length"];
+    //     if ($search['value'] != null && strlen($search['value']) > 2) {
+    //         $searchstring = "where d.ConsumedArticle like '%" . $search['value'] . "%' OR d.TransferArticle like '%" . $search['value'] . "%' OR d.TransferCategory like '%" . $search['value'] . "%' OR d.ConsumeCategory like '%" . $search['value'] . "%' ";
+    //         $vnddataTotalFilter = DB::select("select count(*) as Total from (SELECT stn.StocktransferNumber, stn.StocktransferDate, stn.Remarks, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear from stocktransfernumber stn inner join financialyear fn on fn.Id=stn.FinancialYearId  where stn.Id = '" . $id . "') as d "  . $searchstring );
+    //         $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
+    //     } else {
+    //         $searchstring = "";
+    //         $vnddataTotalFilterValue = $vnTotal;
+    //     }
+    //     $column = $data["order"][0]["column"];
+    //     switch ($column) {
+    //         case 1:
+    //             $ordercolumn = "d.StocktransferNumber";
+    //             break;
+    //         case 2:
+    //             $ordercolumn = "d.StocktransferDate";
+    //             break;
+    //         case 3:
+    //             $ordercolumn = "d.Remarks";
+    //             break;
+    //         case 4:
+    //             $ordercolumn = "d.ST_Number_FinancialYear";
+    //         break;
+           
+            
+    //         default:
+    //             $ordercolumn = "d.StocktransferDate";
+    //             break;
+    //     }
+    //     $order = "";
+    //     if ($data["order"][0]["dir"]) {
+    //         $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
+    //     }
+    //     $vnddata = DB::select("select d.* from (SELECT stn.StocktransferNumber, stn.StocktransferDate, stn.Remarks, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear from stocktransfernumber stn inner join financialyear fn on fn.Id=stn.FinancialYearId  where stn.Id = '" . $id . "') as d " . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length );
+    
+    
+
+    //     return array(
+    //         'datadraw' => $data["draw"],
+    //         'recordsTotal' => $vnTotal,
+    //         'recordsFiltered' => $vnddataTotalFilterValue,
+    //         'response' => 'success',
+    //         'startnumber' => $startnumber,
+    //         'search' => count($vnddata),
+    //         'data' => $vnddata,
+    //     );
+    
+        
     //     return DB::select("SELECT stn.StocktransferNumber, stn.StocktransferDate, stn.Remarks, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear from stocktransfernumber stn inner join financialyear fn on fn.Id=stn.FinancialYearId  where stn.Id = '" . $id . "'");
     // }
+    
+        public function StocktransferDateFromSTNO($id)
+    {
+        return DB::select("SELECT stn.StocktransferNumber, stn.StocktransferDate, stn.Remarks, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear from stocktransfernumber stn inner join financialyear fn on fn.Id=stn.FinancialYearId  where stn.Id = '" . $id . "'");
+    }
+    
 
     public function Deletestocktransfer($id, $type, $LoggedId)
     {

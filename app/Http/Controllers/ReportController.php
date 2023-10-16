@@ -1255,59 +1255,25 @@ class ReportController extends Controller
                 $articleArray = (array) $article;
                 $articleId = $articleArray['ArticleId'];
 
-                $articleData = DB::select("
-                SELECT 
-    c.Colorflag, 
-    a.ArticleRatio, 
-    a.ArticleOpenFlag, 
-    c.Title, 
-    b.Name AS BrandName, 
-    sc.Name AS Subcategory, 
-    rs.SeriesName, 
-    rs.Series, 
-    a.StyleDescription 
-FROM 
-    article a
-INNER JOIN 
-    category c ON a.CategoryId = c.Id
-LEFT JOIN 
-    brand b ON b.Id = a.BrandId
-LEFT JOIN 
-    subcategory sc ON sc.Id = a.SubCategoryId
-LEFT JOIN 
-    rangeseries rs ON rs.Id = a.SeriesId
-WHERE 
-    a.Id = :articleId
+                $articleData = DB::select("SELECT c.Colorflag, a.ArticleRatio, a.ArticleOpenFlag, c.Title, b.Name AS BrandName, sc.Name AS Subcategory, rs.SeriesName, rs.Series, a.StyleDescription FROM article a INNER JOIN category c ON a.CategoryId = c.Id LEFT JOIN brand b ON b.Id = a.BrandId LEFT JOIN subcategory sc ON sc.Id = a.SubCategoryId LEFT JOIN rangeseries rs ON rs.Id = a.SeriesId WHERE  a.Id = :articleId", ['articleId' => $articleId]);
 
-", ['articleId' => $articleId]);
-
-                $articlesColors = DB::select("
-    SELECT   
-        GROUP_CONCAT(DISTINCT articlesize.ArticleSizeName ORDER BY articlesize.Id SEPARATOR ',') as ArticleSize , 
-        GROUP_CONCAT(DISTINCT articlecolor.ArticleColorName ORDER BY articlecolor.Id SEPARATOR ',') as ArticleColor 
-    FROM 
-        article
-    LEFT JOIN 
-        articlecolor ON articlecolor.ArticleId = article.Id
-    LEFT JOIN 
-        articlesize ON articlesize.ArticleId = article.Id  
-    WHERE 
-        article.Id = :articleId
-", ['articleId' => $articleId]);
-
-                $articleData = (array) $articleData[0];
-                $objectArticle->Colorflag = $articleData['Colorflag'];
-                $objectArticle->ArticleRatio = $articleData['ArticleRatio'];
                
-                $objectArticle->Title = $articleData['Title'];
-                $objectArticle->BrandName = $articleData['BrandName'];
-                $objectArticle->Subcategory = $articleData['Subcategory'];
-                $objectArticle->SeriesName = $articleData['SeriesName'];
-                $objectArticle->Series = $articleData['Series'];
-                $objectArticle->StyleDescription = $articleData['StyleDescription'];
-                $articleColors = [];
-                $objectArticle->ArticleColor = ($articleColors) ? implode(',', array_column($articleColors, 'Name')) : "";
-                $objectArticle->ArticleSize = $articlesColors[0]->ArticleSize;
+                    $articleData = (array) $articleData[0];
+                    $objectArticle->Colorflag = $articleData['Colorflag'];
+                    $objectArticle->ArticleRatio = $articleData['ArticleRatio'];
+                    $objectArticle->Title = $articleData['Title'];
+                    $objectArticle->BrandName = $articleData['BrandName'];
+                    $objectArticle->Subcategory = $articleData['Subcategory'];
+                    $objectArticle->SeriesName = $articleData['SeriesName'];
+                    $objectArticle->Series = $articleData['Series'];
+                    $objectArticle->StyleDescription = $articleData['StyleDescription'];
+
+                    // Assuming $articleColors is populated elsewhere in your code
+                    $articlesColors = [];
+                    $objectArticle->ArticleColor = ($articlesColors) ? implode(',', array_column($articleColors, 'Name')) : "";
+                    $objectArticle->ArticleSize = ($articlesColors) ? implode(',', array_column($articleColors, 'Size')) : "";
+                
+
 
                 $articleId = $articleArray['ArticleId'];
                 $partyId = $PartyId;
@@ -1358,17 +1324,20 @@ WHERE
                     $dateThreshold
                 ]);
 
-                // } else {
-                // $allRecords = DB::select('(select `outletsalesreturn`.`NoPacks` as `NoPacks`, 2 as type, `outletsalesreturnnumber`.`CreatedDate` as `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletsalesreturn`.`OutletPartyId` = ' . $PartyId . ')) union (select `outlet`.`NoPacks` as `NoPacks`, 1 as type, `outletnumber`.`CreatedDate` as `SortDate` from `outlet` inner join `outletnumber` on `outlet`.`OutletNumberId` = `outletnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletnumber`.`PartyId` = ' . $PartyId . ')) union (select `outward`.`NoPacks` as `NoPacks`, 0 as type, `outwardnumber`.`created_at` as `SortDate` from `outward` inner join `transportoutlet` on `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId` inner join `outwardnumber` on `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `transportoutlet`.`TransportStatus` = 1 and `outward`.`PartyId` = ' . $PartyId . ')) union (select `salesreturn`.`NoPacks` as `NoPacks`, 3 as type ,`salesreturnnumber`.`CreatedDate` as `SortDate` from `outward` inner join `salesreturn` on `salesreturn`.`OutwardId` = `outward`.`Id` inner join `salesreturnnumber` on `salesreturnnumber`.`Id` = `salesreturn`.`SalesReturnNumber` where (`outward`.`PartyId` = ' . $PartyId . ' and `outward`.`ArticleId` = ' . $articleArray['ArticleId'] . ')) order by `SortDate` asc');
-                // $allRecords = DB::select("select * from (select outletsalesreturn.NoPacks as NoPacks, 2 as type, outletsalesreturnnumber.CreatedDate as SortDate from outletsalesreturn inner join outletsalesreturnnumber on outletsalesreturn.SalesReturnNumber = outletsalesreturnnumber.Id where (ArticleId = '" . $articleArray['ArticleId'] . "' and outletsalesreturn.OutletPartyId = '" . $PartyId . "') union (select outlet.NoPacks as NoPacks, 1 as type, outletnumber.CreatedDate as SortDate from outlet inner join outletnumber on outlet.OutletNumberId = outletnumber.Id where (ArticleId = '" . $articleArray['ArticleId'] . "' and outletnumber.PartyId = '" . $PartyId . "')) union (select outward.NoPacks as NoPacks, 0 as type, transportoutlet.ReceivedDate as SortDate from outward inner join transportoutlet on outward.OutwardNumberId = transportoutlet.OutwardNumberId inner join outwardnumber on outward.OutwardNumberId = outwardnumber.Id where (ArticleId = '" . $articleArray['ArticleId'] . "' and transportoutlet.TransportStatus = 1 and outward.PartyId = '" . $PartyId . "')) union (select salesreturn.NoPacks as NoPacks, 3 as type, salesreturnnumber.CreatedDate as SortDate from outward inner join salesreturn on salesreturn.OutwardId = outward.Id inner join salesreturnnumber on salesreturnnumber.Id = salesreturn.SalesReturnNumber where (outward.PartyId = '" . $PartyId . "' and outward.ArticleId = '" . $articleArray['ArticleId'] . "')) ) as dd");
-                // }
+
                 if (!isset($allRecords[0])) {
                     $outletArticle = Outletimport::where([
                         ['ArticleId', $articleArray['ArticleId']],
                         ['PartyId', $PartyId]
                     ])->first();
 
-                    $outletArticleColors = $outletArticle ? json_decode($outletArticle->ArticleColor) : json_decode($articlesColors[0]->ArticleColor);
+                    if ($outletArticle) {
+                        $outletArticleColors = json_decode($outletArticle->ArticleColor);
+                    } elseif (!empty($articlesColors[0])) {
+                        $outletArticleColors = json_decode($articlesColors[0]->ArticleColor);
+                    } else {
+                        $outletArticleColors = null;
+                    }
                     $outletArticleColors = (array) $outletArticleColors;
 
                     if (count($outletArticleColors) > 0) {
@@ -1378,13 +1347,6 @@ WHERE
                         }
                         // Initialize the array to hold sales packs
                         $SalesNoPacks = [];
-
-                        // $getTransportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')
-                        //     ->where('ArticleId', $articleArray['ArticleId'])
-                        //     ->where('OutwardId', 0)
-                        //     ->where('PartyId', $PartyId)
-                        //     ->get();
-
                         $getTransportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')
                             ->where([
                                 'ArticleId' => $articleArray['ArticleId'],
@@ -4847,18 +4809,18 @@ WHERE
                 'TotalStyle' => $styleSum,
                 'outletClosingStock' => $closingStock,
                 'allOutletData' => [
-                        'inwardData' => $mainOutletInwardRecords,
-                        'totalInwardPacks' => $maintotalInwardNoPacks,
-                        'importData' => $mainImportRecords,
-                        'totalImportPacks' => $mainTotalImportNoPacks,
-                        'outwardData' => $mainOutwardRecords,
-                        'totalOutwardPacks' => $mainTotalOutwardNoPacks,
-                        'jhsploutwardData' => $mainJscplOutwardRecords,
-                        'salesReturnData' => $salesReturnRecords,
-                        'totalSalesReturnPacks' => $mainTotalSalesReturnNoPacks,
-                        'purchaseReturnData' => $purchasereturnRecords,
-                        'totalPurchaseReturnPacks' => $mainTotalPurchaseReturnNoPacks
-                    ],
+                    'inwardData' => $mainOutletInwardRecords,
+                    'totalInwardPacks' => $maintotalInwardNoPacks,
+                    'importData' => $mainImportRecords,
+                    'totalImportPacks' => $mainTotalImportNoPacks,
+                    'outwardData' => $mainOutwardRecords,
+                    'totalOutwardPacks' => $mainTotalOutwardNoPacks,
+                    'jhsploutwardData' => $mainJscplOutwardRecords,
+                    'salesReturnData' => $salesReturnRecords,
+                    'totalSalesReturnPacks' => $mainTotalSalesReturnNoPacks,
+                    'purchaseReturnData' => $purchasereturnRecords,
+                    'totalPurchaseReturnPacks' => $mainTotalPurchaseReturnNoPacks
+                ],
                 'allOutletDataCat' => [
                     'outletInwardCategoryWise' => $outletInwardCategoryWise,
                     'totalCatInwardPacks' => $totalCatInwardPacks + $totalCatJhcplOutwardPacks,

@@ -787,7 +787,13 @@ class InwardController extends Controller
             }
             if ($ArticleOpenFlag == 0) {
                 $ArticleRate = $vl->ArticleRate;
-                $countRate += $ArticleRate;
+                $countRate = $ArticleRate++;
+                if($vl->ArticleColor == null){
+                    $vl->ArticleColor = '[]';
+                }
+                if($vl->ArticleSize == null){
+                    $vl->ArticleSize = '[]';
+                }
                 $getcolor = json_decode($vl->ArticleColor);
                 $getsize = json_decode($vl->ArticleSize);
                 $ArticleColor = "";
@@ -817,6 +823,9 @@ class InwardController extends Controller
                     $Totalstockvalue = "";
                     if ($stringcomma == 1) {
                         foreach ($string as $value) {
+                            if($TotalArticleRatio == 0){
+                                $TotalArticleRatio = 1;
+                            }
                             $Tempnumber = ($value / $TotalArticleRatio);
 
                             if ((int)$Tempnumber != $Tempnumber) {
@@ -849,7 +858,7 @@ class InwardController extends Controller
                 } else {
                     $ArticlemixRatio = $ArticleRatio;
                 }
-                $countRate += $ArticleRate;
+                $countRate = $ArticleRate++;
                 $mixcolor = json_decode($vl->mixcolor);
                 $mixsize = json_decode($vl->mixsize);
                 $ArticleColor = "";
@@ -880,7 +889,10 @@ class InwardController extends Controller
             $numbers_colorQty = explode(",", $ArticleColor);
 
             $numbers_packQty = explode(",", $NoPacks);
-
+            // return $numbers_colorQty;
+            if($numbers_colorQty == [""]){
+                $numbers_colorQty = $numbers_packQty;
+            }
             $C=array_combine($numbers_colorQty,$numbers_packQty);
 
             $jsonData = json_encode($C);

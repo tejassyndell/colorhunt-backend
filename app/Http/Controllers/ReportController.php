@@ -1421,9 +1421,14 @@ class ReportController extends Controller
                     if (strpos($allRecords[0]->NoPacks, ',')) {
                         $NoPacksArray = explode(",", $allRecords[0]->NoPacks);
                         $SalesNoPacks = array_fill(0, count($NoPacksArray), 0);
-
-                        $transportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')->where('ArticleId', $articleArray['ArticleId'])->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
-                        $TotalTransportOutwardpacks = 0;
+                        //optimize new query
+                        $transportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')
+                        ->where([
+                            ['ArticleId', '=', $articleArray['ArticleId']],
+                            ['OutwardId', '=', 0],
+                            ['PartyId', '=', $PartyId]
+                        ])->get();
+                                            $TotalTransportOutwardpacks = 0;
                         if (count($transportOutwardpacks) != 0) {
                             $collectionTransportOutwardpacks = collect($transportOutwardpacks);
                             $getTransportOutwardpacks = $collectionTransportOutwardpacks->unique()->values()->all();

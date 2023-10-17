@@ -731,8 +731,6 @@ class SOController extends Controller
 
         $forAllParty = DB::select('SELECT art.Id, art.ArticleNumber, art.ArticleStatus, art.StyleDescription, art.ArticleOpenFlag, s.ArticleId, inw.NoPacks, inw.SalesNoPacks, SalesNoPacksCheck(inw.Id) AS SalesNoPacksCheck FROM inward inw LEFT JOIN articlelaunch arl ON arl.ArticleId = inw.ArticleId LEFT JOIN so s ON s.ArticleId = inw.ArticleId LEFT JOIN article art ON art.Id = inw.ArticleId WHERE arl.PartyId =0 AND arl.LaunchDate <= CURDATE() GROUP BY arl.ArticleId');
 
-        $forAllParty = DB::select('SELECT art.Id, art.ArticleNumber, art.ArticleStatus, art.StyleDescription, art.ArticleOpenFlag, s.ArticleId, inw.NoPacks, inw.SalesNoPacks, SalesNoPacksCheck(inw.Id) AS SalesNoPacksCheck FROM inward inw LEFT JOIN articlelaunch arl ON arl.ArticleId = inw.ArticleId LEFT JOIN so s ON s.ArticleId = inw.ArticleId LEFT JOIN article art ON art.Id = inw.ArticleId WHERE arl.PartyId =0 AND arl.LaunchDate <= CURDATE() GROUP BY arl.ArticleId');
-
 
         $arr1 = $withoutOpenFlag;
         $arr2 = $withOpenFlag;

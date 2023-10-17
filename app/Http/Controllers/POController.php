@@ -174,54 +174,86 @@ class POController extends Controller
         return DB::select('select * from (SELECT p.Id, pn.Id as POId, pn.PurchaseNumber, concat(fn.StartYear,\'-\',fn.EndYear) as FinancialYear, v.Name, c.Title, p.ArticleId, p.NumPacks, ar.ArticleNumber, inw.ArticleId as InwardArticleId, (Case ws.Name When NULL Then 0 else ws.Name END) as WorkStatusName From po p left join article ar on ar.Id=p.ArticleId left join vendor v on v.Id=p.VendorId left join category c on c.Id=p.CategoryId left join purchasenumber pn on pn.Id=p.PO_Number  inner join financialyear fn on fn.Id=pn.FinancialYearId left join inward inw on inw.ArticleId = p.ArticleId left join workorderstatus ws on ws.Id=p.WorkOrderStatusId group by pn.Id) as ddd where InwardArticleId IS NULL order by Id ASC');
     }
     public function PostPo(Request $request)
-    {
-        $data = $request->all();
-        $search = $data["search"];
-        $startnumber = $data["start"];
-        $vnddataTotal = DB::select("select count(*) as Total from (SELECT p.Id, pn.Id as POId, p.PoDate as pdate, DATE_FORMAT(p.PoDate, '%d/%m/%Y') as PoDate, GROUP_CONCAT(DISTINCT CONCAT(ar.ArticleNumber) ORDER BY ar.Id SEPARATOR ',') as ArticleNumber,concat(pn.PurchaseNumber,'/', fn.StartYear,'-',fn.EndYear) as PurchaseNumber, v.Name, c.Title, p.PO_Number, GetTotalPOPieces(p.PO_Number) as TotalPieces, inw.ArticleId as InwardArticleId, (Case ws.Name When NULL Then 0 else ws.Name END) as WorkStatusName From po p left join article ar on ar.Id=p.ArticleId left join vendor v on v.Id=p.VendorId left join category c on c.Id=p.CategoryId left join purchasenumber pn on pn.Id=p.PO_Number inner join financialyear fn on fn.Id=pn.FinancialYearId left join inward inw on inw.ArticleId = p.ArticleId left join workorderstatus ws on ws.Id=p.WorkOrderStatusId group by pn.Id) as ddd where InwardArticleId IS NULL");
-        $vnTotal = $vnddataTotal[0]->Total;
-        $length = $data["length"];
-        if ($search['value'] != null && strlen($search['value']) > 2) {
-            $searchstring = "and (ddd.PurchaseNumber like '%" . $search['value'] . "%' OR cast(ddd.PoDate as char) like '%" . $search['value'] . "%' OR ddd.ArticleNumber like '%" . $search['value'] . "%' OR ddd.Title like '%" . $search['value'] . "%' OR ddd.Name like '%" . $search['value'] . "%' OR ddd.Title like '%" . $search['value'] . "%' OR ddd.TotalPieces like '%" . $search['value'] . "%')";
-            $vnddataTotalFilter = DB::select("select count(*) as Total from (SELECT p.Id, pn.Id as POId, p.PoDate as pdate, DATE_FORMAT(p.PoDate, '%d/%m/%Y') as PoDate, GROUP_CONCAT(DISTINCT CONCAT(ar.ArticleNumber) ORDER BY ar.Id SEPARATOR ',') as ArticleNumber,concat(pn.PurchaseNumber,'/', fn.StartYear,'-',fn.EndYear) as PurchaseNumber, v.Name, c.Title, p.PO_Number, GetTotalPOPieces(p.PO_Number) as TotalPieces, inw.ArticleId as InwardArticleId, (Case ws.Name When NULL Then 0 else ws.Name END) as WorkStatusName From po p left join article ar on ar.Id=p.ArticleId left join vendor v on v.Id=p.VendorId left join category c on c.Id=p.CategoryId left join purchasenumber pn on pn.Id=p.PO_Number  inner join financialyear fn on fn.Id=pn.FinancialYearId left join inward inw on inw.ArticleId = p.ArticleId left join workorderstatus ws on ws.Id=p.WorkOrderStatusId group by pn.Id) as ddd where InwardArticleId IS NULL " . $searchstring);
-            $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
-        } else {
-            $searchstring = "";
-            $vnddataTotalFilterValue = $vnTotal;
-        }
-        $column = $data["order"][0]["column"];
-        switch ($column) {
-            case 1:
-                $ordercolumn = "date(ddd.pdate)";
-                break;
-            case 2:
-                $ordercolumn = "CAST(ddd.PurchaseNumber as SIGNED INTEGER)";
-                break;
-            case 3:
-                $ordercolumn = "ddd.Name";
-                break;
-            case 4:
-                $ordercolumn = "CAST(ddd.TotalPieces as SIGNED INTEGER)";
-                break;
-            default:
-                $ordercolumn = "ddd.Id";
-                break;
-        }
-        $order = "";
-        if ($data["order"][0]["dir"]) {
-            $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
-        }
-        $vnddata = DB::select("select ddd.* from (SELECT p.Id, pn.Id as POId, p.PoDate as pdate, DATE_FORMAT(p.PoDate, '%d/%m/%Y') as PoDate, GROUP_CONCAT(DISTINCT CONCAT(ar.ArticleNumber) ORDER BY ar.Id SEPARATOR ',') as ArticleNumber, pn.PurchaseNumber as PurchaseNo, concat(pn.PurchaseNumber,'/', fn.StartYear,'-',fn.EndYear) as PurchaseNumber, v.Name, c.Title, p.PO_Number, GetTotalPOPieces(p.PO_Number) as TotalPieces, inw.ArticleId as InwardArticleId, (Case ws.Name When NULL Then 0 else ws.Name END) as WorkStatusName From po p left join article ar on ar.Id=p.ArticleId left join vendor v on v.Id=p.VendorId left join category c on c.Id=p.CategoryId left join purchasenumber pn on pn.Id=p.PO_Number  inner join financialyear fn on fn.Id=pn.FinancialYearId left join inward inw on inw.ArticleId = p.ArticleId left join workorderstatus ws on ws.Id=p.WorkOrderStatusId group by pn.Id) as ddd where ddd.InwardArticleId IS NULL " . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length);
-        return array(
-            'datadraw' => $data["draw"],
-            'recordsTotal' => $vnTotal,
-            'recordsFiltered' => $vnddataTotalFilterValue,
-            'response' => 'success',
-            'startnumber' => $startnumber,
-            'search' => count($vnddata),
-            'data' => $vnddata,
-        );
+{
+    $data = $request->all();
+    $search = $data["search"];
+    $startnumber = $data["start"];
+
+    $query = DB::table('po as p')
+        ->leftJoin('article as ar', 'ar.Id', '=', 'p.ArticleId')
+        ->leftJoin('vendor as v', 'v.Id', '=', 'p.VendorId')
+        ->leftJoin('category as c', 'c.Id', '=', 'p.CategoryId')
+        ->leftJoin('purchasenumber as pn', 'pn.Id', '=', 'p.PO_Number')
+        ->join('financialyear as fn', 'fn.Id', '=', 'pn.FinancialYearId')
+        ->leftJoin('inward as inw', 'inw.ArticleId', '=', 'p.ArticleId')
+        ->leftJoin('workorderstatus as ws', 'ws.Id', '=', 'p.WorkOrderStatusId')
+        ->whereNull('inw.ArticleId');
+
+    if ($search['value'] && strlen($search['value']) > 2) {
+        $query->where(function ($q) use ($search) {
+            $q->where('pn.PurchaseNumber', 'like', '%' . $search['value'] . '%')
+                ->orWhereRaw('CAST(p.PoDate as char) like ?', ['%' . $search['value'] . '%'])
+                ->orWhere('ar.ArticleNumber', 'like', '%' . $search['value'] . '%')
+                ->orWhere('c.Title', 'like', '%' . $search['value'] . '%')
+                ->orWhere('v.Name', 'like', '%' . $search['value'] . '%')
+                ->orWhere('c.Title', 'like', '%' . $search['value'] . '%')
+                ->orWhere('p.PO_Number', 'like', '%' . $search['value'] . '%')
+                ->orWhere('ws.Name', 'like', '%' . $search['value'] . '%');
+        });
     }
+
+    $vnTotal = $query->count();
+
+    $length = $data["length"];
+    $column = $data["order"][0]["column"];
+    $orderColumns = ['p.PoDate', 'pn.PurchaseNumber', 'v.Name', 'GetTotalPOPieces(p.PO_Number)'];
+    $order = $orderColumns[$column] ?? 'p.Id';
+
+    if ($data["order"][0]["dir"]) {
+        $query->orderBy($order, $data["order"][0]["dir"]);
+    }
+
+    $vnddata = $query->select(
+        'p.Id',
+        'pn.Id as POId',
+        DB::raw('DATE_FORMAT(p.PoDate, "%d/%m/%Y") as PoDate'),
+        DB::raw('ar.ArticleNumber as ArticleNumber'),
+        DB::raw('concat(pn.PurchaseNumber, "/", fn.StartYear, "-", fn.EndYear) as PurchaseNumber'),
+        'v.Name',
+        'c.Title',
+        'p.PO_Number',
+        DB::raw('GetTotalPOPieces(p.PO_Number) as TotalPieces'),
+        'inw.ArticleId as InwardArticleId',
+        DB::raw('(Case ws.Name When NULL Then 0 else ws.Name END) as WorkStatusName')
+    )->skip($startnumber)->take($length)->get();
+
+    $formattedData = $vnddata->map(function ($row) {
+        return [
+            'Id' => $row->Id,
+            'POId' => $row->POId,
+            'PoDate' => $row->PoDate,
+            'ArticleNumber' => $row->ArticleNumber,
+            'PurchaseNumber' => $row->PurchaseNumber,
+            'Name' => $row->Name,
+            'Title' => $row->Title,
+            'PO_Number' => $row->PO_Number,
+            'TotalPieces' => $row->TotalPieces,
+            'InwardArticleId' => $row->InwardArticleId,
+            'WorkStatusName' => $row->WorkStatusName
+        ];
+    });
+
+    return [
+        'datadraw' => $data["draw"],
+        'recordsTotal' => $vnTotal,
+        'recordsFiltered' => $vnTotal,
+        'response' => 'success',
+        'startnumber' => $startnumber,
+        'search' => count($vnddata),
+        'data' => $formattedData,
+    ];
+}
+
     public function InwardGetPOList($GRN)
     {
         $getvenderId = DB::select('SELECT count(inw.Id) as Total, p.VendorId FROM `inward` inw left join po p on p.ArticleId=inw.ArticleId where inw.GRN="' . $GRN . '" order by inw.Id asc limit 0,1');

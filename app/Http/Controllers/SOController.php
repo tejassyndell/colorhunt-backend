@@ -717,7 +717,7 @@ class SOController extends Controller
 
     // }
     
-       public function GetArticleSyn(Request $request)
+    public function GetArticleSyn(Request $request)
     {
         //OLD
         // return DB::select('select * from (SELECT art.*, s.ArticleId, inw.NoPacks, inw.SalesNoPacks, SalesNoPacksCheck(inw.Id) as SalesNoPacksCheck From inward inw left join so s on s.ArticleId=inw.ArticleId left join article art on art.Id=inw.ArticleId group by inw.Id union all SELECT a.*, m.ArticleId, m.NoPacks, m.SalesNoPacks, 0 FROM `mixnopacks` m inner join article a on a.Id=m.ArticleId where m.NoPacks!=0) as t where  t.ArticleStatus = 1  group by t.Id');
@@ -732,7 +732,6 @@ class SOController extends Controller
         $forAllParty = DB::select('SELECT art.Id, art.ArticleNumber, art.ArticleStatus, art.StyleDescription, art.ArticleOpenFlag, s.ArticleId, inw.NoPacks, inw.SalesNoPacks, SalesNoPacksCheck(inw.Id) AS SalesNoPacksCheck FROM inward inw LEFT JOIN articlelaunch arl ON arl.ArticleId = inw.ArticleId LEFT JOIN so s ON s.ArticleId = inw.ArticleId LEFT JOIN article art ON art.Id = inw.ArticleId WHERE arl.PartyId =0 AND arl.LaunchDate <= CURDATE() GROUP BY arl.ArticleId');
 
 
-
         $arr1 = $withoutOpenFlag;
         $arr2 = $withOpenFlag;
         $arr3 = $forAllParty;
@@ -741,36 +740,15 @@ class SOController extends Controller
         $userid =1;
 
         $allArts = array_merge($arr3, $arr1, $arr2);
+        // return $allArts;
         
-        return $allArts;
-    
-        foreach($allArts as $key => $vl){
-            
-            $object = (object)$vl;
-            $artDetails = $this->GetInwardArticleDataSO($userid, $request->pid, $object->ArticleId);
-            
-            if(!empty($artDetails) ){
-               
-                if(property_exists($artDetails[0], 'NoPacks')){
-                    $numbersArray = explode(',', $artDetails[0]->NoPacks);
-                    $sum = array_sum($numbersArray);
-                    $object->availSalesNoPacks = $sum;
-                }
-            }
-               
-        }
-        
-        
-        $collection = collect($allArts);
-
-        // Use the filter method to exclude data with availSalesNoPacks = 0
-        $filteredData = $collection->filter(function ($item) {
-            if(property_exists($item, 'availSalesNoPacks')){
-                return $item->availSalesNoPacks !== 0;
-            }
-        })->values();
-        
-        // return $filteredData;
+        $filteredData = collect($allArts)->filter(function($item) {
+            $salesNoPacks = array_map('intval', explode(',', $item->SalesNoPacks));
+            $sum = array_sum($salesNoPacks);
+            return $sum !== 0;
+        })->values()->all();
+ 
+ return $filteredData;
 
 
     }

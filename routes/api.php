@@ -216,7 +216,7 @@ Route::put('updatestocktransfer/{field}', 'StocktransferController@Updatestocktr
 Route::post('stocktransferpostlist', 'StocktransferController@PostStocktransfer');
 Route::post('stocktransferlistfromstno/{id}', 'StocktransferController@StocktransferListFromSTNO');
 Route::post('stockshortagelistfromstno/{id}', 'StocktransferController@StockshortageListFromSTNO');
-Route::post('stocktransferfromstno/{id}', 'StocktransferController@StocktransferDateFromSTNO');
+Route::get('stocktransferfromstno/{id}', 'StocktransferController@StocktransferDateFromSTNO');
 Route::delete('deletestocktransfer/{id}/{type}/{LoggedId}', 'StocktransferController@Deletestocktransfer');
 //Ourward API
 Route::post('addoutward', 'OutwardController@AddOutward');

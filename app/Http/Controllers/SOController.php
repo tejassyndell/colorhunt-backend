@@ -3704,7 +3704,7 @@ class SOController extends Controller
                 'updated_at' => null
             ]);
             Salesreturn::where('Id', $salesReturnRec[0]->salesreturnId)->update([
-                'NoPacks' => $data['NoPacks']
+                'NoPacks' => $data['NoPacksNew']
             ]);
             DB::table('salesreturnpacks')->where(['SalesReturnId' => $salesReturnRec[0]->salesreturnId, 'ArticleId' => $ArticleId, 'ColorId' => 0])
                 ->update(['NoPacks' => $data['NoPacks']]);

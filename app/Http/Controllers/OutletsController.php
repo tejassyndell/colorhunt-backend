@@ -166,8 +166,6 @@ class OutletsController extends Controller
     		}
     		$outletArticleColors = (array)$outletArticleColors;
     
-    
-    
     		if (!empty($data)) {
 			if ($data[0] -> ArticleColor) {
 				$SalesNoPacks = [];
@@ -215,9 +213,7 @@ class OutletsController extends Controller
 			}
 		}
     
-    
-    
-    	} else {
+    } else {
     		if (!empty($data)) {
     			if ($data[0] -> ArticleColor) {
     				$SalesNoPacks = [];

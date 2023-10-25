@@ -1119,52 +1119,48 @@ class ReportController extends Controller
                     ['ArticleId', $articleArray['ArticleId']],
                     ['PartyId', $PartyId]
                 ])->first();
-
+            
+                $outletArticleColors = null;
+            
                 if (!$outletArticle && !empty($articlesColors[0])) {
                     $outletArticleColors = json_decode($articleData['ArticleColor'], true);
                 } elseif ($outletArticle) {
                     $outletArticleColors = json_decode($outletArticle->ArticleColor, true);
-                } else {
-                    $outletArticleColors = null;
                 }
-
+            
+                $SalesNoPacks = [];
                 if ($outletArticleColors) {
-                    $SalesNoPacks = [];
                     $outletArticleColors = array_column($outletArticleColors, null, 'Id');
                     $SalesNoPacks = array_fill_keys(array_keys($outletArticleColors), 0);
-
+            
                     $getTransportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')
                         ->where(['ArticleId' => $articleArray['ArticleId'], 'OutwardId' => 0, 'PartyId' => $PartyId])
                         ->get();
-
+            
                     foreach ($getTransportOutwardpacks as $getTransportOutwardpack) {
                         $colorId = $getTransportOutwardpack->ColorId;
                         if (isset($SalesNoPacks[$colorId])) {
                             $SalesNoPacks[$colorId] -= $getTransportOutwardpack->NoPacks;
                         }
                     }
-
-                    $objectArticle->STOCKS = implode(",", $SalesNoPacks);
-                    $objectArticle->TotalPieces = array_sum($SalesNoPacks);
-                    $objectArticle->salespacks = $objectArticle->TotalPieces;
-
-
                 } else {
                     $TotalTransportOutwardpacks = TransportOutwardpacks::where('ArticleId', $articleArray['ArticleId'])
                         ->where('OutwardId', 0)
                         ->where('PartyId', $PartyId)
                         ->sum('NoPacks');
-
+            
                     $totalStock = max($TotalTransportOutwardpacks, 0);
-                    $objectArticle->STOCKS = $totalStock;
-
+                    $SalesNoPacks = $totalStock;
+            
                     if ($totalStock <= 0) {
                         unset($articles[$key]);
-                    } else {
-                        $objectArticle->TotalPieces = $totalStock;
                     }
                 }
-            } else {
+            
+                $objectArticle->STOCKS = is_array($SalesNoPacks) ? implode(",", $SalesNoPacks) : $SalesNoPacks;
+                $objectArticle->TotalPieces = is_array($SalesNoPacks) ? array_sum($SalesNoPacks) : $SalesNoPacks;
+                $objectArticle->salespacks = $objectArticle->TotalPieces;
+            }      else {
                 if (strpos($allRecords[0]->NoPacks, ',')) {
                     $NoPacksArray = explode(",", $allRecords[0]->NoPacks);
                     $SalesNoPacks = array_fill(0, count($NoPacksArray), 0);
@@ -1227,16 +1223,17 @@ class ReportController extends Controller
                     $objectArticle->STOCKS = $newimplodeSalesNoPacks;
                 } else {
                     $transportOutwardpacks = TransportOutwardpacks::select('NoPacks')
-                        ->where('ArticleId', $articleArray['ArticleId'])
-                        ->where('OutwardId', 0)
-                        ->where('PartyId', $PartyId)
-                        ->get();
-
+                        ->where([
+                            ['ArticleId', '=', $articleArray['ArticleId']],
+                            ['OutwardId', '=', 0],
+                            ['PartyId', '=', $PartyId]
+                        ])->get();
+                
                     $TotalTransportOutwardpacks = $transportOutwardpacks->sum('NoPacks');
-
+                
                     $TotalInwardPacks = $TotalTransportOutwardpacks;
                     $TotalOutwardPacks = 0;
-
+                
                     foreach ($allRecords as $allRecord) {
                         switch ($allRecord->type) {
                             case 0:
@@ -1257,6 +1254,7 @@ class ReportController extends Controller
                         unset($articles[$key]);
                     }
                 }
+                
             }
 
         }

@@ -1051,69 +1051,22 @@ class ReportController extends Controller
 
     public function GetOutletStocks($PartyId)
     {
-        $articlesArray = DB::select('
-                SELECT 
-                    article.ArticleNumber, 
-                    article.Id AS ArticleId 
-                FROM 
-                    transportoutlet 
-                JOIN 
-                    outward ON transportoutlet.OutwardNumberId = outward.OutwardNumberId
-                JOIN 
-                    article ON article.Id = outward.ArticleId
-                WHERE 
-                    transportoutlet.TransportStatus = 1 
-                    AND transportoutlet.PartyId = ' . $PartyId . '
-                UNION 
-                SELECT 
-                    article.ArticleNumber, 
-                    article.Id AS ArticleId 
-                FROM 
-                    transportoutwardpacks 
-                JOIN 
-                    article ON article.Id = transportoutwardpacks.ArticleId
-                WHERE 
-                    transportoutwardpacks.OutwardId = 0 
-                    AND transportoutwardpacks.PartyId = ' . $PartyId . '
-                ORDER BY 
-                    ArticleId ASC
-            ');
-        $collectionArticles = collect($articlesArray);
-        $articles = $collectionArticles->unique()->values()->all();
-        foreach ($articles as $key => $article) {
+        $articlesArray = DB::select('SELECT article.ArticleNumber, article.Id AS ArticleId FROM transportoutlet JOIN outward ON transportoutlet.OutwardNumberId = outward.OutwardNumberId JOIN article ON article.Id = outward.ArticleId WHERE transportoutlet.TransportStatus = 1 AND transportoutlet.PartyId = ' . $PartyId . ' UNION SELECT article.ArticleNumber, article.Id AS ArticleId FROM transportoutwardpacks JOIN article ON article.Id = transportoutwardpacks.ArticleId WHERE transportoutwardpacks.OutwardId = 0 AND transportoutwardpacks.PartyId = ' . $PartyId . ' ORDER BY ArticleId ASC');
+        $articles = [];
+        foreach ($articlesArray as $key => $article) {
             $objectArticle = $article;
             $articleArray = (array) $article;
             $articleId = $articleArray['ArticleId'];
-            // Logic 1
-            $articleData = DB::select("
-            SELECT DISTINCT 
-                a.ArticleRatio, 
-                a.ArticleOpenFlag, 
-                c.Title, 
-                b.Name AS BrandName, 
-                sc.Name AS Subcategory, 
-                a.StyleDescription,
-                (SELECT GROUP_CONCAT(DISTINCT articlesize.ArticleSizeName ORDER BY articlesize.Id SEPARATOR ',') 
-                FROM articlesize 
-                WHERE articlesize.ArticleId = a.Id) as ArticleSize,
-                (SELECT GROUP_CONCAT(DISTINCT articlecolor.ArticleColorName ORDER BY articlecolor.Id SEPARATOR ',') 
-                FROM articlecolor 
-                WHERE articlecolor.ArticleId = a.Id) as ArticleColor
-            FROM article a 
-            INNER JOIN category c ON a.CategoryId = c.Id 
-            LEFT JOIN brand b ON b.Id = a.BrandId 
-            LEFT JOIN subcategory sc ON sc.Id = a.SubCategoryId 
-            WHERE a.Id = :articleId", ['articleId' => $articleId]);
+            $articleData = DB::select("SELECT DISTINCT a.ArticleRatio, a.ArticleOpenFlag, c.Title, b.Name AS BrandName, sc.Name AS Subcategory, a.StyleDescription, (SELECT GROUP_CONCAT(DISTINCT articlesize.ArticleSizeName ORDER BY articlesize.Id SEPARATOR ',') FROM articlesize  WHERE articlesize.ArticleId = a.Id) as ArticleSize, (SELECT GROUP_CONCAT(DISTINCT articlecolor.ArticleColorName ORDER BY articlecolor.Id SEPARATOR ',') FROM articlecolor WHERE articlecolor.ArticleId = a.Id) as ArticleColor FROM article a INNER JOIN category c ON a.CategoryId = c.Id LEFT JOIN brand b ON b.Id = a.BrandId LEFT JOIN subcategory sc ON sc.Id = a.SubCategoryId WHERE a.Id = :articleId", ['articleId' => $articleId]);
+            $articleData = (array) $articleData[0];
+            $properties = ['ArticleRatio', 'ArticleOpenFlag', 'Title', 'BrandName', 'Subcategory', 'StyleDescription', 'ArticleSize', 'ArticleColor'];
+            foreach ($properties as $property) {
+                $objectArticle->$property = $articleData[$property] ?? null;
+            }
         
-        $articleData = (array) $articleData[0];
-        $properties = ['ArticleRatio', 'ArticleOpenFlag', 'Title', 'BrandName', 'Subcategory', 'StyleDescription', 'ArticleSize', 'ArticleColor'];
-        
-        foreach ($properties as $property) {
-            $objectArticle->$property = $articleData[$property] ?? null;
-        }           
+            $articles[] = $objectArticle;               
                 //Logic 2
             $allRecords = DB::select('(select `outletsalesreturn`.`NoPacks` as `NoPacks`, 1 as type, `outletsalesreturnnumber`.`CreatedDate` as `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletsalesreturn`.`OutletPartyId` = ' . $PartyId . ')) union (select `outlet`.`NoPacks` as `NoPacks`, 1 as type, `outletnumber`.`CreatedDate` as `SortDate` from `outlet` inner join `outletnumber` on `outlet`.`OutletNumberId` = `outletnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletnumber`.`PartyId` = ' . $PartyId . ')) union (select `outward`.`NoPacks` as `NoPacks`, 0 as type, `outwardnumber`.`created_at` as `SortDate` from `outward` inner join `transportoutlet` on `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId` inner join `outwardnumber` on `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `transportoutlet`.`TransportStatus` = 1 and `outward`.`PartyId` = ' . $PartyId . ')) order by `SortDate` asc');
-
             if (!isset($allRecords[0])) {
                 $outletArticle = Outletimport::where([
                     ['ArticleId', $articleArray['ArticleId']],
@@ -1127,6 +1080,7 @@ class ReportController extends Controller
                 } elseif ($outletArticle) {
                     $outletArticleColors = json_decode($outletArticle->ArticleColor, true);
                 }
+            
             
                 $SalesNoPacks = [];
                 if ($outletArticleColors) {

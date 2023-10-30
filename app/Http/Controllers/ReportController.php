@@ -2864,7 +2864,7 @@ WHERE
 
 
         //start daily stock
-        $maininwardRecordss = DB::select("select * from (select ig.Id as GRNId, concat(ig.GRN,'/', fn.StartYear,'-',fn.EndYear) as GRNnumber, DATE_FORMAT(i.created_at ,'%Y-%m-%d') as CreatedAt, DATE_FORMAT(i.created_at ,'%d-%m-%Y') as CreatedDate from inwardgrn ig inner join inward i on ig.Id=i.GRN inner join financialyear fn on fn.Id=ig.FinancialYearId) as dd where dd.CreatedAt = '" . $RangeDate . "'");
+        $maininwardRecordss = DB::select("select * from (select ig.InwardDate, ig.Id as GRNId, concat(ig.GRN,'/', fn.StartYear,'-',fn.EndYear) as GRNnumber, DATE_FORMAT(i.created_at ,'%Y-%m-%d') as CreatedAt, DATE_FORMAT(i.created_at ,'%d-%m-%Y') as CreatedDate from inwardgrn ig inner join inward i on ig.Id=i.GRN inner join financialyear fn on fn.Id=ig.FinancialYearId) as dd where dd.InwardDate = '" . $RangeDate . "'");
         $collectioncateInwa = collect($maininwardRecordss);
         $maininwardRecords = $collectioncateInwa->unique()->values()->all();
         $maintotalInwardSalesNoPacks = 0;

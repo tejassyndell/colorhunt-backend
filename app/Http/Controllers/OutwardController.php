@@ -1469,21 +1469,41 @@ class OutwardController extends Controller
         $GSTValue = 0;
         $CGSTValue = 0;
         $SGSTValue = 0;
-        
+
+
+
+
+                
         if ($Discount > 0 || $Discount != "") {
             $TotalFinalAmountDiscount = (($TotalAmount * $Discount) / 100);
             $SubTotalAmount = $TotalAmount - $TotalFinalAmountDiscount;
             $TotalFinalAmount = $SubTotalAmount;
-        } else {
+        } 
+        elseif($Discount_in_amount > 0 || $Discount_in_amount != ""){
+            $SubTotalAmount = $TotalAmount - $Discount_in_amount;
+            $TotalFinalAmount = $SubTotalAmount;
+        }
+        else {
             if ($TotalFinalAmount == 0) {
                 $TotalFinalAmount = $TotalAmount;
             }
         }
 
-        if ($Discount_in_amount > 0 || $Discount_in_amount != "") {
-            $SubTotalAmount = $TotalAmount - $Discount_in_amount;
-            $TotalFinalAmount = $SubTotalAmount;
-        } 
+        
+        // if ($Discount > 0 || $Discount != "") {
+        //     $TotalFinalAmountDiscount = (($TotalAmount * $Discount) / 100);
+        //     $SubTotalAmount = $TotalAmount - $TotalFinalAmountDiscount;
+        //     $TotalFinalAmount = $SubTotalAmount;
+        // } else {
+        //     if ($TotalFinalAmount == 0) {
+        //         $TotalFinalAmount = $TotalAmount;
+        //     }
+        // }
+
+        // if ($Discount_in_amount > 0 || $Discount_in_amount != "") {
+        //     $SubTotalAmount = $TotalAmount - $Discount_in_amount;
+        //     $TotalFinalAmount = $SubTotalAmount;
+        // } 
 
         if ($GSTPercentage != "" || $GSTAmount != "") {
             if ($GSTPercentage > 0) {

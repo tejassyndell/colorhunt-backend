@@ -222,6 +222,7 @@ class POController extends Controller
             'data' => $vnddata,
         );
     }
+
     public function InwardGetPOList($GRN)
     {
         $getvenderId = DB::select('SELECT count(inw.Id) as Total, p.VendorId FROM `inward` inw left join po p on p.ArticleId=inw.ArticleId where inw.GRN="' . $GRN . '" order by inw.Id asc limit 0,1');

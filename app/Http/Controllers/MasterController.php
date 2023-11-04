@@ -1184,7 +1184,11 @@ class MasterController extends Controller
 
     public function getoutletpartyoutletreport($id){
         if ($id == 0) {
-            return DB::select("SELECT '4' as Id , '' as UserId, 'SELECT ALL' AS Name, '' as Address, '' as PhoneNumber,'' as State, '' as City,'' as PinCode, '' as Country,'' as ContactPerson, '' as GSTNumber,'' as GSTType, '' as Discount,'' as OutletAssign, '' as OutletArticleRate,'' as Source, '' as Status,'' as created_at, '' as updated_at UNION SELECT * FROM party WHERE OutletAssign=1 AND status=1");
+            return DB::select("SELECT '4' as Id , '' as UserId, 'SELECT ALL' AS Name, '' as Address, '' as PhoneNumber,'' as State, '' as City,'' as PinCode, '' as Country,'' as ContactPerson, '' as GSTNumber,'' as GSTType, '' as Discount,'' as OutletAssign, '' as OutletArticleRate,'' as Source, '' as Status,'' as created_at, '' as updated_at 
+            UNION 
+            SELECT Id, UserId, Name, Address, PhoneNumber, State, City, PinCode, Country, ContactPerson, GSTNumber, GSTType, Discount, OutletAssign, OutletArticleRate, Source, Status, created_at, updated_at 
+            FROM party 
+            WHERE OutletAssign=1 AND status=1;");
         } else {
             return DB::select("select * from party where OutletAssign=1 and Id=" . $id . " AND status=1 order by Name ASC");
         }

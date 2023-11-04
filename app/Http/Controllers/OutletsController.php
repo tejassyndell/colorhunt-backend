@@ -997,10 +997,12 @@ class OutletsController extends Controller
 						if (isset($data[$noPacksNewKey]) && isset($data[$noPacksKey])) {
 							$noPacksNewValue = (int) $data[$noPacksNewKey];
 							$noPacksValue = (int) $data[$noPacksKey];
-							$salesNoPacksData[] = abs($noPacksNewValue - $noPacksValue);
+							$salesNoPacksData[] = abs($noPacksValue - $noPacksNewValue);
 						} else {
 							$salesNoPacksData[] = 0;
 						}
+
+						
 
 
 					$totalPieces = array_sum($salesNoPacksData);

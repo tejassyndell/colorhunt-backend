@@ -1499,22 +1499,22 @@ DB::table('artstockstatus')
 		
 		//update artstockstatus yashvi
 		if (!empty($data) && $data[0]->ArticleOpenFlag == 0) {
-				$salesNoPacksData = []; // Initialize outside the loop
-				$data1 = DB::select("SELECT * FROM `artstockstatus` WHERE ArticleId = {$data[0]->ArticleId} AND outletId = {$data[0]->PartyId}");
-				$totalPieces = 0;
-				$salesNoPacksData = [];
-	
+			$salesNoPacksData = []; // Initialize outside the loop
+			$data1 = DB::select("SELECT * FROM `artstockstatus` WHERE ArticleId = {$data[0]->ArticleId} AND outletId = {$data[0]->PartyId}");
+			$totalPieces = 0;
+			
+			if (!empty($data1) && isset($data1[0]->SalesNoPacks)) {
 				$articleColors = json_decode($data[0]->ArticleColor, true);
-	
+			
 				foreach ($articleColors as $key => $vl) {
 					$numberofpacks = $vl["Id"];
 					$articleId = $data[0]->ArticleId;
 					$noPacksNewKey = $data1[0]->SalesNoPacks;
 					$noPacksKey = $data[0]->NoPacks;
-	
+			
 					$noPacksNewKey = explode(',', $noPacksNewKey);
 					$noPacksKey = explode(',', $noPacksKey);
-	
+			
 					if (count($noPacksNewKey) === count($noPacksKey)) {
 						$salesNoPacksData = [];
 						for ($i = 0; $i < count($noPacksNewKey); $i++) {
@@ -1523,14 +1523,15 @@ DB::table('artstockstatus')
 					} else {
 						$salesNoPacksData[] = 0;
 					}
-	
+			
 					$salesNoPacksDataString = implode(',', $salesNoPacksData);
 					$totalPieces = array_sum($salesNoPacksData);
-	
+			
 					DB::table('artstockstatus')
-					    ->where(['outletId' => $data[0]->PartyId, 'ArticleId' => $data[0]->ArticleId])
+						->where(['outletId' => $data[0]->PartyId, 'ArticleId' => $data[0]->ArticleId])
 						->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
 				}
+			} 
 		}else
 		{
 		$data1 = DB::select("SELECT * FROM `artstockstatus` WHERE ArticleId = {$data[0]->ArticleId} AND outletId = {$data[0]->PartyId}");
@@ -1572,40 +1573,42 @@ DB::table('artstockstatus')
 		//update artstockstatus yashvi
 		if (!empty($data) && $data[0]->ArticleOpenFlag == 0) {
 			$salesNoPacksData = []; // Initialize outside the loop
-			foreach ($data as $d) {
-				$data1 = DB::select("SELECT * FROM `artstockstatus` where ArticleId =  $d->ArticleId and outletId =   $d->PartyId ");
-				$totalPieces = 0;
-				$salesNoPacksData = [];
-	
-				$articleColors = json_decode($d->ArticleColor, true);
-	
-				foreach ($articleColors as $key => $vl) {
-					$numberofpacks = $vl["Id"];
-					$articleId = $d->ArticleId;
-					$noPacksNewKey = $data1[0]->SalesNoPacks;
-					$noPacksKey = $d->NoPacks;
-	
-					$noPacksNewKey = explode(',', $noPacksNewKey);
-					$noPacksKey = explode(',', $noPacksKey);
-	
-					if (count($noPacksNewKey) === count($noPacksKey)) {
-						$salesNoPacksData = [];
-						for ($i = 0; $i < count($noPacksNewKey); $i++) {
-							$salesNoPacksData[] = $noPacksNewKey[$i] + $noPacksKey[$i];
-						}
-					} else {
-						$salesNoPacksData[] = 0;
-					}
-	
-					$salesNoPacksDataString = implode(',', $salesNoPacksData);
-					$totalPieces = array_sum($salesNoPacksData);
-					
-	
-					DB::table('artstockstatus')
-						->where(['outletId' => $d->PartyId, 'ArticleId' => $articleId])
-						->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
-				}
-			}
+foreach ($data as $d) {
+    $data1 = DB::select("SELECT * FROM `artstockstatus` where ArticleId =  $d->ArticleId and outletId =   $d->PartyId ");
+    $totalPieces = 0;
+
+    if (!empty($data1) && isset($data1[0]->SalesNoPacks)) {
+        $salesNoPacksData = [];
+
+        $articleColors = json_decode($d->ArticleColor, true);
+
+        foreach ($articleColors as $key => $vl) {
+            $numberofpacks = $vl["Id"];
+            $articleId = $d->ArticleId;
+            $noPacksNewKey = $data1[0]->SalesNoPacks;
+            $noPacksKey = $d->NoPacks;
+
+            $noPacksNewKey = explode(',', $noPacksNewKey);
+            $noPacksKey = explode(',', $noPacksKey);
+
+            if (count($noPacksNewKey) === count($noPacksKey)) {
+                for ($i = 0; $i < count($noPacksNewKey); $i++) {
+                    $salesNoPacksData[] = $noPacksNewKey[$i] + $noPacksKey[$i];
+                }
+            } else {
+                $salesNoPacksData[] = 0;
+            }
+
+            $salesNoPacksDataString = implode(',', $salesNoPacksData);
+            $totalPieces = array_sum($salesNoPacksData);
+
+            DB::table('artstockstatus')
+                ->where(['outletId' => $d->PartyId, 'ArticleId' => $articleId])
+                ->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
+        }
+	}
+}
+
 		}else{
 			foreach ($data as $d) {
 				$data1 = DB::select("SELECT * FROM `artstockstatus` where ArticleId = $d->ArticleId and outletId =  $d->PartyId ");

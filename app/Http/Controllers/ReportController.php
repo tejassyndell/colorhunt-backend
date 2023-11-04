@@ -375,19 +375,23 @@ class ReportController extends Controller
 
         //ORIGINAL
         // $data = DB::select("select dv.Id, dv.ArticleNumber, dv.ArticleOpenFlag, dv.SalesNoPacks, dv.TotalPieces, dv.ArticleColor, dv.ArticleSize, dv.ArticleRatio, dv.Colorflag, dv.Title, dv.BrandName, dv.Subcategory,  dv.SeriesName, dv.Series, dv.StyleDescription, CountNoPacks(dv.ArticleRatio) as TotalArticleRatio, DATE_FORMAT(dv.created_at, '%d-%m-%Y') as InwardDate  from (select * from (SELECT (case when pl.ProductStatus IS NULL then 1 else pl.ProductStatus end)  as ProductStatusData, a.Id, a.ArticleNumber, a.ArticleOpenFlag, inw.created_at, inw.SalesNoPacks, CountNoPacks(inw.SalesNoPacks) as TotalPieces, GROUP_CONCAT(DISTINCT CONCAT(ac.ArticleColorName) ORDER BY ac.Id SEPARATOR ',') as ArticleColor, GROUP_CONCAT(DISTINCT CONCAT(asz.ArticleSizeName) ORDER BY asz.Id SEPARATOR ',') as ArticleSize, a.ArticleRatio, cat.Colorflag, cat.Title, bn.Name as BrandName, subc.Name as Subcategory, rs.SeriesName, rs.Series, a.StyleDescription FROM `inward` inw inner join article a on a.Id=inw.ArticleId left join articlecolor ac on ac.ArticleId=a.Id left join articlesize asz on asz.ArticleId=a.Id left join po p on p.ArticleId=a.Id inner join category cat on cat.Id=a.CategoryId left join productlaunch pl on pl.ArticleId=a.Id left join brand bn on bn.Id= a.BrandId left join subcategory subc on subc.Id=a.SubCategoryId left join rangeseries rs on rs.Id=a.SeriesId group by a.Id) as ddd where ddd.ProductStatusData= 1 and ddd.ArticleOpenFlag=0 HAVING ddd.TotalPieces > 0 Union SELECT 1, a.Id, a.ArticleNumber, a.ArticleOpenFlag, '-', mxn.NoPacks as TotalPieces, '-', '-', '-', '-',c.Title, '-', '-', '-', '-', '-','-' FROM `mixnopacks` mxn inner join article a on a.Id=mxn.ArticleId left join po p on p.ArticleId=a.Id left join category c on c.Id=a.CategoryId where a.ArticleOpenFlag=1 HAVING TotalPieces > 0) as dv");
-
+        
         // $data1 = DB::select("SELECT dv.Id, dv.ArticleNumber, dv.ArticleOpenFlag, dv.SalesNoPacks, dv.TotalPieces, dv.ArticleColor, dv.ArticleSize, dv.ArticleRatio, dv.Colorflag, dv.Title, dv.BrandName, dv.Subcategory, dv.SeriesName, dv.Series, dv.StyleDescription, TotalArticleRatio, DATE_FORMAT(dv.created_at, '%d-%m-%Y') as InwardDate FROM ( SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag, inw.created_at, inw.SalesNoPacks, CountNoPacks(inw.SalesNoPacks) as TotalPieces, GROUP_CONCAT(DISTINCT CONCAT(ac.ArticleColorName) ORDER BY ac.Id SEPARATOR ',') as ArticleColor, GROUP_CONCAT(DISTINCT CONCAT(asz.ArticleSizeName) ORDER BY asz.Id SEPARATOR ',') as ArticleSize, a.ArticleRatio, cat.Colorflag, cat.Title, bn.Name as BrandName, subc.Name as Subcategory, rs.SeriesName, rs.Series, a.StyleDescription, CountNoPacks(a.ArticleRatio) as TotalArticleRatio FROM inward inw INNER JOIN article a ON a.Id = inw.ArticleId LEFT JOIN articlecolor ac ON ac.ArticleId = a.Id LEFT JOIN articlesize asz ON asz.ArticleId = a.Id INNER JOIN category cat ON cat.Id = a.CategoryId LEFT JOIN brand bn ON bn.Id = a.BrandId LEFT JOIN subcategory subc ON subc.Id = a.SubCategoryId LEFT JOIN rangeseries rs ON rs.Id = a.SeriesId WHERE a.ArticleOpenFlag = 0 AND inw.SalesNoPacks > 0 GROUP BY a.Id ) dv");
         // $data2 = DB::select("SELECT 1, a.Id, a.ArticleNumber, a.ArticleOpenFlag, '-', mxn.NoPacks as TotalPieces, '-', '-', '-', '-',c.Title, '-', '-', '-', '-', '-','-' FROM `mixnopacks` mxn inner join article a on a.Id=mxn.ArticleId left join po p on p.ArticleId=a.Id left join category c on c.Id=a.CategoryId where a.ArticleOpenFlag=1 HAVING TotalPieces > 0");
-
-
+        
+        
         // $data = array_merge($data1 );
+        
 
 
 
+        $array1 = DB::select("SELECT * from (SELECT dv.Id, dv.ArticleNumber, dv.ArticleOpenFlag, dv.SalesNoPacks, dv.TotalPieces, dv.ArticleColor, dv.ArticleSize, dv.ArticleRatio, dv.Colorflag, dv.Title, dv.BrandName, dv.Subcategory, dv.SeriesName, dv.Series, dv.StyleDescription, TotalArticleRatio, DATE_FORMAT(dv.created_at, '%d-%m-%Y') as InwardDate FROM ( SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag, inw.created_at, inw.SalesNoPacks, CountNoPacks(inw.SalesNoPacks) as TotalPieces, GROUP_CONCAT(DISTINCT CONCAT(ac.ArticleColorName) ORDER BY ac.Id SEPARATOR ',') as ArticleColor, GROUP_CONCAT(DISTINCT CONCAT(asz.ArticleSizeName) ORDER BY asz.Id SEPARATOR ',') as ArticleSize, a.ArticleRatio, cat.Colorflag, cat.Title, bn.Name as BrandName, subc.Name as Subcategory, rs.SeriesName, rs.Series, a.StyleDescription, CountNoPacks(a.ArticleRatio) as TotalArticleRatio FROM inward inw INNER JOIN article a ON a.Id = inw.ArticleId LEFT JOIN articlecolor ac ON ac.ArticleId = a.Id LEFT JOIN articlesize asz ON asz.ArticleId = a.Id INNER JOIN category cat ON cat.Id = a.CategoryId LEFT JOIN brand bn ON bn.Id = a.BrandId LEFT JOIN subcategory subc ON subc.Id = a.SubCategoryId LEFT JOIN rangeseries rs ON rs.Id = a.SeriesId WHERE a.ArticleOpenFlag = 0 GROUP BY a.Id ) dv where dv.ArticleOpenFlag = 0)v where v.TotalPieces > 0"); 
+    
+        
+        $array2 = DB::select("SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag,  '' AS ArticleColor, '' AS ArticleSize, '' AS ArticleRatio, '' as Colorflag, '' as BrandName, '' as Subcategory, '' as SeriesName, '' as Series, '' as StyleDescription, '' as TotalArticleRatio, '' as InwardDate, mxn.NoPacks as SalesNoPacks, mxn.NoPacks as TotalPieces, c.Title FROM `mixnopacks` mxn INNER JOIN article a ON a.Id = mxn.ArticleId LEFT JOIN po p ON p.ArticleId = a.Id LEFT JOIN category c ON c.Id = a.CategoryId WHERE a.ArticleOpenFlag = 1 AND mxn.NoPacks > 0 GROUP BY a.ArticleNumber"); 
 
-        $array1 = DB::select("SELECT * from (SELECT dv.Id, dv.ArticleNumber, dv.ArticleOpenFlag, dv.SalesNoPacks, dv.TotalPieces, dv.ArticleColor, dv.ArticleSize, dv.ArticleRatio, dv.Colorflag, dv.Title, dv.BrandName, dv.Subcategory, dv.SeriesName, dv.Series, dv.StyleDescription, TotalArticleRatio, DATE_FORMAT(dv.created_at, '%d-%m-%Y') as InwardDate FROM ( SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag, inw.created_at, inw.SalesNoPacks, CountNoPacks(inw.SalesNoPacks) as TotalPieces, GROUP_CONCAT(DISTINCT CONCAT(ac.ArticleColorName) ORDER BY ac.Id SEPARATOR ',') as ArticleColor, GROUP_CONCAT(DISTINCT CONCAT(asz.ArticleSizeName) ORDER BY asz.Id SEPARATOR ',') as ArticleSize, a.ArticleRatio, cat.Colorflag, cat.Title, bn.Name as BrandName, subc.Name as Subcategory, rs.SeriesName, rs.Series, a.StyleDescription, CountNoPacks(a.ArticleRatio) as TotalArticleRatio FROM inward inw INNER JOIN article a ON a.Id = inw.ArticleId LEFT JOIN articlecolor ac ON ac.ArticleId = a.Id LEFT JOIN articlesize asz ON asz.ArticleId = a.Id INNER JOIN category cat ON cat.Id = a.CategoryId LEFT JOIN brand bn ON bn.Id = a.BrandId LEFT JOIN subcategory subc ON subc.Id = a.SubCategoryId LEFT JOIN rangeseries rs ON rs.Id = a.SeriesId WHERE a.ArticleOpenFlag = 0 GROUP BY a.Id ) dv where dv.ArticleOpenFlag = 0)v where v.TotalPieces > 0");
 
-        $array2 = DB::select("SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag,  '' AS ArticleColor, '' AS ArticleSize, '' AS ArticleRatio, '' as Colorflag, '' as BrandName, '' as Subcategory, '' as SeriesName, '' as Series, '' as StyleDescription, '' as TotalArticleRatio, '' as InwardDate, mxn.NoPacks as SalesNoPacks, mxn.NoPacks as TotalPieces, c.Title FROM `mixnopacks` mxn INNER JOIN article a ON a.Id = mxn.ArticleId LEFT JOIN po p ON p.ArticleId = a.Id LEFT JOIN category c ON c.Id = a.CategoryId WHERE a.ArticleOpenFlag = 1 AND mxn.NoPacks > 0 GROUP BY a.ArticleNumber");
+
         $result = array_merge($array1, $array2);
 
         // // Modify the values of the merged array
@@ -408,119 +412,119 @@ class ReportController extends Controller
 
         // unset($item); // Unset the reference to the last item
 
-
+        
         // $mergedArray = $result;
 
 
         // return $result;
 
 
-        // foreach ($result as $vl) {
+        foreach ($result as $vl) {
 
-        //     $object = (object) $vl;
+            $object = (object)$vl;
 
-        //     $NoPacks = $vl->SalesNoPacks;
+            $NoPacks = $vl->SalesNoPacks;
 
-        //     if ($vl->ArticleOpenFlag != 0) {
+            if ($vl->ArticleOpenFlag != 0) {
 
-        //         $object->TotalPieces = $NoPacks;
+                $object->TotalPieces = $NoPacks;
 
-        //         $article = Article::select('category.Title', 'article.StyleDescription', 'subcategory.Name as Subcategory', 'brand.Name as BrandName')
+                $article = Article::select('category.Title', 'article.StyleDescription', 'subcategory.Name as Subcategory', 'brand.Name as BrandName')
 
-        //             ->join('category', 'category.Id', '=', 'article.CategoryId')
+                    ->join('category', 'category.Id', '=', 'article.CategoryId')
 
-        //             ->leftjoin('subcategory', 'subcategory.Id', '=', 'article.SubCategoryId')
+                    ->leftjoin('subcategory', 'subcategory.Id', '=', 'article.SubCategoryId')
 
-        //             ->join('brand', 'brand.Id', '=', 'article.BrandId')
+                    ->join('brand', 'brand.Id', '=', 'article.BrandId')
 
-        //             ->where('article.Id', $vl->Id)->first();
+                    ->where('article.Id', $vl->Id)->first();
 
-        //         $object->Title = $article->Title;
+                $object->Title = $article->Title;
 
-        //         $object->StyleDescription = $article->StyleDescription;
+                $object->StyleDescription = $article->StyleDescription;
 
-        //         $object->Subcategory = $article->Subcategory;
+                $object->Subcategory = $article->Subcategory;
 
-        //         $object->BrandName = $article->BrandName;
+                $object->BrandName = $article->BrandName;
 
-        //     }
+            }
 
-        //     $sorecords = SO::where('ArticleId', $vl->Id)->where('Status', 0)->get();
+            $sorecords  = SO::where('ArticleId', $vl->Id)->where('Status', 0)->get();
 
-        //     if (count($sorecords) > 0) {
+            if (count($sorecords) > 0) {
 
-        //         if (strpos($vl->SalesNoPacks, ',') !== false) {
+                if (strpos($vl->SalesNoPacks, ',') !== false) {
 
-        //             $SalesNoPacks = [];
+                    $SalesNoPacks = [];
 
-        //             foreach (explode(",", $vl->SalesNoPacks) as $makearray) {
+                    foreach (explode(",", $vl->SalesNoPacks) as $makearray) {
 
-        //                 array_push($SalesNoPacks, 0);
+                        array_push($SalesNoPacks, 0);
 
-        //             }
+                    }
 
-        //             foreach ($sorecords as $sorecord) {
+                    foreach ($sorecords as $sorecord) {
 
 
 
-        //                 for ($i = 0; $i < count(explode(",", $vl->SalesNoPacks)); $i++) {
+                        for ($i = 0; $i < count(explode(",", $vl->SalesNoPacks)); $i++) {
 
-        //                     $OutwardNoPacks = explode(",", $sorecord->OutwardNoPacks);
+                            $OutwardNoPacks = explode(",", $sorecord->OutwardNoPacks);
 
-        //                     $SalesNoPacks[$i] = (int) $SalesNoPacks[$i] + (int) $OutwardNoPacks[$i];
+                            $SalesNoPacks[$i] = (int)$SalesNoPacks[$i] + (int)$OutwardNoPacks[$i];
 
-        //                 }
+                        }
 
-        //                 if (array_sum($SalesNoPacks) > 0) {
+                        if (array_sum($SalesNoPacks) > 0) {
 
-        //                     $object->SoColorwise = implode(',', $SalesNoPacks);
+                            $object->SoColorwise =     implode(',', $SalesNoPacks);
 
-        //                     $object->SoTotalQuantity = array_sum($SalesNoPacks);
+                            $object->SoTotalQuantity = array_sum($SalesNoPacks);
 
-        //                 } else {
+                        } else {
 
-        //                     $object->SoColorwise = "";
+                            $object->SoColorwise =     "";
 
-        //                     $object->SoTotalQuantity = "";
+                            $object->SoTotalQuantity = "";
 
-        //                 }
+                        }
 
-        //             }
+                    }
 
-        //         } else {
+                } else {
 
-        //             $SalesNoPacks = 0;
+                    $SalesNoPacks = 0;
 
-        //             foreach ($sorecords as $sorecord) {
+                    foreach ($sorecords as $sorecord) {
 
-        //                 $SalesNoPacks = $SalesNoPacks + (int) $sorecord->OutwardNoPacks;
+                        $SalesNoPacks = $SalesNoPacks + (int)$sorecord->OutwardNoPacks;
 
-        //             }
+                    }
 
-        //             if ($SalesNoPacks > 0) {
+                    if ($SalesNoPacks > 0) {
 
-        //                 $object->SoColorwise = $SalesNoPacks;
+                        $object->SoColorwise =     $SalesNoPacks;
 
-        //                 $object->SoTotalQuantity = $SalesNoPacks;
+                        $object->SoTotalQuantity = $SalesNoPacks;
 
-        //             } else {
+                    } else {
 
-        //                 $object->SoColorwise = "";
+                        $object->SoColorwise =     "";
 
-        //                 $object->SoTotalQuantity = "";
+                        $object->SoTotalQuantity = "";
 
-        //             }
+                    }
 
-        //         }
+                }
 
-        //     } else {
+            } else {
 
-        //         $object->SoColorwise = "";
+                $object->SoColorwise =     "";
 
-        //         $object->SoTotalQuantity = "";
-        //     }
+                $object->SoTotalQuantity = "";
+            }
 
-        // }
+        }
 
         return array("data" => $result);
     }

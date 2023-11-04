@@ -17,6 +17,7 @@ use App\Outward;
 use App\UserLogs;
 use App\OutwardNumber;
 use App\Users;
+use App\Artstockstatus;
 
 class OutletsController extends Controller
 {
@@ -97,238 +98,247 @@ class OutletsController extends Controller
 	}
 
 
+	//yashvi
 
-//NEW
+	// public function GetArticleofOutlet($PartyId)
+// {
+//     // $articlesArray = DB::select('
+//     //     SELECT `Artstockstatus`.`ArticleId`, `Artstockstatus`.`ArticleNumber`
+//     //     FROM `Artstockstatus`
+//     //     WHERE `Artstockstatus`.`outletId` = ? 
+//     // ', [$PartyId]);
 
-    	public function GetArticleofOutlet($PartyId)
+	// 	$articlesArray = DB::table('Artstockstatus')
+//     ->select('ArticleId', 'ArticleNumber')
+//     ->where('outletId', $PartyId)
+//     ->get();
+
+
+	//     // $jsonData = array_values($articlesArray);
+// 	$jsonData = $articlesArray->toArray();
+
+
+	//     return $jsonData;
+// }
+
+
+
+
+
+	//NEW
+
+	public function GetArticleofOutlet($PartyId)
 	{
 		$articlesArray = DB::select('(select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutlet` right join `outward` on `transportoutlet`.`OutwardNumberId` = `outward`.`OutwardNumberId` inner join `article` on `article`.`Id` = `outward`.`ArticleId`  where `transportoutlet`.`TransportStatus` = 1 )  union (select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutwardpacks` inner join `article` on `article`.`Id` = `transportoutwardpacks`.`ArticleId` where `transportoutwardpacks`.`OutwardId` = 0 )   order by `ArticleId` asc');
-
 		$collectionArticles = collect($articlesArray);
-		$articles  = $collectionArticles->unique()->values()->all();
+		$articles = $collectionArticles->unique()->values()->all();
 		foreach ($articles as $key => $article) {
 			$objectArticle = $article;
-			$articleArray = (array)$article;
-			//$allRecords = DB::select('(select `outletsalesreturn`.`NoPacks` as `NoPacks`, 1 as type, `outletsalesreturnnumber`.`CreatedDate` as `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletsalesreturn`.`OutletPartyId` = ' . $PartyId . ')) union (select `outlet`.`NoPacks` as `NoPacks`, 1 as type, `outletnumber`.`CreatedDate` as `SortDate` from `outlet` inner join `outletnumber` on `outlet`.`OutletNumberId` = `outletnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletnumber`.`PartyId` = ' . $PartyId . ')) union (select `outward`.`NoPacks` as `NoPacks`, 0 as type, `outwardnumber`.`created_at` as `SortDate` from `outward` inner join `transportoutlet` on `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId` inner join `outwardnumber` on `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `transportoutlet`.`TransportStatus` = 1 and `outward`.`PartyId` = ' . $PartyId . ')) order by `SortDate` asc');
-
-		    
-		    
-		    $getdata  = $this->GetOutletSingleArticle($PartyId, $articleArray['ArticleId'] , '$outletId');
-		    
-		    if (!empty($getdata)) {
-		        $SalesNoPacks = $getdata[0]->SalesNoPacks;
-		        $numbersArray = array_map('intval', explode(',', $SalesNoPacks));
-                $totalSales = array_sum($numbersArray);
-	            $objectArticle->COUNTVL2 = $totalSales;
-		    }
-		    
-
-
-		}
-        $jsonData = array_values($articles);
-		
-		
-		$filteredData = array_filter($jsonData, function ($item) {
-            return isset($item->COUNTVL2) && $item->COUNTVL2 !== 0;
-        });
-
-        // If you want the filtered data to be reindexed, use array_values
-        $filteredData = array_values($filteredData);
-        
-        
-        return  $filteredData;
-	
-	}
-
-    public function GetOutletSingleArticle($PartyId, $ArtId, $OutletPartyId) {
-    	$data = DB:: select("select ar.ArticleNumber, CASE WHEN (oi.ArticleColor IS NULL) THEN ar.ArticleColor ELSE oi.ArticleColor END AS `ArticleColor`, ar.ArticleSize, ar.ArticleRatio, ar.ArticleOpenFlag, CASE WHEN (art.ArticleRate IS NULL) THEN ar.ArticleRate ELSE art.ArticleRate END  as ArticleRate , p.OutletArticleRate as OutletArticleRate, c.Colorflag, c.Title as Category ,  ddd.ArticleId, ddd.SalesNoPacks from (select d.ArticleId, (CASE d.Colorflag WHEN '0' THEN (d.Outward_NoPacks - d.SalesReturn_NoPacks - d.Outlet_NoPacks + d.OutletSalesReturn_NoPacks) ELSE GROUP_CONCAT(CONCAT((d.Outward_NoPacks - d.SalesReturn_NoPacks - d.Outlet_NoPacks + d.OutletSalesReturn_NoPacks)) ORDER BY d.Id SEPARATOR ',') END) as SalesNoPacKs from (SELECT A.Outward_NoPacks, (case WHEN C.SalesReturn_NoPacks IS NULL THEN '0' ELSE C.SalesReturn_NoPacks END) as SalesReturn_NoPacks, (case WHEN D.OutletSalesReturn_NoPacks IS NULL THEN '0' ELSE D.OutletSalesReturn_NoPacks END) as OutletSalesReturn_NoPacks, (case WHEN B.Outlet_NoPacks IS NULL THEN '0' ELSE B.Outlet_NoPacks END) as Outlet_NoPacks, A.ArticleId, A.Id, A.Colorflag FROM ( SELECT sum(onp.NoPacks) as Outward_NoPacks, onp.ColorId, onp.ArticleId, onp.Id, c.Colorflag FROM `transportoutwardpacks` onp inner join article a on a.Id=onp.ArticleId inner join category c on c.Id=a.CategoryId where onp.ArticleId='".$ArtId. "' and onp.PartyId='".$PartyId. "' group by onp.ColorId) AS A LEFT JOIN ( SELECT sum(onp.NoPacks) as Outlet_NoPacks, onp.ColorId, onp.ArticleId, onp.Id, c.Colorflag  FROM `outletnopacks` onp left join po p on p.ArticleId = onp.ArticleId inner join article a on a.Id=onp.ArticleId inner join category c on c.Id=a.CategoryId where onp.ArticleId='".$ArtId. "' and onp.PartyId='".$PartyId. "' group by onp.ColorId) AS B ON A.ColorId=B.ColorId LEFT JOIN ( SELECT sum(srp.NoPacks) as SalesReturn_NoPacks, srp.ColorId, srp.ArticleId, srp.Id, c.Colorflag  FROM `salesreturnpacks` srp inner join article a on a.Id=srp.ArticleId inner join category c on c.Id=a.CategoryId where srp.ArticleId='".$ArtId. "' and srp.PartyId='".$PartyId. "' group by srp.ColorId) AS C ON A.ColorId=C.ColorId LEFT JOIN ( select sum(f.NoPacks) as OutletSalesReturn_NoPacks, f.ColorId, f.ArticleId, f.OutletId, f.Id, f.Colorflag from (SELECT srp.NoPacks, srp.ColorId, srp.ArticleId, srp.OutletId, srp.Id, c.Colorflag FROM `outletsalesreturnpacks` srp inner join outletsalesreturn osr on osr.OutletId=srp.OutletId inner join article a on a.Id=srp.ArticleId inner join category c on c.Id=a.CategoryId where srp.ArticleId='".$ArtId. "' and osr.OutletPartyId='".$PartyId. "' group by srp.Id) as f group by f.ColorId) AS D ON A.ColorId=D.ColorId) as d group by d.ArticleId) as ddd inner join article ar on ar.Id=ddd.ArticleId inner join category c on c.Id=ar.CategoryId left join articlerate art on art.ArticleId=ar.Id left join party p on p.Id='".$PartyId. "' left join outletimport oi on oi.ArticleId='".$ArtId. "' and oi.PartyId = '".$PartyId. "'");
-    
-    
-    	if (!empty($data)) {
-    		$artucleratedata = DB:: table('articlerate') -> where('ArticleId', $ArtId) -> first();
-    		if ($artucleratedata) {
-    			$data[0] -> ArticleRate =  (int)$artucleratedata -> ArticleRate + (int)$data[0] -> OutletArticleRate ;
-    		} else {
-    			// Handle the case when $artucleratedata is empty
-    		}
-    	} else {
-    		$data = [];
-    	}
-    
-    	$allRecords = DB:: select('(select `outletsalesreturn`.`NoPacks` as `NoPacks`, 2 as type, `outletsalesreturnnumber`.`CreatedDate` as `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id` where (`ArticleId` = '.$ArtId. ' and `outletsalesreturn`.`OutletPartyId` = '.$PartyId. ')) union (select `outlet`.`NoPacks` as `NoPacks`, 1 as type, `outletnumber`.`CreatedDate` as `SortDate` from `outlet` inner join `outletnumber` on `outlet`.`OutletNumberId` = `outletnumber`.`Id` where (`ArticleId` = '.$ArtId. ' and `outletnumber`.`PartyId` = '.$PartyId. ')) union (select `outward`.`NoPacks` as `NoPacks`, 0 as type, `outwardnumber`.`created_at` as `SortDate` from `outward` inner join `transportoutlet` on `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId` inner join `outwardnumber` on `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where (`ArticleId` = '.$ArtId. ' and `transportoutlet`.`TransportStatus` = 1 and `outward`.`PartyId` = '.$PartyId. ')) union (select `salesreturn`.`NoPacks` as `NoPacks`, 3 as type ,`salesreturnnumber`.`CreatedDate` as `SortDate` from `outward` inner join `salesreturn` on `salesreturn`.`OutwardId` = `outward`.`Id` inner join `salesreturnnumber` on `salesreturnnumber`.`Id` = `salesreturn`.`SalesReturnNumber` where (`outward`.`PartyId` = '.$PartyId. ' and `outward`.`ArticleId` = '.$ArtId. ')) order by `SortDate` asc');
-    	if (!isset($allRecords[0])) {
-    		$outletArticle = Outletimport:: where('ArticleId', $ArtId) -> where('PartyId', $PartyId) -> first();
-    		if ($outletArticle) {
-    			$outletArticleColors = json_decode($outletArticle -> ArticleColor);
-    		} else {
-    			$articleRecord = Article:: where('Id', $ArtId) -> first();
-    			$outletArticleColors = json_decode($articleRecord -> ArticleColor);
-    		}
-    		$outletArticleColors = (array)$outletArticleColors;
-    
-    
-    
-    		if (!empty($data)) {
-			if ($data[0] -> ArticleColor) {
-				$SalesNoPacks = [];
-				foreach($outletArticleColors as $makearray) {
-					array_push($SalesNoPacks, 0);
-				}
-				$transportOutwardpacks = TransportOutwardpacks:: select('NoPacks', 'ColorId') -> where('ArticleId', $ArtId) -> where('OutwardId', 0) -> where('PartyId', $PartyId) -> get();
-				$TotalTransportOutwardpacks = 0;
-				if (count($transportOutwardpacks) != 0) {
-					// $collectionTransportOutwardpacks = collect($transportOutwardpacks);
-					// $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
-					foreach($transportOutwardpacks as $getTransportOutwardpack) {
-						$outletArticle = Outletimport:: where('ArticleId', $ArtId) -> where('PartyId', $PartyId) -> first();
-						if ($outletArticle) {
-							$articleColors = json_decode($outletArticle -> ArticleColor);
-						} else {
-							$article = Article:: select('ArticleColor') -> where('Id', $ArtId) -> first();
-							$articleColors = json_decode($article['ArticleColor']);
-						}
-						$count = 0;
-						foreach($articleColors as $articlecolor) {
-							if ($articlecolor -> Id == $getTransportOutwardpack -> ColorId) {
-								if (!isset($SalesNoPacks[$count])) {
-									array_push($SalesNoPacks, 0);
-								}
-								$SalesNoPacks[$count] = $SalesNoPacks[$count] + $getTransportOutwardpack -> NoPacks;
-							}
-							$count = $count + 1;
-						}
-					}
-				}
-				$newimplodeSalesNoPacks = implode(",", $SalesNoPacks);
-				$data[0] -> SalesNoPacks =  $newimplodeSalesNoPacks;
-			} else {
-				$transportOutwardpacks = TransportOutwardpacks:: select('NoPacks') -> where('ArticleId', $ArtId) -> where('OutwardId', 0) -> where('PartyId', $PartyId) -> get();
-				$TotalTransportOutwardpacks = 0;
-				if (count($transportOutwardpacks) != 0) {
-					// $collectionTransportOutwardpacks = collect($transportOutwardpacks);
-					// $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
-					foreach($transportOutwardpacks as $getTransportOutwardpack) {
-						$TotalTransportOutwardpacks = $TotalTransportOutwardpacks + $getTransportOutwardpack -> NoPacks;
-					}
-				}
-				$data[0] -> SalesNoPacks =  $TotalTransportOutwardpacks;
+			$articleArray = (array) $article;
+			//$allRecords = DB::select('(select `outletsalesreturn`.`NoPacks` as `NoPacks`, 1 as type, `outletsalesreturnnumber`.`CreatedDate` as `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletsalesreturn`.`OutletPartyId` = ' . $PartyId . ')) union (select `outlet`.`NoPacks` as `NoPacks`, 1 as type, `outletnumber`.`CreatedDate` as `SortDate` from `outlet` inner join `outletnumber` on `outlet`.`OutletNumberId` = `outletnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletnumber`.`PartyId` = ' . $PartyId . ')) union (select `outward`.`NoPacks` as `NoPacks`, 0 as type, `outwardnumber`.`created_at` as `SortDate` from `outward` inner join `transportoutlet` on `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId` inner join `outwardnumber` on `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `transportoutlet`.`TransportStatus` = 1 and `outward`.`PartyId` = ' . $PartyId . ')) order by `SortDate` asc');		    
+			$getdata = $this->GetOutletSingleArticle($PartyId, $articleArray['ArticleId'], '$outletId');
+			if (!empty($getdata)) {
+				$SalesNoPacks = $getdata[0]->SalesNoPacks;
+				$numbersArray = array_map('intval', explode(',', $SalesNoPacks));
+				$totalSales = array_sum($numbersArray);
+				$objectArticle->COUNTVL2 = $totalSales;
 			}
 		}
-    
-    
-    
-    	} else {
-    		if (!empty($data)) {
-    			if ($data[0] -> ArticleColor) {
-    				$SalesNoPacks = [];
-    				foreach(explode(",", $allRecords[0] -> NoPacks) as $makearray) {
-    					array_push($SalesNoPacks, 0);
-    				}
-    				$transportOutwardpacks = TransportOutwardpacks:: select('NoPacks', 'ColorId') -> where('ArticleId', $ArtId) -> where('OutwardId', 0) -> where('PartyId', $PartyId) -> get();
-    				$TotalTransportOutwardpacks = 0;
-    				if (count($transportOutwardpacks) != 0) {
-    					// $collectionTransportOutwardpacks = collect($transportOutwardpacks);
-    					// $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
-    					foreach($transportOutwardpacks as $getTransportOutwardpack) {
-    						$outletArticle = Outletimport:: where('ArticleId', $ArtId) -> where('PartyId', $PartyId) -> first();
-    						if ($outletArticle) {
-    							$articleColors = json_decode($outletArticle -> ArticleColor);
-    						} else {
-    							$article = Article:: select('ArticleColor') -> where('Id', $ArtId) -> first();
-    							$articleColors = json_decode($article['ArticleColor']);
-    						}
-    						$count = 0;
-    						foreach($articleColors as $articlecolor) {
-    							if ($articlecolor -> Id == $getTransportOutwardpack -> ColorId) {
-    								if (!isset($SalesNoPacks[$count])) {
-    									array_push($SalesNoPacks, 0);
-    								}
-    								$SalesNoPacks[$count] = $SalesNoPacks[$count] + $getTransportOutwardpack -> NoPacks;
-    							}
-    							$count = $count + 1;
-    						}
-    					}
-    				}
-    				foreach($allRecords as $allRecord) {
-    					for ($i = 0; $i < count(explode(",", $allRecord -> NoPacks)); $i++) {
-    						if (!isset($SalesNoPacks[$i])) {
-    							array_push($SalesNoPacks, 0);
-    						}
-    						$noPacks = explode(",", $allRecord -> NoPacks);
-    						if ($allRecord -> type == 0) {
-    							$SalesNoPacks[$i] = $SalesNoPacks[$i] + $noPacks[$i];
-    						} else if ($allRecord -> type == 1) {
-    							$SalesNoPacks[$i] = $SalesNoPacks[$i] - $noPacks[$i];
-    						} else if ($allRecord -> type == 2) {
-    							$SalesNoPacks[$i] = $SalesNoPacks[$i] + $noPacks[$i];
-    						} else if ($allRecord -> type == 3) {
-    							$SalesNoPacks[$i] = $SalesNoPacks[$i] - $noPacks[$i];
-    						}
-    					}
-    				}
-    				$newimplodeSalesNoPacks = implode(",", $SalesNoPacks);
-    				$data[0] -> SalesNoPacks =  $newimplodeSalesNoPacks;
-    			} else {
-    				$transportOutwardpacks = TransportOutwardpacks:: select('NoPacks') -> where('ArticleId', $ArtId) -> where('OutwardId', 0) -> where('PartyId', $PartyId) -> get();
-    				$TotalTransportOutwardpacks = 0;
-    				if (count($transportOutwardpacks) != 0) {
-    					// $collectionTransportOutwardpacks = collect($transportOutwardpacks);
-    					// $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
-    					foreach($transportOutwardpacks as $getTransportOutwardpack) {
-    						$TotalTransportOutwardpacks = $TotalTransportOutwardpacks + $getTransportOutwardpack -> NoPacks;
-    					}
-    				}
-    				$TotalInwardPacks = $TotalTransportOutwardpacks;
-    				$TotalOutwardPacks = 0;
-    				foreach($allRecords as $allRecord) {
-    					if ($allRecord -> type == 0) {
-    						$TotalInwardPacks = $TotalInwardPacks + $allRecord -> NoPacks;
-    					} else if ($allRecord -> type == 1) {
-    						$TotalOutwardPacks = $TotalOutwardPacks + $allRecord -> NoPacks;
-    					} else if ($allRecord -> type == 2) {
-    						$TotalInwardPacks = $TotalInwardPacks + $allRecord -> NoPacks;
-    					} else if ($allRecord -> type == 3) {
-    						$TotalOutwardPacks = $TotalOutwardPacks + $allRecord -> NoPacks;
-    					}
-    				}
-    				$data[0] -> SalesNoPacks =  $TotalInwardPacks - $TotalOutwardPacks;
-    			}
-    		}
-    	}
-    	return $data;
-    }
+		$jsonData = array_values($articles);
+		$filteredData = array_filter($jsonData, function ($item) {
+			return isset($item->COUNTVL2) && $item->COUNTVL2 !== 0;
+		});
+		// If you want the filtered data to be reindexed, use array_values
+		$filteredData = array_values($filteredData);
+		return $filteredData;
+	}
+
+	public function GetOutletSingleArticle($PartyId, $ArtId, $OutletPartyId)
+	{
+		$data = DB::select("select ar.ArticleNumber, CASE WHEN (oi.ArticleColor IS NULL) THEN ar.ArticleColor ELSE oi.ArticleColor END AS `ArticleColor`, ar.ArticleSize, ar.ArticleRatio, ar.ArticleOpenFlag, CASE WHEN (art.ArticleRate IS NULL) THEN ar.ArticleRate ELSE art.ArticleRate END  as ArticleRate , p.OutletArticleRate as OutletArticleRate, c.Colorflag, c.Title as Category ,  ddd.ArticleId, ddd.SalesNoPacks from (select d.ArticleId, (CASE d.Colorflag WHEN '0' THEN (d.Outward_NoPacks - d.SalesReturn_NoPacks - d.Outlet_NoPacks + d.OutletSalesReturn_NoPacks) ELSE GROUP_CONCAT(CONCAT((d.Outward_NoPacks - d.SalesReturn_NoPacks - d.Outlet_NoPacks + d.OutletSalesReturn_NoPacks)) ORDER BY d.Id SEPARATOR ',') END) as SalesNoPacKs from (SELECT A.Outward_NoPacks, (case WHEN C.SalesReturn_NoPacks IS NULL THEN '0' ELSE C.SalesReturn_NoPacks END) as SalesReturn_NoPacks, (case WHEN D.OutletSalesReturn_NoPacks IS NULL THEN '0' ELSE D.OutletSalesReturn_NoPacks END) as OutletSalesReturn_NoPacks, (case WHEN B.Outlet_NoPacks IS NULL THEN '0' ELSE B.Outlet_NoPacks END) as Outlet_NoPacks, A.ArticleId, A.Id, A.Colorflag FROM ( SELECT sum(onp.NoPacks) as Outward_NoPacks, onp.ColorId, onp.ArticleId, onp.Id, c.Colorflag FROM `transportoutwardpacks` onp inner join article a on a.Id=onp.ArticleId inner join category c on c.Id=a.CategoryId where onp.ArticleId='" . $ArtId . "' and onp.PartyId='" . $PartyId . "' group by onp.ColorId) AS A LEFT JOIN ( SELECT sum(onp.NoPacks) as Outlet_NoPacks, onp.ColorId, onp.ArticleId, onp.Id, c.Colorflag  FROM `outletnopacks` onp left join po p on p.ArticleId = onp.ArticleId inner join article a on a.Id=onp.ArticleId inner join category c on c.Id=a.CategoryId where onp.ArticleId='" . $ArtId . "' and onp.PartyId='" . $PartyId . "' group by onp.ColorId) AS B ON A.ColorId=B.ColorId LEFT JOIN ( SELECT sum(srp.NoPacks) as SalesReturn_NoPacks, srp.ColorId, srp.ArticleId, srp.Id, c.Colorflag  FROM `salesreturnpacks` srp inner join article a on a.Id=srp.ArticleId inner join category c on c.Id=a.CategoryId where srp.ArticleId='" . $ArtId . "' and srp.PartyId='" . $PartyId . "' group by srp.ColorId) AS C ON A.ColorId=C.ColorId LEFT JOIN ( select sum(f.NoPacks) as OutletSalesReturn_NoPacks, f.ColorId, f.ArticleId, f.OutletId, f.Id, f.Colorflag from (SELECT srp.NoPacks, srp.ColorId, srp.ArticleId, srp.OutletId, srp.Id, c.Colorflag FROM `outletsalesreturnpacks` srp inner join outletsalesreturn osr on osr.OutletId=srp.OutletId inner join article a on a.Id=srp.ArticleId inner join category c on c.Id=a.CategoryId where srp.ArticleId='" . $ArtId . "' and osr.OutletPartyId='" . $PartyId . "' group by srp.Id) as f group by f.ColorId) AS D ON A.ColorId=D.ColorId) as d group by d.ArticleId) as ddd inner join article ar on ar.Id=ddd.ArticleId inner join category c on c.Id=ar.CategoryId left join articlerate art on art.ArticleId=ar.Id left join party p on p.Id='" . $PartyId . "' left join outletimport oi on oi.ArticleId='" . $ArtId . "' and oi.PartyId = '" . $PartyId . "'");
 
 
-//NEW
+		if (!empty($data)) {
+			$artucleratedata = DB::table('articlerate')->where('ArticleId', $ArtId)->first();
+			if ($artucleratedata) {
+				$data[0]->ArticleRate = (int) $artucleratedata->ArticleRate + (int) $data[0]->OutletArticleRate;
+			} else {
+				// Handle the case when $artucleratedata is empty
+			}
+		} else {
+			$data = [];
+		}
 
-//WORKED
+		$allRecords = DB::select('(select `outletsalesreturn`.`NoPacks` as `NoPacks`, 2 as type, `outletsalesreturnnumber`.`CreatedDate` as `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id` where (`ArticleId` = ' . $ArtId . ' and `outletsalesreturn`.`OutletPartyId` = ' . $PartyId . ')) union (select `outlet`.`NoPacks` as `NoPacks`, 1 as type, `outletnumber`.`CreatedDate` as `SortDate` from `outlet` inner join `outletnumber` on `outlet`.`OutletNumberId` = `outletnumber`.`Id` where (`ArticleId` = ' . $ArtId . ' and `outletnumber`.`PartyId` = ' . $PartyId . ')) union (select `outward`.`NoPacks` as `NoPacks`, 0 as type, `outwardnumber`.`created_at` as `SortDate` from `outward` inner join `transportoutlet` on `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId` inner join `outwardnumber` on `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where (`ArticleId` = ' . $ArtId . ' and `transportoutlet`.`TransportStatus` = 1 and `outward`.`PartyId` = ' . $PartyId . ')) union (select `salesreturn`.`NoPacks` as `NoPacks`, 3 as type ,`salesreturnnumber`.`CreatedDate` as `SortDate` from `outward` inner join `salesreturn` on `salesreturn`.`OutwardId` = `outward`.`Id` inner join `salesreturnnumber` on `salesreturnnumber`.`Id` = `salesreturn`.`SalesReturnNumber` where (`outward`.`PartyId` = ' . $PartyId . ' and `outward`.`ArticleId` = ' . $ArtId . ')) order by `SortDate` asc');
+		if (!isset($allRecords[0])) {
+			$outletArticle = Outletimport::where('ArticleId', $ArtId)->where('PartyId', $PartyId)->first();
+			if ($outletArticle) {
+				$outletArticleColors = json_decode($outletArticle->ArticleColor);
+			} else {
+				$articleRecord = Article::where('Id', $ArtId)->first();
+				$outletArticleColors = json_decode($articleRecord->ArticleColor);
+			}
+			$outletArticleColors = (array) $outletArticleColors;
+
+			if (!empty($data)) {
+				if ($data[0]->ArticleColor) {
+					$SalesNoPacks = [];
+					foreach ($outletArticleColors as $makearray) {
+						array_push($SalesNoPacks, 0);
+					}
+					$transportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')->where('ArticleId', $ArtId)->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
+					$TotalTransportOutwardpacks = 0;
+					if (count($transportOutwardpacks) != 0) {
+						// $collectionTransportOutwardpacks = collect($transportOutwardpacks);
+						// $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
+						foreach ($transportOutwardpacks as $getTransportOutwardpack) {
+							$outletArticle = Outletimport::where('ArticleId', $ArtId)->where('PartyId', $PartyId)->first();
+							if ($outletArticle) {
+								$articleColors = json_decode($outletArticle->ArticleColor);
+							} else {
+								$article = Article::select('ArticleColor')->where('Id', $ArtId)->first();
+								$articleColors = json_decode($article['ArticleColor']);
+							}
+							$count = 0;
+							foreach ($articleColors as $articlecolor) {
+								if ($articlecolor->Id == $getTransportOutwardpack->ColorId) {
+									if (!isset($SalesNoPacks[$count])) {
+										array_push($SalesNoPacks, 0);
+									}
+									$SalesNoPacks[$count] = $SalesNoPacks[$count] + $getTransportOutwardpack->NoPacks;
+								}
+								$count = $count + 1;
+							}
+						}
+					}
+					$newimplodeSalesNoPacks = implode(",", $SalesNoPacks);
+					$data[0]->SalesNoPacks = $newimplodeSalesNoPacks;
+				} else {
+					$transportOutwardpacks = TransportOutwardpacks::select('NoPacks')->where('ArticleId', $ArtId)->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
+					$TotalTransportOutwardpacks = 0;
+					if (count($transportOutwardpacks) != 0) {
+						// $collectionTransportOutwardpacks = collect($transportOutwardpacks);
+						// $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
+						foreach ($transportOutwardpacks as $getTransportOutwardpack) {
+							$TotalTransportOutwardpacks = $TotalTransportOutwardpacks + $getTransportOutwardpack->NoPacks;
+						}
+					}
+					$data[0]->SalesNoPacks = $TotalTransportOutwardpacks;
+				}
+			}
+
+		} else {
+			if (!empty($data)) {
+				if ($data[0]->ArticleColor) {
+					$SalesNoPacks = [];
+					foreach (explode(",", $allRecords[0]->NoPacks) as $makearray) {
+						array_push($SalesNoPacks, 0);
+					}
+					$transportOutwardpacks = TransportOutwardpacks::select('NoPacks', 'ColorId')->where('ArticleId', $ArtId)->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
+					$TotalTransportOutwardpacks = 0;
+					if (count($transportOutwardpacks) != 0) {
+						// $collectionTransportOutwardpacks = collect($transportOutwardpacks);
+						// $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
+						foreach ($transportOutwardpacks as $getTransportOutwardpack) {
+							$outletArticle = Outletimport::where('ArticleId', $ArtId)->where('PartyId', $PartyId)->first();
+							if ($outletArticle) {
+								$articleColors = json_decode($outletArticle->ArticleColor);
+							} else {
+								$article = Article::select('ArticleColor')->where('Id', $ArtId)->first();
+								$articleColors = json_decode($article['ArticleColor']);
+							}
+							$count = 0;
+							foreach ($articleColors as $articlecolor) {
+								if ($articlecolor->Id == $getTransportOutwardpack->ColorId) {
+									if (!isset($SalesNoPacks[$count])) {
+										array_push($SalesNoPacks, 0);
+									}
+									$SalesNoPacks[$count] = $SalesNoPacks[$count] + $getTransportOutwardpack->NoPacks;
+								}
+								$count = $count + 1;
+							}
+						}
+					}
+					foreach ($allRecords as $allRecord) {
+						for ($i = 0; $i < count(explode(",", $allRecord->NoPacks)); $i++) {
+							if (!isset($SalesNoPacks[$i])) {
+								array_push($SalesNoPacks, 0);
+							}
+							$noPacks = explode(",", $allRecord->NoPacks);
+							if ($allRecord->type == 0) {
+								$SalesNoPacks[$i] = $SalesNoPacks[$i] + $noPacks[$i];
+							} else if ($allRecord->type == 1) {
+								$SalesNoPacks[$i] = $SalesNoPacks[$i] - $noPacks[$i];
+							} else if ($allRecord->type == 2) {
+								$SalesNoPacks[$i] = $SalesNoPacks[$i] + $noPacks[$i];
+							} else if ($allRecord->type == 3) {
+								$SalesNoPacks[$i] = $SalesNoPacks[$i] - $noPacks[$i];
+							}
+						}
+					}
+					$newimplodeSalesNoPacks = implode(",", $SalesNoPacks);
+					$data[0]->SalesNoPacks = $newimplodeSalesNoPacks;
+				} else {
+					$transportOutwardpacks = TransportOutwardpacks::select('NoPacks')->where('ArticleId', $ArtId)->where('OutwardId', 0)->where('PartyId', $PartyId)->get();
+					$TotalTransportOutwardpacks = 0;
+					if (count($transportOutwardpacks) != 0) {
+						// $collectionTransportOutwardpacks = collect($transportOutwardpacks);
+						// $getTransportOutwardpacks  = $collectionTransportOutwardpacks->unique()->values()->all();
+						foreach ($transportOutwardpacks as $getTransportOutwardpack) {
+							$TotalTransportOutwardpacks = $TotalTransportOutwardpacks + $getTransportOutwardpack->NoPacks;
+						}
+					}
+					$TotalInwardPacks = $TotalTransportOutwardpacks;
+					$TotalOutwardPacks = 0;
+					foreach ($allRecords as $allRecord) {
+						if ($allRecord->type == 0) {
+							$TotalInwardPacks = $TotalInwardPacks + $allRecord->NoPacks;
+						} else if ($allRecord->type == 1) {
+							$TotalOutwardPacks = $TotalOutwardPacks + $allRecord->NoPacks;
+						} else if ($allRecord->type == 2) {
+							$TotalInwardPacks = $TotalInwardPacks + $allRecord->NoPacks;
+						} else if ($allRecord->type == 3) {
+							$TotalOutwardPacks = $TotalOutwardPacks + $allRecord->NoPacks;
+						}
+					}
+					$data[0]->SalesNoPacks = $TotalInwardPacks - $TotalOutwardPacks;
+				}
+			}
+		}
+		return $data;
+	}
+
+
+	//NEW
+
+	//WORKED
 // 	public function GetArticleofOutlet($PartyId)
 // 	{
 // 		$articlesArray = DB::select('(select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutlet` right join `outward` on `transportoutlet`.`OutwardNumberId` = `outward`.`OutwardNumberId` inner join `article` on `article`.`Id` = `outward`.`ArticleId`  where `transportoutlet`.`TransportStatus` = 1 )  union (select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutwardpacks` inner join `article` on `article`.`Id` = `transportoutwardpacks`.`ArticleId` where `transportoutwardpacks`.`OutwardId` = 0 )   order by `ArticleId` asc');
 
-// 		$collectionArticles = collect($articlesArray);
+	// 		$collectionArticles = collect($articlesArray);
 // 		$articles  = $collectionArticles->unique()->values()->all();
 // 		foreach ($articles as $key => $article) {
-		    
 
-		    
-// 			$objectArticle = $article;
+
+
+	// 			$objectArticle = $article;
 // 			$articleArray = (array)$article;
-	
-		
-		
-// 			$allRecords = DB::select('(select `outletsalesreturn`.`NoPacks` as `NoPacks`, 1 as type, `outletsalesreturnnumber`.`CreatedDate` as `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletsalesreturn`.`OutletPartyId` = ' . $PartyId . ')) union (select `outlet`.`NoPacks` as `NoPacks`, 1 as type, `outletnumber`.`CreatedDate` as `SortDate` from `outlet` inner join `outletnumber` on `outlet`.`OutletNumberId` = `outletnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletnumber`.`PartyId` = ' . $PartyId . ')) union (select `outward`.`NoPacks` as `NoPacks`, 0 as type, `outwardnumber`.`created_at` as `SortDate` from `outward` inner join `transportoutlet` on `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId` inner join `outwardnumber` on `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `transportoutlet`.`TransportStatus` = 1 and `outward`.`PartyId` = ' . $PartyId . ')) order by `SortDate` asc');
-			
-// 			// $allRecords = DB::select('(select `outletsalesreturn`.`NoPacks` AS `NoPacks`,1 AS TYPE,`outletsalesreturnnumber`.`CreatedDate` AS `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id`)union(select `outlet`.`NoPacks` AS `NoPacks`,1 AS TYPE,`outletnumber`.`CreatedDate` AS `SortDate` from `outlet`inner join `outletnumber` ON `outlet`.`OutletNumberId` = `outletnumber`.`Id`)union(select `outward`.`NoPacks` AS `NoPacks`, 0 AS TYPE,`outwardnumber`.`created_at` AS `SortDate`from `outward` inner join `transportoutlet` ON `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId`inner join `outwardnumber` ON `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where(`transportoutlet`.`TransportStatus` = 1)order by`SortDate` asc )');
-			
-// 			if (!isset($allRecords[0])) {
+
+
+
+	// 			$allRecords = DB::select('(select `outletsalesreturn`.`NoPacks` as `NoPacks`, 1 as type, `outletsalesreturnnumber`.`CreatedDate` as `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletsalesreturn`.`OutletPartyId` = ' . $PartyId . ')) union (select `outlet`.`NoPacks` as `NoPacks`, 1 as type, `outletnumber`.`CreatedDate` as `SortDate` from `outlet` inner join `outletnumber` on `outlet`.`OutletNumberId` = `outletnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletnumber`.`PartyId` = ' . $PartyId . ')) union (select `outward`.`NoPacks` as `NoPacks`, 0 as type, `outwardnumber`.`created_at` as `SortDate` from `outward` inner join `transportoutlet` on `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId` inner join `outwardnumber` on `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `transportoutlet`.`TransportStatus` = 1 and `outward`.`PartyId` = ' . $PartyId . ')) order by `SortDate` asc');
+
+	// 			// $allRecords = DB::select('(select `outletsalesreturn`.`NoPacks` AS `NoPacks`,1 AS TYPE,`outletsalesreturnnumber`.`CreatedDate` AS `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id`)union(select `outlet`.`NoPacks` AS `NoPacks`,1 AS TYPE,`outletnumber`.`CreatedDate` AS `SortDate` from `outlet`inner join `outletnumber` ON `outlet`.`OutletNumberId` = `outletnumber`.`Id`)union(select `outward`.`NoPacks` AS `NoPacks`, 0 AS TYPE,`outwardnumber`.`created_at` AS `SortDate`from `outward` inner join `transportoutlet` ON `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId`inner join `outwardnumber` ON `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where(`transportoutlet`.`TransportStatus` = 1)order by`SortDate` asc )');
+
+	// 			if (!isset($allRecords[0])) {
 // 				$outletArticle = Outletimport::where('ArticleId', $articleArray['ArticleId'])->where('PartyId', $PartyId)->first();
 // 				if ($outletArticle) {
 // 					$outletArticleColors = json_decode($outletArticle->ArticleColor);
 // 				} else {
 // 					$articleRecord = Article::where('Id', $articleArray['ArticleId'])->first();
 
-// 					$outletArticleColors  = json_decode($articleRecord->ArticleColor);
+	// 					$outletArticleColors  = json_decode($articleRecord->ArticleColor);
 // 				}
 // 				$outletArticleColors =  (array)$outletArticleColors;
 // 				if (count($outletArticleColors) > 0) {
@@ -464,7 +474,7 @@ class OutletsController extends Controller
 // 						unset($articles[$key]);
 // 					}
 
-// 				// 	$TotalInwardPacks = $TotalTransportOutwardpacks;
+	// 				// 	$TotalInwardPacks = $TotalTransportOutwardpacks;
 // 				// $TotalOutwardPacks = 0;
 // 				// foreach ($allRecords as  $allRecord) {
 // 				// 	if ($allRecord->type == 0) {
@@ -485,14 +495,14 @@ class OutletsController extends Controller
 // 	}
 
 
-// 	public function GetOutletSingleArticle($PartyId, $ArtId, $OutletPartyId)
+	// 	public function GetOutletSingleArticle($PartyId, $ArtId, $OutletPartyId)
 // 	{
 // 		// $updatedartucleratedata = DB::select("SELECT o.Id , o.PartyDiscount, o.OutwardNumberId, o.OutwardBox, o.OutwardRate,o.OutwardWeight, owdn.OutwardNumber, owdn.OutwardDate, owdn.GSTAmount, owdn.GSTPercentage, owdn.GSTType, o.NoPacks, a.ArticleNumber, a.Id as ArticleId,c.Title as Category, concat(owdn.OutwardNumber) as OW_Number_FinancialYear FROM `outward` o inner join outwardnumber owdn on o.OutwardNumberId=owdn.Id inner join article a on a.Id=o.ArticleId inner join category c on c.Id=a.CategoryId inner join financialyear fn on fn.Id=owdn.FinancialYearId where o.OutwardNumberId='5100'");
 // 		// return $updatedartucleratedata;
 
-// 		$data = DB::select("select ar.ArticleNumber, CASE WHEN (oi.ArticleColor IS NULL) THEN ar.ArticleColor ELSE oi.ArticleColor END AS `ArticleColor`, ar.ArticleSize, ar.ArticleRatio, ar.ArticleOpenFlag, CASE WHEN (art.ArticleRate IS NULL) THEN ar.ArticleRate ELSE art.ArticleRate END  as ArticleRate , p.OutletArticleRate as OutletArticleRate, c.Colorflag, c.Title as Category ,  ddd.ArticleId, ddd.SalesNoPacks from (select d.ArticleId, (CASE d.Colorflag WHEN '0' THEN (d.Outward_NoPacks - d.SalesReturn_NoPacks - d.Outlet_NoPacks + d.OutletSalesReturn_NoPacks) ELSE GROUP_CONCAT(CONCAT((d.Outward_NoPacks - d.SalesReturn_NoPacks - d.Outlet_NoPacks + d.OutletSalesReturn_NoPacks)) ORDER BY d.Id SEPARATOR ',') END) as SalesNoPacKs from (SELECT A.Outward_NoPacks, (case WHEN C.SalesReturn_NoPacks IS NULL THEN '0' ELSE C.SalesReturn_NoPacks END) as SalesReturn_NoPacks, (case WHEN D.OutletSalesReturn_NoPacks IS NULL THEN '0' ELSE D.OutletSalesReturn_NoPacks END) as OutletSalesReturn_NoPacks, (case WHEN B.Outlet_NoPacks IS NULL THEN '0' ELSE B.Outlet_NoPacks END) as Outlet_NoPacks, A.ArticleId, A.Id, A.Colorflag FROM ( SELECT sum(onp.NoPacks) as Outward_NoPacks, onp.ColorId, onp.ArticleId, onp.Id, c.Colorflag FROM `transportoutwardpacks` onp inner join article a on a.Id=onp.ArticleId inner join category c on c.Id=a.CategoryId where onp.ArticleId='" . $ArtId . "' and onp.PartyId='" . $PartyId . "' group by onp.ColorId) AS A LEFT JOIN ( SELECT sum(onp.NoPacks) as Outlet_NoPacks, onp.ColorId, onp.ArticleId, onp.Id, c.Colorflag  FROM `outletnopacks` onp left join po p on p.ArticleId = onp.ArticleId inner join article a on a.Id=onp.ArticleId inner join category c on c.Id=a.CategoryId where onp.ArticleId='" . $ArtId . "' and onp.PartyId='" . $PartyId . "' group by onp.ColorId) AS B ON A.ColorId=B.ColorId LEFT JOIN ( SELECT sum(srp.NoPacks) as SalesReturn_NoPacks, srp.ColorId, srp.ArticleId, srp.Id, c.Colorflag  FROM `salesreturnpacks` srp inner join article a on a.Id=srp.ArticleId inner join category c on c.Id=a.CategoryId where srp.ArticleId='" . $ArtId . "' and srp.PartyId='" . $PartyId . "' group by srp.ColorId) AS C ON A.ColorId=C.ColorId LEFT JOIN ( select sum(f.NoPacks) as OutletSalesReturn_NoPacks, f.ColorId, f.ArticleId, f.OutletId, f.Id, f.Colorflag from (SELECT srp.NoPacks, srp.ColorId, srp.ArticleId, srp.OutletId, srp.Id, c.Colorflag FROM `outletsalesreturnpacks` srp inner join outletsalesreturn osr on osr.OutletId=srp.OutletId inner join article a on a.Id=srp.ArticleId inner join category c on c.Id=a.CategoryId where srp.ArticleId='" . $ArtId . "' and osr.OutletPartyId='" . $PartyId . "' group by srp.Id) as f group by f.ColorId) AS D ON A.ColorId=D.ColorId) as d group by d.ArticleId) as ddd inner join article ar on ar.Id=ddd.ArticleId inner join category c on c.Id=ar.CategoryId left join articlerate art on art.ArticleId=ar.Id left join party p on p.Id='" . $PartyId . "' left join outletimport oi on oi.ArticleId='" . $ArtId . "' and oi.PartyId = '" . $PartyId . "'");
+	// 		$data = DB::select("select ar.ArticleNumber, CASE WHEN (oi.ArticleColor IS NULL) THEN ar.ArticleColor ELSE oi.ArticleColor END AS `ArticleColor`, ar.ArticleSize, ar.ArticleRatio, ar.ArticleOpenFlag, CASE WHEN (art.ArticleRate IS NULL) THEN ar.ArticleRate ELSE art.ArticleRate END  as ArticleRate , p.OutletArticleRate as OutletArticleRate, c.Colorflag, c.Title as Category ,  ddd.ArticleId, ddd.SalesNoPacks from (select d.ArticleId, (CASE d.Colorflag WHEN '0' THEN (d.Outward_NoPacks - d.SalesReturn_NoPacks - d.Outlet_NoPacks + d.OutletSalesReturn_NoPacks) ELSE GROUP_CONCAT(CONCAT((d.Outward_NoPacks - d.SalesReturn_NoPacks - d.Outlet_NoPacks + d.OutletSalesReturn_NoPacks)) ORDER BY d.Id SEPARATOR ',') END) as SalesNoPacKs from (SELECT A.Outward_NoPacks, (case WHEN C.SalesReturn_NoPacks IS NULL THEN '0' ELSE C.SalesReturn_NoPacks END) as SalesReturn_NoPacks, (case WHEN D.OutletSalesReturn_NoPacks IS NULL THEN '0' ELSE D.OutletSalesReturn_NoPacks END) as OutletSalesReturn_NoPacks, (case WHEN B.Outlet_NoPacks IS NULL THEN '0' ELSE B.Outlet_NoPacks END) as Outlet_NoPacks, A.ArticleId, A.Id, A.Colorflag FROM ( SELECT sum(onp.NoPacks) as Outward_NoPacks, onp.ColorId, onp.ArticleId, onp.Id, c.Colorflag FROM `transportoutwardpacks` onp inner join article a on a.Id=onp.ArticleId inner join category c on c.Id=a.CategoryId where onp.ArticleId='" . $ArtId . "' and onp.PartyId='" . $PartyId . "' group by onp.ColorId) AS A LEFT JOIN ( SELECT sum(onp.NoPacks) as Outlet_NoPacks, onp.ColorId, onp.ArticleId, onp.Id, c.Colorflag  FROM `outletnopacks` onp left join po p on p.ArticleId = onp.ArticleId inner join article a on a.Id=onp.ArticleId inner join category c on c.Id=a.CategoryId where onp.ArticleId='" . $ArtId . "' and onp.PartyId='" . $PartyId . "' group by onp.ColorId) AS B ON A.ColorId=B.ColorId LEFT JOIN ( SELECT sum(srp.NoPacks) as SalesReturn_NoPacks, srp.ColorId, srp.ArticleId, srp.Id, c.Colorflag  FROM `salesreturnpacks` srp inner join article a on a.Id=srp.ArticleId inner join category c on c.Id=a.CategoryId where srp.ArticleId='" . $ArtId . "' and srp.PartyId='" . $PartyId . "' group by srp.ColorId) AS C ON A.ColorId=C.ColorId LEFT JOIN ( select sum(f.NoPacks) as OutletSalesReturn_NoPacks, f.ColorId, f.ArticleId, f.OutletId, f.Id, f.Colorflag from (SELECT srp.NoPacks, srp.ColorId, srp.ArticleId, srp.OutletId, srp.Id, c.Colorflag FROM `outletsalesreturnpacks` srp inner join outletsalesreturn osr on osr.OutletId=srp.OutletId inner join article a on a.Id=srp.ArticleId inner join category c on c.Id=a.CategoryId where srp.ArticleId='" . $ArtId . "' and osr.OutletPartyId='" . $PartyId . "' group by srp.Id) as f group by f.ColorId) AS D ON A.ColorId=D.ColorId) as d group by d.ArticleId) as ddd inner join article ar on ar.Id=ddd.ArticleId inner join category c on c.Id=ar.CategoryId left join articlerate art on art.ArticleId=ar.Id left join party p on p.Id='" . $PartyId . "' left join outletimport oi on oi.ArticleId='" . $ArtId . "' and oi.PartyId = '" . $PartyId . "'");
 
-// 		// return $data;
+	// 		// return $data;
 // 		$artucleratedata = DB::table('articlerate')->where('ArticleId', $ArtId)->first();
 // 		$data[0]->ArticleRate = $artucleratedata->ArticleRate + $data[0]->OutletArticleRate;
 // 		$allRecords = DB::select('(select `outletsalesreturn`.`NoPacks` as `NoPacks`, 2 as type, `outletsalesreturnnumber`.`CreatedDate` as `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id` where (`ArticleId` = ' . $ArtId . ' and `outletsalesreturn`.`OutletPartyId` = ' . $PartyId . ')) union (select `outlet`.`NoPacks` as `NoPacks`, 1 as type, `outletnumber`.`CreatedDate` as `SortDate` from `outlet` inner join `outletnumber` on `outlet`.`OutletNumberId` = `outletnumber`.`Id` where (`ArticleId` = ' . $ArtId . ' and `outletnumber`.`PartyId` = ' . $PartyId . ')) union (select `outward`.`NoPacks` as `NoPacks`, 0 as type, `outwardnumber`.`created_at` as `SortDate` from `outward` inner join `transportoutlet` on `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId` inner join `outwardnumber` on `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where (`ArticleId` = ' . $ArtId . ' and `transportoutlet`.`TransportStatus` = 1 and `outward`.`PartyId` = ' . $PartyId . ')) union (select `salesreturn`.`NoPacks` as `NoPacks`, 3 as type ,`salesreturnnumber`.`CreatedDate` as `SortDate` from `outward` inner join `salesreturn` on `salesreturn`.`OutwardId` = `outward`.`Id` inner join `salesreturnnumber` on `salesreturnnumber`.`Id` = `salesreturn`.`SalesReturnNumber` where (`outward`.`PartyId` = ' . $PartyId . ' and `outward`.`ArticleId` = ' . $ArtId . ')) order by `SortDate` asc');
@@ -550,8 +560,8 @@ class OutletsController extends Controller
 // 				$data[0]->SalesNoPacks =  $TotalTransportOutwardpacks;
 // 			}
 // 		} else {
-		    
-// 			if ($data[0]->ArticleColor) {
+
+	// 			if ($data[0]->ArticleColor) {
 // 				$SalesNoPacks = [];
 // 				foreach (explode(",", $allRecords[0]->NoPacks) as $makearray) {
 // 					array_push($SalesNoPacks, 0);
@@ -662,20 +672,20 @@ class OutletsController extends Controller
 
 		$data = $request->all();
 
-		$outletName  = $data['OutletPartyId'];
+		$outletName = $data['OutletPartyId'];
 
 
-        if (isset($outletName['Id'])) {
-            // Case: $outletName is an array with 'Id' key
-            $id = $outletName['Id'];
-            $outletName = $outletName['Name'];
-        } elseif (is_string($outletName)) {
-            // Case: $outletName is a string
-            $outletName = $outletName;
-        } else {
-            // Case: $outletName is neither an array with 'Id' key nor a string
-            // Handle the case as per your requirements
-        }
+		if (isset($outletName['Id'])) {
+			// Case: $outletName is an array with 'Id' key
+			$id = $outletName['Id'];
+			$outletName = $outletName['Name'];
+		} elseif (is_string($outletName)) {
+			// Case: $outletName is a string
+			$outletName = $outletName;
+		} else {
+			// Case: $outletName is neither an array with 'Id' key nor a string
+			// Handle the case as per your requirements
+		}
 
 
 
@@ -686,7 +696,7 @@ class OutletsController extends Controller
 		$soadd = array();
 
 
-		$getdata  = $this->GetOutletSingleArticle($data['PartyId'], $data['ArticleId'], $outletId);
+		$getdata = $this->GetOutletSingleArticle($data['PartyId'], $data['ArticleId'], $outletId);
 
 		$ArticleRate = $data['ArticleRate'];
 
@@ -716,7 +726,7 @@ class OutletsController extends Controller
 
 				$OutletNumberId = DB::table('outletnumber')->insertGetId(
 
-					['OutletNumber' =>  $Outlet_Number, "FinancialYearId" => $Outlet_Number_Financial_Id, 'UserId' => $data['UserId'], 'OutletPartyId' => $outletId, 'PartyId' =>  $data['PartyId'], 'OutletDate' => $data['Date'], 'GSTAmount' => $data['GSTAmount'], 'GSTPercentage' => $data['GSTPercentage'], 'Remarks' => $data['Remarks'], 'Discount' => $Discount, 'Address' => $data['Address'], 'Contact' => $data['Contact'], 'CreatedDate' => date('Y-m-d H:i:s')]
+					['OutletNumber' => $Outlet_Number, "FinancialYearId" => $Outlet_Number_Financial_Id, 'UserId' => $data['UserId'], 'OutletPartyId' => $outletId, 'PartyId' => $data['PartyId'], 'OutletDate' => $data['Date'], 'GSTAmount' => $data['GSTAmount'], 'GSTPercentage' => $data['GSTPercentage'], 'Remarks' => $data['Remarks'], 'Discount' => $Discount, 'Address' => $data['Address'], 'Contact' => $data['Contact'], 'CreatedDate' => date('Y-m-d H:i:s')]
 
 				);
 
@@ -754,7 +764,7 @@ class OutletsController extends Controller
 
 						->where('Id', $OutletNumberId)
 
-						->update(['UserId' => $data['UserId'], 'PartyId' =>  $data['PartyId'], 'OutletPartyId' => $outletId, 'OutletDate' => $data['Date'], 'GSTAmount' => $data['GSTAmount'], 'GSTPercentage' => $data['GSTPercentage'], 'Discount' => $Discount, 'Remarks' => $data['Remarks'], 'Address' => $data['Address'], 'Contact' => $data['Contact']]);
+						->update(['UserId' => $data['UserId'], 'PartyId' => $data['PartyId'], 'OutletPartyId' => $outletId, 'OutletDate' => $data['Date'], 'GSTAmount' => $data['GSTAmount'], 'GSTPercentage' => $data['GSTPercentage'], 'Discount' => $Discount, 'Remarks' => $data['Remarks'], 'Address' => $data['Address'], 'Contact' => $data['Contact']]);
 
 				}
 
@@ -782,7 +792,15 @@ class OutletsController extends Controller
 
 			if ($data["ArticleOpenFlag"] == 1) {
 
+				//using for outletrepot yashvi
+				$dataupdate = $data['NoPacks'] - $data['NoPacksNew'];
+				DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $data['ArticleId']])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+				//close
+
 				$NoPacks = "";
+				// $newSalesNoPacks = $article->STOCKS - $NoPacks; // Adjust this logic as needed
+				// $article->update(['SalesNoPacks' => $newSalesNoPacks]);		
+
 
 				if (isset($data['NoPacksNew'])) {
 
@@ -823,6 +841,9 @@ class OutletsController extends Controller
 						->update(['NoPacks' => $nopacksadded]);
 
 					if ($data['ArticleOpenFlag'] == 0) {
+
+
+
 
 						if (strpos($nopacksadded, ',') !== false) {
 
@@ -890,7 +911,9 @@ class OutletsController extends Controller
 
 					if ($data['ArticleOpenFlag'] == 0) {
 
+
 						if (strpos($NoPacks, ',') !== false) {
+
 
 							$NoPacks = explode(',', $NoPacks);
 
@@ -900,7 +923,7 @@ class OutletsController extends Controller
 
 								DB::table('outletnopacks')->insertGetId(
 
-									['ArticleId' =>  $data['ArticleId'], 'ColorId' => $numberofpacks, 'OutletId' => $outlet_insertedid, 'NoPacks' => $NoPacks[$key], 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
+									['ArticleId' => $data['ArticleId'], 'ColorId' => $numberofpacks, 'OutletId' => $outlet_insertedid, 'NoPacks' => $NoPacks[$key], 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
 
 								);
 
@@ -914,7 +937,7 @@ class OutletsController extends Controller
 
 								DB::table('outletnopacks')->insertGetId(
 
-									['ArticleId' =>  $data['ArticleId'], 'ColorId' => $numberofpacks, 'OutletId' => $outlet_insertedid, 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
+									['ArticleId' => $data['ArticleId'], 'ColorId' => $numberofpacks, 'OutletId' => $outlet_insertedid, 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
 
 								);
 
@@ -930,7 +953,7 @@ class OutletsController extends Controller
 
 						DB::table('outletnopacks')->insertGetId(
 
-							['ArticleId' =>  $data['ArticleId'], 'ColorId' => 0, 'OutletId' => $outlet_insertedid, 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
+							['ArticleId' => $data['ArticleId'], 'ColorId' => 0, 'OutletId' => $outlet_insertedid, 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
 
 						);
 
@@ -961,10 +984,33 @@ class OutletsController extends Controller
 				$NoPacks = "";
 
 				if ($data['Colorflag'] == 1) {
+					//update artstockstatus yashvi
+					$salesNoPacksData = [];
+					$totalPieces = 0;
 
 					foreach ($data['ArticleSelectedColor'] as $key => $vl) {
-
 						$numberofpacks = $vl["Id"];
+						$articleId = $data['ArticleId'];
+						$noPacksNewKey = 'NoPacksNew_' . $numberofpacks;
+						$noPacksKey = 'NoPacks_' . $numberofpacks;
+
+						if (isset($data[$noPacksNewKey]) && isset($data[$noPacksKey])) {
+							$noPacksNewValue = (int) $data[$noPacksNewKey];
+							$noPacksValue = (int) $data[$noPacksKey];
+							$salesNoPacksData[] = abs($noPacksNewValue - $noPacksValue);
+						} else {
+							$salesNoPacksData[] = 0;
+						}
+
+
+					$totalPieces = array_sum($salesNoPacksData);
+					$salesNoPacksDataString = implode(',', $salesNoPacksData);
+
+					DB::table('artstockstatus')
+						->where(['outletId' => $data['PartyId'], 'ArticleId' => $articleId])
+						->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
+
+					//close
 
 						if ($data["NoPacksNew_" . $numberofpacks] != "") {
 
@@ -1016,6 +1062,10 @@ class OutletsController extends Controller
 
 				}
 
+
+
+
+				//For non openflag
 				$NoPacks = rtrim($NoPacks, ',');
 
 				$CheckSalesNoPacks = explode(',', $NoPacks);
@@ -1045,16 +1095,19 @@ class OutletsController extends Controller
 						foreach ($getnppacks as $key => $vl) {
 
 							$nopacksadded .= $NoPacks1[$key] + $vl . ",";
+							$nopacksaddeds .= $NoPacks1[$key] - $vl . ",";
 
 						}
 
 					} else {
 
 						$nopacksadded .= $getnppacks + $NoPacks . ",";
+						$nopacksaddeds .= $getnppacks - $NoPacks . ",";
 
 					}
 
 					$nopacksadded = rtrim($nopacksadded, ',');
+					$nopacksaddeds = rtrim($nopacksaddeds, ',');
 
 					DB::table('outlet')
 
@@ -1064,13 +1117,24 @@ class OutletsController extends Controller
 
 						->update(['NoPacks' => $nopacksadded]);
 
+					//For non openflag colse
+
+
 					$IdData = DB::select("select Id from outlet where OutletNumberId='" . $OutletNumberId . "' and ArticleId='" . $data['ArticleId'] . "'");
 
 					if ($data['ArticleOpenFlag'] == 0) {
 
+						DB::table('artstockstatus')
+							->where(['outletId' => $data['PartyId']])
+							->where(['ArticleId' => $data['ArticleId']])
+							->update(['SalesNoPacks' => $nopacksadded[$key]]);
+
+
 						if (strpos($nopacksadded, ',') !== false) {
 
 							$nopacksadded = explode(',', $nopacksadded);
+
+
 
 							foreach ($data['ArticleSelectedColor'] as $key => $vl) {
 
@@ -1144,7 +1208,7 @@ class OutletsController extends Controller
 
 								DB::table('outletnopacks')->insertGetId(
 
-									['ArticleId' =>  $data['ArticleId'], 'ColorId' => $numberofpacks, 'OutletId' => $outlet_insertedid, 'NoPacks' => $NoPacks[$key], 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
+									['ArticleId' => $data['ArticleId'], 'ColorId' => $numberofpacks, 'OutletId' => $outlet_insertedid, 'NoPacks' => $NoPacks[$key], 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
 
 								);
 
@@ -1158,7 +1222,7 @@ class OutletsController extends Controller
 
 								DB::table('outletnopacks')->insertGetId(
 
-									['ArticleId' =>  $data['ArticleId'], 'ColorId' => $numberofpacks, 'OutletId' => $outlet_insertedid, 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
+									['ArticleId' => $data['ArticleId'], 'ColorId' => $numberofpacks, 'OutletId' => $outlet_insertedid, 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
 
 								);
 
@@ -1174,7 +1238,7 @@ class OutletsController extends Controller
 
 						DB::table('outletnopacks')->insertGetId(
 
-							['ArticleId' =>  $data['ArticleId'], 'ColorId' => 0, 'OutletId' => $outlet_insertedid, 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
+							['ArticleId' => $data['ArticleId'], 'ColorId' => 0, 'OutletId' => $outlet_insertedid, 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
 
 						);
 
@@ -1198,10 +1262,15 @@ class OutletsController extends Controller
 
 	}
 
-	public function UpdateOutlet(Request $request)
+	public function UpdateOutlet(Request $request, $field)
 	{
+		//articleId yashvi
+		$result = DB::select("SELECT ArticleId FROM `outlet` WHERE outlet.Id = '" . $field . "'");
+        $articleId = $result[0]->ArticleId;
+		//close
 		$data = $request->all();
-		$outletName  = $data['OutletPartyId'];
+
+		$outletName = $data['OutletPartyId'];
 		$partyoutlet = Party::where('Name', $outletName)->first();
 		$outletId = $partyoutlet->Id;
 		$getresult = DB::select("SELECT NoPacks as GetNoPacks FROM `outlet` where Id = '" . $data["id"] . "'");
@@ -1219,6 +1288,11 @@ class OutletsController extends Controller
 			$Discount = $data['Discount'];
 		}
 		if ($data["ArticleOpenFlag"] == 1) {
+				//using for outletrepot yashvi
+				$dataupdatenew =$data['NoPacks'] + $GetNoPacks;
+				$dataupdate =  $dataupdatenew - $data['NoPacksNew'];
+				DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+				//close
 			$UpdateInwardNoPacks = "";
 			$updateNoPacks = $data['NoPacksNew'];
 			$remainignopacks = $data['NoPacks'];
@@ -1233,15 +1307,15 @@ class OutletsController extends Controller
 			try {
 				$logDesc = "";
 				$ActiveOutlet = Outlet::where('id', $data['id'])->first();
-				if ($ActiveOutlet->NoPacks  != $updateNoPacks) {
+				if ($ActiveOutlet->NoPacks != $updateNoPacks) {
 					$logDesc = $logDesc . 'Pieces,';
 				}
-				if ($ActiveOutlet->ArticleRate  != $ArticleRate) {
+				if ($ActiveOutlet->ArticleRate != $ArticleRate) {
 					$logDesc = $logDesc . 'ArticleRate,';
 				}
 				$newLogDesc = rtrim($logDesc, ',');
 				$userRec = Users::where('Id', $data['UserId'])->first();
-				$artRateRecord = Article::where('Id', $data['ArticleId'])->first();
+				$artRateRecord = Article::where('Id', $articleId)->first();
 				$outletRec = DB::select("select concat(un.OutletNumber,'/', fn.StartYear,'-',fn.EndYear) as OutletNumber from outletnumber un inner join financialyear fn on fn.Id=un.FinancialYearId where un.Id= '" . $data['OutletNumberId'] . "'");
 				UserLogs::create([
 					'Module' => 'Outlet',
@@ -1253,13 +1327,16 @@ class OutletsController extends Controller
 				]);
 				DB::table('outletnumber')
 					->where('Id', $data['OutletNumberId'])
-					->update(['OutletDate' => $data['Date'], 'OutletPartyId' => $outletId,  'PartyId' =>  $data['PartyId'], 'Remarks' => $data['Remarks'], 'GSTAmount' => $data['GSTAmount'], 'GSTPercentage' => $data['GSTPercentage'], 'Discount' => $Discount, 'Address' => $data['Address'], 'Contact' => $data['Contact']]);
-				Outlet::where('id', $data['id'])->update(array(
-					'NoPacks' => $updateNoPacks, 'ArticleRate' => $ArticleRate
-				));
+					->update(['OutletDate' => $data['Date'], 'OutletPartyId' => $outletId, 'PartyId' => $data['PartyId'], 'Remarks' => $data['Remarks'], 'GSTAmount' => $data['GSTAmount'], 'GSTPercentage' => $data['GSTPercentage'], 'Discount' => $Discount, 'Address' => $data['Address'], 'Contact' => $data['Contact']]);
+				Outlet::where('id', $data['id'])->update(
+					array(
+						'NoPacks' => $updateNoPacks,
+						'ArticleRate' => $ArticleRate
+					)
+				);
 				DB::table('outletnopacks')
 					->where('OutletId', $data['id'])
-					->where('ArticleId', $data['ArticleId'])
+					->where('ArticleId', $articleId)
 					->where('PartyId', $data['PartyId'])
 					->update(['NoPacks' => $updateNoPacks, 'UpdatedDate' => date('Y-m-d H:i:s')]);
 				DB::commit();
@@ -1278,8 +1355,38 @@ class OutletsController extends Controller
 			}
 			$updateNoPacks = "";
 			if ($data["Colorflag"] == 1) {
-				foreach ($data['ArticleSelectedColor'] as $key => $vl) {
-					$numberofpacks = $vl["Id"];
+					//update artstockstatus yashvi
+					$getresult = DB::select("SELECT NoPacks as GetNoPacks FROM `outlet` where Id = '" . $data["id"] . "'");
+$GetNoPacksString = $getresult[0]->GetNoPacks;
+$GetNoPacksArray = explode(',', $GetNoPacksString);
+
+$salesNoPacksData = [];
+$totalPieces = 0;
+
+foreach ($data['ArticleSelectedColor'] as $key => $vl) {
+    $numberofpacks = $vl["Id"];
+    $noPacksNewKey = 'NoPacksNew_' . $numberofpacks;
+    $noPacksKey = 'NoPacks_' . $numberofpacks;
+
+    if (isset($data[$noPacksNewKey]) && isset($data[$noPacksKey])) {
+        $noPacksNewValue = (int) $data[$noPacksNewKey];
+        $noPacksValue = (int) $data[$noPacksKey];
+        
+        $salesNoPacksDataupdate = abs($GetNoPacksArray[$key] + $noPacksValue);
+        $salesNoPacksData[] = abs($salesNoPacksDataupdate - $noPacksNewValue);
+    } else {
+        $salesNoPacksData[] = 0;
+    }
+
+
+$salesNoPacksDataString = implode(',', $salesNoPacksData);
+$totalPieces = array_sum($salesNoPacksData);
+
+DB::table('artstockstatus')
+    ->where(['outletId' => $data['PartyId'], 'ArticleId' => $articleId])
+    ->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
+//close
+
 					$outletsale = $OutletNoPacks[$key];
 					$remaingnopacks = $data["NoPacks_" . $numberofpacks];
 					$getnopacks1 = $data["NoPacksNew_" . $numberofpacks];
@@ -1322,15 +1429,15 @@ class OutletsController extends Controller
 			try {
 				$logDesc = "";
 				$ActiveOutlet = Outlet::where('id', $data['id'])->first();
-				if ($ActiveOutlet->NoPacks  != $updateNoPacks) {
+				if ($ActiveOutlet->NoPacks != $updateNoPacks) {
 					$logDesc = $logDesc . 'Pieces,';
 				}
-				if ($ActiveOutlet->ArticleRate  != $ArticleRate) {
+				if ($ActiveOutlet->ArticleRate != $ArticleRate) {
 					$logDesc = $logDesc . 'ArticleRate,';
 				}
 				$newLogDesc = rtrim($logDesc, ',');
 				$userRec = Users::where('Id', $data['UserId'])->first();
-				$artRateRecord = Article::where('Id', $data['ArticleId'])->first();
+				$artRateRecord = Article::where('Id', $articleId)->first();
 				$outletRec = DB::select("select concat(un.OutletNumber,'/', fn.StartYear,'-',fn.EndYear) as OutletNumber from outletnumber un inner join financialyear fn on fn.Id=un.FinancialYearId where un.Id= '" . $data['OutletNumberId'] . "'");
 				UserLogs::create([
 					'Module' => 'Outlet',
@@ -1342,16 +1449,19 @@ class OutletsController extends Controller
 				]);
 				DB::table('outletnumber')
 					->where('Id', $data['OutletNumberId'])
-					->update(['OutletDate' => $data['Date'], 'OutletPartyId' => $outletId, 'PartyId' =>  $data['PartyId'], 'Remarks' => $data['Remarks'], 'GSTAmount' => $data['GSTAmount'], 'GSTPercentage' => $data['GSTPercentage'], 'Discount' => $Discount, 'Address' => $data['Address'], 'Contact' => $data['Contact']]);
-				Outlet::where('id', $data['id'])->update(array(
-					'NoPacks' => $updateNoPacks, 'ArticleRate' => $ArticleRate
-				));
+					->update(['OutletDate' => $data['Date'], 'OutletPartyId' => $outletId, 'PartyId' => $data['PartyId'], 'Remarks' => $data['Remarks'], 'GSTAmount' => $data['GSTAmount'], 'GSTPercentage' => $data['GSTPercentage'], 'Discount' => $Discount, 'Address' => $data['Address'], 'Contact' => $data['Contact']]);
+				Outlet::where('id', $data['id'])->update(
+					array(
+						'NoPacks' => $updateNoPacks,
+						'ArticleRate' => $ArticleRate
+					)
+				);
 				if ($data['ArticleOpenFlag'] == 0) {
 					if (strpos($updateNoPacks, ',') !== false) {
 						$updateNoPacks = explode(',', $updateNoPacks);
 						foreach ($data['ArticleSelectedColor'] as $key => $vl) {
 							$numberofpacks = $vl["Id"];
-							$res = DB::select("select Id from outletnopacks where ColorId='" . $numberofpacks . "' and OutletId='" . $data['id'] . "' and ArticleId='" . $data['ArticleId'] . "'");
+							$res = DB::select("select Id from outletnopacks where ColorId='" . $numberofpacks . "' and OutletId='" . $data['id'] . "' and ArticleId='" . $articleId . "'");
 							DB::table('outletnopacks')
 								->where('Id', $res[0]->Id)
 								->update(['NoPacks' => $updateNoPacks[$key], 'UpdatedDate' => date('Y-m-d H:i:s')]);
@@ -1359,17 +1469,17 @@ class OutletsController extends Controller
 					} else {
 						foreach ($data['ArticleSelectedColor'] as $key => $vl) {
 							$numberofpacks = $vl["Id"];
-							$res = DB::select("select Id from outletnopacks where ColorId='" . $numberofpacks . "' and OutletId='" . $data['id'] . "' and ArticleId='" . $data['ArticleId'] . "'");
+							$res = DB::select("select Id from outletnopacks where ColorId='" . $numberofpacks . "' and OutletId='" . $data['id'] . "' and ArticleId='" . $articleId . "'");
 							DB::table('outletnopacks')
 								->where('Id', $res[0]->Id)
 								->update(['NoPacks' => $updateNoPacks, 'UpdatedDate' => date('Y-m-d H:i:s')]);
 						}
 					}
 				} else {
-					$datavl = DB::select('select Id from outlet where OutletNumberId = "' . $data['OutletNumberId'] . '" and ArticleId = "' . $data['ArticleId'] . '"');
+					$datavl = DB::select('select Id from outlet where OutletNumberId = "' . $data['OutletNumberId'] . '" and ArticleId = "' . $articleId . '"');
 					DB::table('outletnopacks')
 						->where('OutletId', $datavl[0]->Id)
-						->where('ArticleId', $data['ArticleId'])
+						->where('ArticleId', $articleId)
 						->update(['NoPacks' => $updateNoPacks, 'UpdatedDate' => date('Y-m-d H:i:s')]);
 				}
 
@@ -1384,6 +1494,50 @@ class OutletsController extends Controller
 
 	public function DeleteOutlet($id, $ArticleOpenFlag, $LoggedId)
 	{
+		
+		$data = DB::select("SELECT outlet.* , otn.PartyId , a.ArticleColor , a.ArticleOpenFlag  FROM `outlet` inner join outletnumber otn On otn.Id = outlet.OutletNumberId INNER JOIN article a ON a.Id = outlet.ArticleId where outlet.Id = '" . $id . "'");
+		
+		//update artstockstatus yashvi
+		if (!empty($data) && $data[0]->ArticleOpenFlag == 0) {
+				$salesNoPacksData = []; // Initialize outside the loop
+				$data1 = DB::select("SELECT * FROM `artstockstatus` WHERE ArticleId = {$data[0]->ArticleId} AND outletId = {$data[0]->PartyId}");
+				$totalPieces = 0;
+				$salesNoPacksData = [];
+	
+				$articleColors = json_decode($data[0]->ArticleColor, true);
+	
+				foreach ($articleColors as $key => $vl) {
+					$numberofpacks = $vl["Id"];
+					$articleId = $data[0]->ArticleId;
+					$noPacksNewKey = $data1[0]->SalesNoPacks;
+					$noPacksKey = $data[0]->NoPacks;
+	
+					$noPacksNewKey = explode(',', $noPacksNewKey);
+					$noPacksKey = explode(',', $noPacksKey);
+	
+					if (count($noPacksNewKey) === count($noPacksKey)) {
+						$salesNoPacksData = [];
+						for ($i = 0; $i < count($noPacksNewKey); $i++) {
+							$salesNoPacksData[] = $noPacksNewKey[$i] + $noPacksKey[$i];
+						}
+					} else {
+						$salesNoPacksData[] = 0;
+					}
+	
+					$salesNoPacksDataString = implode(',', $salesNoPacksData);
+					$totalPieces = array_sum($salesNoPacksData);
+	
+					DB::table('artstockstatus')
+					    ->where(['outletId' => $data[0]->PartyId, 'ArticleId' => $data[0]->ArticleId])
+						->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
+				}
+		}else
+		{
+		$data1 = DB::select("SELECT * FROM `artstockstatus` WHERE ArticleId = {$data[0]->ArticleId} AND outletId = {$data[0]->PartyId}");
+		$dataupdate = $data[0]->NoPacks + $data1[0]->SalesNoPacks ;	
+		DB::table('artstockstatus')->where(['outletId' => $data[0]->PartyId, 'ArticleId' => $data[0]->ArticleId])->update(['SalesNoPacks' =>  $dataupdate,  'TotalPieces' => $dataupdate]);
+		}		
+		//close
 		DB::beginTransaction();
 		try {
 			$outletRec = DB::select("select un.Id as OutletNumberId, a.ArticleNumber, concat(un.OutletNumber,'/', fn.StartYear,'-',fn.EndYear) as Outletnumber from outlet o inner join outletnumber un on un.Id=o.OutletNumberId inner join article a on a.Id=o.ArticleId inner join financialyear fn on fn.Id=un.FinancialYearId where o.Id= '" . $id . "'");
@@ -1412,7 +1566,99 @@ class OutletsController extends Controller
 
 	public function DeleteOutleNumber($OTLNO, $LoggedId)
 	{
-		$data = DB::select("SELECT * FROM `outlet` where OutletNumberId = '" . $OTLNO . "'");
+
+
+		$data = DB::select("SELECT outlet.* , otn.PartyId , a.ArticleColor , a.ArticleOpenFlag  FROM `outlet` inner join outletnumber otn On otn.Id = outlet.OutletNumberId INNER JOIN article a ON a.Id = outlet.ArticleId where OutletNumberId = '" . $OTLNO . "'");
+		//update artstockstatus yashvi
+		if (!empty($data) && $data[0]->ArticleOpenFlag == 0) {
+			$salesNoPacksData = []; // Initialize outside the loop
+			foreach ($data as $d) {
+				$data1 = DB::select("SELECT * FROM `artstockstatus` where ArticleId =  $d->ArticleId and outletId =   $d->PartyId ");
+				$totalPieces = 0;
+				$salesNoPacksData = [];
+	
+				$articleColors = json_decode($d->ArticleColor, true);
+	
+				foreach ($articleColors as $key => $vl) {
+					$numberofpacks = $vl["Id"];
+					$articleId = $d->ArticleId;
+					$noPacksNewKey = $data1[0]->SalesNoPacks;
+					$noPacksKey = $d->NoPacks;
+	
+					$noPacksNewKey = explode(',', $noPacksNewKey);
+					$noPacksKey = explode(',', $noPacksKey);
+	
+					if (count($noPacksNewKey) === count($noPacksKey)) {
+						$salesNoPacksData = [];
+						for ($i = 0; $i < count($noPacksNewKey); $i++) {
+							$salesNoPacksData[] = $noPacksNewKey[$i] + $noPacksKey[$i];
+						}
+					} else {
+						$salesNoPacksData[] = 0;
+					}
+	
+					$salesNoPacksDataString = implode(',', $salesNoPacksData);
+					$totalPieces = array_sum($salesNoPacksData);
+					
+	
+					DB::table('artstockstatus')
+						->where(['outletId' => $d->PartyId, 'ArticleId' => $articleId])
+						->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
+				}
+			}
+		}else{
+			foreach ($data as $d) {
+				$data1 = DB::select("SELECT * FROM `artstockstatus` where ArticleId = $d->ArticleId and outletId =  $d->PartyId ");
+				$dataupdate = $d->NoPacks + $data1[0]->SalesNoPacks ;
+				DB::table('artstockstatus')->where(['outletId' => $d->PartyId])->where(['ArticleId' => $d->ArticleId])->update(['SalesNoPacks' =>  $dataupdate,  'TotalPieces' => $dataupdate]);
+			}
+		
+		}	
+		// $salesNoPacksData = []; // Initialize outside the loop
+		// foreach ($data as $d) {
+		// 	$data1 = DB::select("SELECT * FROM `artstockstatus` where ArticleId =  $d->ArticleId and outletId =   $d->PartyId ");
+		// 	$totalPieces = 0;
+		// 	$salesNoPacksData = [];
+
+		// 	$articleColors = json_decode($d->ArticleColor, true);
+
+		// 	foreach ($articleColors as $key => $vl) {
+		// 		$numberofpacks = $vl["Id"];
+		// 		$articleId = $d->ArticleId;
+		// 		$noPacksNewKey = $data1[0]->SalesNoPacks;
+		// 		$noPacksKey = $d->NoPacks;
+
+		// 		$noPacksNewKey = explode(',', $noPacksNewKey);
+		// 		$noPacksKey = explode(',', $noPacksKey);
+
+		// 		if (count($noPacksNewKey) === count($noPacksKey)) {
+		// 			$salesNoPacksData = [];
+		// 			for ($i = 0; $i < count($noPacksNewKey); $i++) {
+		// 				$salesNoPacksData[] = $noPacksNewKey[$i] + $noPacksKey[$i];
+		// 			}
+		// 		} else {
+		// 			$salesNoPacksData[] = 0;
+		// 		}
+
+		// 		$salesNoPacksDataString = implode(',', $salesNoPacksData);
+		// 		$totalPieces = array_sum($salesNoPacksData);
+				
+
+		// 		DB::table('artstockstatus')
+		// 			->where(['outletId' => $d->PartyId, 'ArticleId' => $articleId])
+		// 			->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
+		// 	}
+		// }
+
+
+	
+		// foreach ($data as $d) {
+		// 		$data1 = DB::select("SELECT * FROM `artstockstatus` where ArticleId = $d->ArticleId and outletId =  $d->PartyId ");
+		// 		$dataupdate = $d->NoPacks + $data1[0]->SalesNoPacks ;
+		// 		DB::table('artstockstatus')->where(['outletId' => $d->PartyId])->where(['ArticleId' => $d->ArticleId])->update(['SalesNoPacks' =>  $dataupdate,  'TotalPieces' => $dataupdate]);
+
+		// 	}
+		//close 	
 		if (!empty($data)) {
 			DB::beginTransaction();
 			try {
@@ -1446,7 +1692,7 @@ class OutletsController extends Controller
 
 	public function GetOutletChallen($OTLNO)
 	{
-		$outletsData =  OutletNumber::where('Id', $OTLNO)->first();
+		$outletsData = OutletNumber::where('Id', $OTLNO)->first();
 		if ($outletsData->OutwardnumberId == null) {
 			$getoutletchallen = DB::select("SELECT oln.Address as OutletAddress,  o.Id as OID,pr.UserId as SalesUserId , a.Id, a.ArticleNumber, CASE WHEN (oi.ArticleColor IS NULL) THEN a.ArticleColor ELSE oi.ArticleColor END AS `ArticleColor`, a.ArticleSize, a.ArticleRatio, a.ArticleOpenFlag, o.NoPacks, concat(Replace(partyuser.Name,' ',''), oln.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutletNumber, oln.OutletDate, oln.GSTAmount, oln.GSTPercentage, oln.Discount, oln.Remarks, pr.Address, pr.PhoneNumber as Contact, pr.City , pr.State , pr.Country ,pr.PinCode ,  u.Name as UserName, c.Title, c.Colorflag, o.ArticleRate, pr.Name as PartyName , pr.GSTNumber as GST FROM `outlet` o inner join outletnumber oln on oln.Id=o.OutletNumberId inner join article a on a.Id=o.ArticleId inner join users u on u.Id=oln.UserId left join po p on p.ArticleId=a.Id inner join category c on c.Id=a.CategoryId inner join financialyear fn on fn.Id=oln.FinancialYearId left join party pr on pr.Id=oln.OutletPartyId left join users partyuser on oln.PartyId=partyuser.PartyId  left join outletimport oi on oi.ArticleId=a.Id and oi.PartyId = oln.PartyId where o.OutletNumberId = '" . $OTLNO . "' order by c.Title asc");
 		} else {
@@ -1535,32 +1781,32 @@ class OutletsController extends Controller
 				}
 				$jsonResult = $results;
 				//COLOR
-	
+
 				//PACKS
 				$data = $NoPacks;
 				$results = explode(",", $data);
-	
+
 				// Convert the results to JSON if needed
 				$jsonResultP = $results;
-	
+
 				//PACKS
-				
-	
-				$C=array_combine($jsonResult,$jsonResultP);
-	
+
+
+				$C = array_combine($jsonResult, $jsonResultP);
+
 				$jsonData = json_encode($C);
-	
+
 				$arrayData = json_decode($jsonData, true);
-				$TotalCQty="";
-				$allkey="";
-				$allvalue="";
-                foreach ($arrayData as $key => $value) { 
-                    if (!empty($key)) {
-                        $TotalCQty .= '<b>' . $key . " : " . '</b>' . $value . ", ";
-                    } else {
-                        $TotalCQty .= '<b>' . '--' . " : " . '</b>'. $value. ', ';
-                    }
-                }
+				$TotalCQty = "";
+				$allkey = "";
+				$allvalue = "";
+				foreach ($arrayData as $key => $value) {
+					if (!empty($key)) {
+						$TotalCQty .= '<b>' . $key . " : " . '</b>' . $value . ", ";
+					} else {
+						$TotalCQty .= '<b>' . '--' . " : " . '</b>' . $value . ', ';
+					}
+				}
 
 
 				$ArticleColor = "";
@@ -1585,9 +1831,9 @@ class OutletsController extends Controller
 			}
 
 			$numbers_array = explode(",", $NoPacks);
-            $sum = array_sum($numbers_array);
-            $TotalQty = $sum;
-			$challendata[] = json_decode(json_encode(array("SalesPerson" => $SalesPerson, "TotalCQty" => $TotalCQty,  "TotalQty" => $TotalQty , "Address" => $Address, "Remarks" => $Remarks, "Contact" => $Contact, "GST" => $GST,  "PartyName" => $PartyName, "UserName" => $UserName, "OutletDate" => $OutletDate, "OutletNumber" => $OutletNumber, "ArticleNumber" => $ArticleNumber, "Title" => $Title, "ArticleRatio" => $ArticleRatio, "QuantityInSet" => $NoPacks, "ArticleColor" => $ArticleColor, "ArticleSize" => $ArticleSize, "ArticleRate" => number_format($ArticleRate, 2), "Amount" => number_format($Amount, 2))), false);
+			$sum = array_sum($numbers_array);
+			$TotalQty = $sum;
+			$challendata[] = json_decode(json_encode(array("SalesPerson" => $SalesPerson, "TotalCQty" => $TotalCQty, "TotalQty" => $TotalQty, "Address" => $Address, "Remarks" => $Remarks, "Contact" => $Contact, "GST" => $GST, "PartyName" => $PartyName, "UserName" => $UserName, "OutletDate" => $OutletDate, "OutletNumber" => $OutletNumber, "ArticleNumber" => $ArticleNumber, "Title" => $Title, "ArticleRatio" => $ArticleRatio, "QuantityInSet" => $NoPacks, "ArticleColor" => $ArticleColor, "ArticleSize" => $ArticleSize, "ArticleRate" => number_format($ArticleRate, 2), "Amount" => number_format($Amount, 2))), false);
 		}
 		$TotalFinalAmount = 0;
 		$GSTLabel = "";
@@ -1617,7 +1863,7 @@ class OutletsController extends Controller
 				$TotalFinalAmount = $TotalAmount;
 			}
 		}
-		$as  = array($challendata, array("RoundOff" => $this->splitter(number_format($TotalFinalAmount, 2, '.', '')), "TotalQuantityPic" => $TotalNoPacks, "TotalAmount" => number_format($TotalAmount, 2), "Discount" => number_format($Discount, 2), "TotalFinalAmount" => number_format($TotalFinalAmount, 2), "GSTLabel" => $GSTLabel, "GSTValue" => $GSTValue));
+		$as = array($challendata, array("RoundOff" => $this->splitter(number_format($TotalFinalAmount, 2, '.', '')), "TotalQuantityPic" => $TotalNoPacks, "TotalAmount" => number_format($TotalAmount, 2), "Discount" => number_format($Discount, 2), "TotalFinalAmount" => number_format($TotalFinalAmount, 2), "GSTLabel" => $GSTLabel, "GSTValue" => $GSTValue));
 		return $as;
 	}
 
@@ -1739,12 +1985,12 @@ class OutletsController extends Controller
 		$TotalAmount = 0;
 		foreach ($vnddata as $vnd) {
 			$outlets = Outlet::where('OutletNumberId', $vnd->OutletNumberId)->get();
-			$outletsData =  OutletNumber::where('Id', $vnd->OutletNumberId)->first();
+			$outletsData = OutletNumber::where('Id', $vnd->OutletNumberId)->first();
 			if ($vnd->OutwardnumberId == null) {
 				foreach ($outlets as $outlet) {
 					if (strpos($outlet->NoPacks, ',') !== false) {
 						foreach (explode(",", $outlet->NoPacks) as $pack) {
-							$TotalAmount = $TotalAmount +  ($pack * $outlet->ArticleRate);
+							$TotalAmount = $TotalAmount + ($pack * $outlet->ArticleRate);
 						}
 					} else {
 						$TotalAmount = $TotalAmount + ($outlet->NoPacks * $outlet->ArticleRate);
@@ -1757,8 +2003,8 @@ class OutletsController extends Controller
 				if ($outletsData->Discount != 0) {
 					$TotalAmount = $TotalAmount - $outletsData->Discount;
 				}
-				$totalRoundoffAmmount  = $this->splitter(number_format($TotalAmount, 2, '.', ''));
-				$vnd->TotalAmount  = $totalRoundoffAmmount['TotalRoundAmount'];
+				$totalRoundoffAmmount = $this->splitter(number_format($TotalAmount, 2, '.', ''));
+				$vnd->TotalAmount = $totalRoundoffAmmount['TotalRoundAmount'];
 				$TotalAmount = 0;
 			} else {
 				$outwardNumberId = DB::select("select Id as OutwardNumberId from outwardnumber where Id=" . $vnd->OutwardnumberId . "");
@@ -1770,23 +2016,23 @@ class OutletsController extends Controller
 							foreach (explode(",", $outward->NoPacks) as $pack) {
 								if ($outward->PartyDiscount) {
 									$partyDiscountAmount = (($pack * $outward->OutwardRate * $outward->PartyDiscount) / 100);
-									$AmountWithPartyDiscount = $pack * $outward->OutwardRate -  $partyDiscountAmount;
+									$AmountWithPartyDiscount = $pack * $outward->OutwardRate - $partyDiscountAmount;
 									$TotalAmount = $TotalAmount + $AmountWithPartyDiscount;
 								} else {
-									$TotalAmount = $TotalAmount +  ($pack * $outward->OutwardRate);
+									$TotalAmount = $TotalAmount + ($pack * $outward->OutwardRate);
 								}
 							}
 						} else {
 							if ($outward->PartyDiscount) {
 								$partyDiscountAmount = ((($outward->NoPacks * $outward->OutwardRate) * $outward->PartyDiscount) / 100);
-								$AmountWithPartyDiscount = $outward->NoPacks * $outward->OutwardRate -  $partyDiscountAmount;
+								$AmountWithPartyDiscount = $outward->NoPacks * $outward->OutwardRate - $partyDiscountAmount;
 								$TotalAmount = $TotalAmount + $AmountWithPartyDiscount;
 							} else {
 								$TotalAmount = $TotalAmount + ($outward->NoPacks * $outward->OutwardRate);
 							}
 						}
 					}
-					$outwardData =  OutwardNumber::where('Id', $outwardNumberId[0]->OutwardNumberId)->first();
+					$outwardData = OutwardNumber::where('Id', $outwardNumberId[0]->OutwardNumberId)->first();
 					if (!is_null($outwardData->GSTPercentage)) {
 						$GSTValue = (($TotalAmount * $outwardData->GSTPercentage) / 100);
 						$TotalAmount = $TotalAmount + $GSTValue;
@@ -1798,8 +2044,8 @@ class OutletsController extends Controller
 					if (!is_null($outwardData->GSTAmount)) {
 						$TotalAmount = $TotalAmount + $outwardData->GSTAmount;
 					}
-					$totalRoundoffAmmount  = $this->splitter(number_format($TotalAmount, 2, '.', ''));
-					$vnd->TotalAmount  = $totalRoundoffAmmount['TotalRoundAmount'];
+					$totalRoundoffAmmount = $this->splitter(number_format($TotalAmount, 2, '.', ''));
+					$vnd->TotalAmount = $totalRoundoffAmmount['TotalRoundAmount'];
 					$TotalAmount = 0;
 				}
 			}
@@ -1817,57 +2063,57 @@ class OutletsController extends Controller
 
 	public function OutletListFromOTLNO($Id, Request $request)
 	{
-	              $data = $request->all();
-        $search = $data["search"];
-        $startnumber = $data["start"];
-        $vnddataTotal = DB::select('select count(*) as Total from (SELECT o.ArticleRate as Rate ,  concat(oln.OutletNumber, \'/\',fn.StartYear,\'-\',fn.EndYear) as Outlet_Number_FinancialYear, o.Id , o.OutletNumberId, oln.OutletNumber,  oln.OutletDate, o.NoPacks, a.ArticleNumber, a.ArticleOpenFlag FROM `outlet` o inner join outletnumber oln on o.OutletNumberId=oln.Id inner join financialyear fn on fn.Id=oln.FinancialYearId inner join article a on a.Id=o.ArticleId where o.OutletNumberId="' . $Id . '") as d');
-        $vnTotal = $vnddataTotal[0]->Total;
-        $length = $data["length"];
-        if ($search['value'] != null && strlen($search['value']) > 2) {
-            $searchstring = "where d.NoPacks like '%" . $search['value'] . "%' OR d.Rate like '%" . $search['value'] . "%' OR d.ArticleNumber like '%" . $search['value'] . "%' ";
-            $vnddataTotalFilter = DB::select('select count(*) as Total from (SELECT o.ArticleRate as Rate ,  concat(oln.OutletNumber, \'/\',fn.StartYear,\'-\',fn.EndYear) as Outlet_Number_FinancialYear, o.Id , o.OutletNumberId, oln.OutletNumber,  oln.OutletDate, o.NoPacks, a.ArticleNumber, a.ArticleOpenFlag FROM `outlet` o inner join outletnumber oln on o.OutletNumberId=oln.Id inner join financialyear fn on fn.Id=oln.FinancialYearId inner join article a on a.Id=o.ArticleId where o.OutletNumberId="' . $Id . '") as d '  . $searchstring );
-            $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
-        } else {
-            $searchstring = "";
-            $vnddataTotalFilterValue = $vnTotal;
-        }
-        $column = $data["order"][0]["column"];
-        switch ($column) {
-            case 1:
-                $ordercolumn = "d.ArticleNumber";
-                break;
-            case 2:
-                $ordercolumn = "d.NoPacks";
-                break;
-            case 3:
-                $ordercolumn = "d.Rate";
-                break;
-           
-            
-            default:
-                $ordercolumn = "d.OutletDate";
-                break;
-        }
-        $order = "";
-        if ($data["order"][0]["dir"]) {
-            $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
-        }
-        $vnddata = DB::select('select d.* from (SELECT o.ArticleRate as Rate ,  concat(oln.OutletNumber, \'/\',fn.StartYear,\'-\',fn.EndYear) as Outlet_Number_FinancialYear, o.Id , o.OutletNumberId, oln.OutletNumber,  oln.OutletDate, o.NoPacks, a.ArticleNumber, a.ArticleOpenFlag FROM `outlet` o inner join outletnumber oln on o.OutletNumberId=oln.Id inner join financialyear fn on fn.Id=oln.FinancialYearId inner join article a on a.Id=o.ArticleId where o.OutletNumberId="' . $Id . '") as d ' . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length );
-    
-    
+		$data = $request->all();
+		$search = $data["search"];
+		$startnumber = $data["start"];
+		$vnddataTotal = DB::select('select count(*) as Total from (SELECT o.ArticleRate as Rate ,  concat(oln.OutletNumber, \'/\',fn.StartYear,\'-\',fn.EndYear) as Outlet_Number_FinancialYear, o.Id , o.OutletNumberId, oln.OutletNumber,  oln.OutletDate, o.NoPacks, a.ArticleNumber, a.ArticleOpenFlag FROM `outlet` o inner join outletnumber oln on o.OutletNumberId=oln.Id inner join financialyear fn on fn.Id=oln.FinancialYearId inner join article a on a.Id=o.ArticleId where o.OutletNumberId="' . $Id . '") as d');
+		$vnTotal = $vnddataTotal[0]->Total;
+		$length = $data["length"];
+		if ($search['value'] != null && strlen($search['value']) > 2) {
+			$searchstring = "where d.NoPacks like '%" . $search['value'] . "%' OR d.Rate like '%" . $search['value'] . "%' OR d.ArticleNumber like '%" . $search['value'] . "%' ";
+			$vnddataTotalFilter = DB::select('select count(*) as Total from (SELECT o.ArticleRate as Rate ,  concat(oln.OutletNumber, \'/\',fn.StartYear,\'-\',fn.EndYear) as Outlet_Number_FinancialYear, o.Id , o.OutletNumberId, oln.OutletNumber,  oln.OutletDate, o.NoPacks, a.ArticleNumber, a.ArticleOpenFlag FROM `outlet` o inner join outletnumber oln on o.OutletNumberId=oln.Id inner join financialyear fn on fn.Id=oln.FinancialYearId inner join article a on a.Id=o.ArticleId where o.OutletNumberId="' . $Id . '") as d ' . $searchstring);
+			$vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
+		} else {
+			$searchstring = "";
+			$vnddataTotalFilterValue = $vnTotal;
+		}
+		$column = $data["order"][0]["column"];
+		switch ($column) {
+			case 1:
+				$ordercolumn = "d.ArticleNumber";
+				break;
+			case 2:
+				$ordercolumn = "d.NoPacks";
+				break;
+			case 3:
+				$ordercolumn = "d.Rate";
+				break;
 
-        return array(
-            'datadraw' => $data["draw"],
-            'recordsTotal' => $vnTotal,
-            'recordsFiltered' => $vnddataTotalFilterValue,
-            'response' => 'success',
-            'startnumber' => $startnumber,
-            'search' => count($vnddata),
-            'data' => $vnddata,
-        );
-	    
-	    
-// 		return DB::select('SELECT o.ArticleRate as Rate ,  concat(oln.OutletNumber, \'/\',fn.StartYear,\'-\',fn.EndYear) as Outlet_Number_FinancialYear, o.Id , o.OutletNumberId, oln.OutletNumber,  oln.OutletDate, o.NoPacks, a.ArticleNumber, a.ArticleOpenFlag FROM `outlet` o inner join outletnumber oln on o.OutletNumberId=oln.Id inner join financialyear fn on fn.Id=oln.FinancialYearId inner join article a on a.Id=o.ArticleId where o.OutletNumberId="' . $Id . '"');
+
+			default:
+				$ordercolumn = "d.OutletDate";
+				break;
+		}
+		$order = "";
+		if ($data["order"][0]["dir"]) {
+			$order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
+		}
+		$vnddata = DB::select('select d.* from (SELECT o.ArticleRate as Rate ,  concat(oln.OutletNumber, \'/\',fn.StartYear,\'-\',fn.EndYear) as Outlet_Number_FinancialYear, o.Id , o.OutletNumberId, oln.OutletNumber,  oln.OutletDate, o.NoPacks, a.ArticleNumber, a.ArticleOpenFlag FROM `outlet` o inner join outletnumber oln on o.OutletNumberId=oln.Id inner join financialyear fn on fn.Id=oln.FinancialYearId inner join article a on a.Id=o.ArticleId where o.OutletNumberId="' . $Id . '") as d ' . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length);
+
+
+
+		return array(
+			'datadraw' => $data["draw"],
+			'recordsTotal' => $vnTotal,
+			'recordsFiltered' => $vnddataTotalFilterValue,
+			'response' => 'success',
+			'startnumber' => $startnumber,
+			'search' => count($vnddata),
+			'data' => $vnddata,
+		);
+
+
+		// 		return DB::select('SELECT o.ArticleRate as Rate ,  concat(oln.OutletNumber, \'/\',fn.StartYear,\'-\',fn.EndYear) as Outlet_Number_FinancialYear, o.Id , o.OutletNumberId, oln.OutletNumber,  oln.OutletDate, o.NoPacks, a.ArticleNumber, a.ArticleOpenFlag FROM `outlet` o inner join outletnumber oln on o.OutletNumberId=oln.Id inner join financialyear fn on fn.Id=oln.FinancialYearId inner join article a on a.Id=o.ArticleId where o.OutletNumberId="' . $Id . '"');
 	}
 
 	public function OutletDatePartyfromOTLNO($Id)
@@ -1883,13 +2129,15 @@ class OutletsController extends Controller
 	public function UpdateTransportStatus(Request $request)
 	{
 		$data = $request->all();
-		Transportoutlet::where('OutwardNumberId', $data['OutwardId'])->update(array(
-			'TransportStatus' => $data['TransportStatus'],
-			'Remarks' => $data['Remarks'],
-			'UserId' => $data['UserId'],
-			'TotalPieces' => $data['TotalPieces'],
-			'ReceivedDate' => $data['ReceivedDate']
-		));
+		Transportoutlet::where('OutwardNumberId', $data['OutwardId'])->update(
+			array(
+				'TransportStatus' => $data['TransportStatus'],
+				'Remarks' => $data['Remarks'],
+				'UserId' => $data['UserId'],
+				'TotalPieces' => $data['TotalPieces'],
+				'ReceivedDate' => $data['ReceivedDate']
+			)
+		);
 		if ($data['TransportStatus'] == 1) {
 			DB::select('INSERT INTO `transportoutwardpacks` (`ArticleId`, `ColorId`, `OutwardId`, `NoPacks`, `PartyId`, `CreatedDate`, `UpdatedDate`) select `ArticleId`, `ColorId`, `OutwardId`, `NoPacks`, `PartyId`, `CreatedDate`, `UpdatedDate` from outwardpacks where OutwardId in (SELECT Id FROM `outward` where OutwardNumberId = ' . $data['OutwardId'] . ')');
 		}
@@ -1961,7 +2209,7 @@ class OutletsController extends Controller
 			$SR_Number = $generate_SRNUMBER['SR_Number'];
 			$SR_Number_Financial_Id = $generate_SRNUMBER['SR_Number_Financial_Id'];
 			$SRNumberId = DB::table('outletsalesreturnnumber')->insertGetId(
-				['SalesReturnNumber' =>  $SR_Number, "FinancialYearId" => $SR_Number_Financial_Id, 'PartyId' =>  $data['PartyId'], 'OutletPartyId' => $OutletPartyId, 'Remarks' => $data['Remark'], 'CreatedDate' => date('Y-m-d H:i:s')]
+				['SalesReturnNumber' => $SR_Number, "FinancialYearId" => $SR_Number_Financial_Id, 'PartyId' => $data['PartyId'], 'OutletPartyId' => $OutletPartyId, 'Remarks' => $data['Remark'], 'CreatedDate' => date('Y-m-d H:i:s')]
 			);
 			$salesRetRec = DB::select("select concat($SR_Number,'/', fn.StartYear,'-',fn.EndYear) as OutletSalesreturnnumber from outletsalesreturnnumber srn inner join financialyear fn on fn.Id=srn.FinancialYearId where srn.Id= '" . $SRNumberId . "'");
 			UserLogs::create([
@@ -1988,7 +2236,7 @@ class OutletsController extends Controller
 				$SRNumberId = $data['SRNumberId'];
 				DB::table('outletsalesreturnnumber')
 					->where('Id', $SRNumberId)
-					->update(['PartyId' =>  $data['PartyId'], 'OutletPartyId' => $OutletPartyId, 'Remarks' => $data['Remark']]);
+					->update(['PartyId' => $data['PartyId'], 'OutletPartyId' => $OutletPartyId, 'Remarks' => $data['Remark']]);
 				$artRateRecord = Article::where('Id', $data["ArticleId"])->first();
 				$salesRetRec = DB::select("select concat($SR_Number,'/', fn.StartYear,'-',fn.EndYear) as OutletSalesreturnnumber from outletsalesreturnnumber srn inner join financialyear fn on fn.Id=srn.FinancialYearId where srn.Id= '" . $SRNumberId . "'");
 				UserLogs::create([
@@ -2017,10 +2265,10 @@ class OutletsController extends Controller
 						OutletSalesReturnPacks::where('SalesReturnId', $outletSalesreturnrecord->Id)->where('ColorId', 0)->where('OutletId', $data['OutletId'])->update(['NoPacks' => $NoPacks + $outletSalesreturnrecord->NoPacks]);
 					} else {
 						$salesreturnId = DB::table('outletsalesreturn')->insertGetId(
-							["SalesReturnNumber" => $SRNumberId, 'OutletId' => $data['OutletId'], 'OutletPartyId' => $data['OutletPartyId'], 'PartyId' => $data["PartyId"], 'ArticleId' => $data['ArticleId'], 'NoPacks' =>  $NoPacks, 'UserId' =>  $data['UserId'], 'CreatedDate' => date('Y-m-d H:i:s')]
+							["SalesReturnNumber" => $SRNumberId, 'OutletId' => $data['OutletId'], 'OutletPartyId' => $data['OutletPartyId'], 'PartyId' => $data["PartyId"], 'ArticleId' => $data['ArticleId'], 'NoPacks' => $NoPacks, 'UserId' => $data['UserId'], 'CreatedDate' => date('Y-m-d H:i:s')]
 						);
 						DB::table('outletsalesreturnpacks')->insertGetId(
-							['SalesReturnId' => $salesreturnId, 'ArticleId' =>  $data['ArticleId'], 'ColorId' => 0, 'OutletId' => $data['OutletId'], 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
+							['SalesReturnId' => $salesreturnId, 'ArticleId' => $data['ArticleId'], 'ColorId' => 0, 'OutletId' => $data['OutletId'], 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
 						);
 					}
 					DB::commit();
@@ -2056,7 +2304,7 @@ class OutletsController extends Controller
 				if ($as[0]->SalesReturnNoPacks != "") {
 					$npacks = explode(",", $getalldata[0]->OutletNoPacks);
 					$spacks = explode(",", $as[0]->SalesReturnNoPacks);
-					$newdata  = "";
+					$newdata = "";
 					foreach ($npacks as $key => $vl) {
 						$newdata .= ($vl - $spacks[$key]) . ',';
 					}
@@ -2129,8 +2377,8 @@ class OutletsController extends Controller
 						$newPacksImport[$count] = $outletSalesreturnrecordPacks[$count] + $NoPacksGot[$count];
 						$count = $count + 1;
 					}
-					$newPacksImportstring =  implode(',', $newPacksImport);
-					OutletSalesreturn::where('SalesReturnNumber', $SRNumberId)->where('OutletId', $OutletId)->where('ArticleId', $data['ArticleId'])->update(['NoPacks' =>  $newPacksImportstring]);
+					$newPacksImportstring = implode(',', $newPacksImport);
+					OutletSalesreturn::where('SalesReturnNumber', $SRNumberId)->where('OutletId', $OutletId)->where('ArticleId', $data['ArticleId'])->update(['NoPacks' => $newPacksImportstring]);
 					if ($data['ArticleOpenFlag'] == 0) {
 						if (strpos($NoPacks, ',') !== false) {
 							$NoPacks = explode(',', $NoPacks);
@@ -2160,64 +2408,64 @@ class OutletsController extends Controller
 							foreach ($data['ArticleSelectedColor'] as $key => $vl) {
 								$numberofpacks = $vl["Id"];
 								DB::table('outletsalesreturnpacks')->insertGetId(
-									['SalesReturnId' => $salesreturnId, 'ArticleId' =>  $data['ArticleId'], 'ColorId' => $numberofpacks, 'OutletId' => $OutletId, 'NoPacks' => $NoPacks[$key], 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
+									['SalesReturnId' => $salesreturnId, 'ArticleId' => $data['ArticleId'], 'ColorId' => $numberofpacks, 'OutletId' => $OutletId, 'NoPacks' => $NoPacks[$key], 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
 								);
 							}
 						} else {
 							foreach ($data['ArticleSelectedColor'] as $key => $vl) {
 								$numberofpacks = $vl["Id"];
 								DB::table('outletsalesreturnpacks')->insertGetId(
-									['SalesReturnId' => $salesreturnId, 'ArticleId' =>  $data['ArticleId'], 'ColorId' => $numberofpacks, 'OutletId' => $OutletId, 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
+									['SalesReturnId' => $salesreturnId, 'ArticleId' => $data['ArticleId'], 'ColorId' => $numberofpacks, 'OutletId' => $OutletId, 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
 								);
 							}
 						}
 					} else {
 						DB::table('outletsalesreturnpacks')->insertGetId(
-							['SalesReturnId' => $salesreturnId, 'ArticleId' =>  $data['ArticleId'], 'ColorId' => 0, 'OutletId' => $OutletId, 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
+							['SalesReturnId' => $salesreturnId, 'ArticleId' => $data['ArticleId'], 'ColorId' => 0, 'OutletId' => $OutletId, 'NoPacks' => $NoPacks, 'PartyId' => $data["PartyId"], 'CreatedDate' => date('Y-m-d H:i:s'), 'UpdatedDate' => date('Y-m-d H:i:s')]
 						);
 					}
 				}
 				DB::commit();
-					return response()->json(array("SRNumberId" => $SRNumberId, "id" => "SUCCESS"), 200);
+				return response()->json(array("SRNumberId" => $SRNumberId, "id" => "SUCCESS"), 200);
 			} catch (\Exception $e) {
 				DB::rollback();
 				return response()->json(array("id" => ""), 200);
 			}
 		}
 	}
-	
+
 	public function GetOutletSalesReturn($id)
 	{
 		// return($id);
 		$userrole = DB::select("SELECT Role FROM `users`where Id='" . $id . "'");
 		// return($userrole);
-		
+
 		if ($userrole[0]->Role == 2) {
 			$wherecustom = "";
 		} else {
-			$wherecustom = "where otn.UserId='" . $id . "'";	
-		}	
+			$wherecustom = "where otn.UserId='" . $id . "'";
+		}
 		return DB::select("SELECT concat(otn.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, slr.Id, p.Name, a.ArticleNumber, FirstCharacterConcat(u.Name),pp.Name as OutletPartyName slr.NoPacks, slr.CreatedDate FROM `salesreturn` slr inner join party p on p.Id=slr.PartyId inner join article a on a.Id=slr.ArticleId  inner join outward o on o.Id=slr.OutwardId inner join outwardnumber otn on otn.Id=o.OutwardNumberId inner join financialyear fn on fn.Id=otn.FinancialYearId inner join users u on u.Id=oln.UserId " . $wherecustom . " group by oln.Id");
 	}
 
 	public function PostOutletSalesReturn(Request $request)
 	{
-		
+
 		// var_dump($request);
 		// print_r($request);
 		$data = $request->all();
 		// $UserId = $data['UserID'];
 		$search = $data["search"];
 		$startnumber = $data["start"];
-		
 
 
-		$role = DB::select("SELECT `Role` FROM `users` where `Id` = ". $request->pid);
+
+		$role = DB::select("SELECT `Role` FROM `users` where `Id` = " . $request->pid);
 
 
-		if($role[0]->Role != 2){
-			$vnddataTotal = DB::select("select count(*) as Total from (SELECT slr.Id FROM `outletsalesreturn` slr inner join outletsalesreturnnumber sln on sln.Id=slr.SalesReturnNumber inner join party p on p.Id=sln.PartyId inner join article a on a.Id=slr.ArticleId inner join users u on u.Id=slr.UserId inner join outlet o on o.Id=slr.OutletId inner join outletnumber otn on otn.Id=o.OutletNumberId inner join financialyear fn on fn.Id=otn.FinancialYearId where slr.UserId = ". $request->pid ."  group by slr.SalesReturnNumber ) as d");
-		}else{
+		if ($role[0]->Role != 2) {
+			$vnddataTotal = DB::select("select count(*) as Total from (SELECT slr.Id FROM `outletsalesreturn` slr inner join outletsalesreturnnumber sln on sln.Id=slr.SalesReturnNumber inner join party p on p.Id=sln.PartyId inner join article a on a.Id=slr.ArticleId inner join users u on u.Id=slr.UserId inner join outlet o on o.Id=slr.OutletId inner join outletnumber otn on otn.Id=o.OutletNumberId inner join financialyear fn on fn.Id=otn.FinancialYearId where slr.UserId = " . $request->pid . "  group by slr.SalesReturnNumber ) as d");
+		} else {
 			$vnddataTotal = DB::select("select count(*) as Total from (SELECT slr.Id FROM `outletsalesreturn` slr inner join outletsalesreturnnumber  sln on sln.Id=slr.SalesReturnNumber inner join party p on p.Id=sln.PartyId inner join article a on a.Id=slr.ArticleId inner join users u on u.Id=slr.UserId inner join outlet o on o.Id=slr.OutletId inner join outletnumber otn on otn.Id=o.OutletNumberId inner join financialyear fn on fn.Id=otn.FinancialYearId group by slr.SalesReturnNumber) as d");
 		}
 
@@ -2228,10 +2476,10 @@ class OutletsController extends Controller
 
 		if ($search['value'] != null && strlen($search['value']) > 2) {
 			$searchstring = "WHERE d.SalesReturnNumber like '%" . $search['value'] . "%' OR d.Name like '%" . $search['value'] . "%' OR d.ArticleNumber like '%" . $search['value'] . "%' OR cast(d.CreatedDate as char) like '%" . $search['value'] . "%'";
-			
-			if($role[0]->Role != 2){
+
+			if ($role[0]->Role != 2) {
 				$vnddataTotalFilter = DB::select("select count(*) as Total from (select * from (SELECT GetTotalOSROrderPieces(son.Id) as TotalSRPieces, s.UserId, DATE_FORMAT(son.CreatedDate, '%d/%m/%Y') as CreatedDate, son.Id, p.Name, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY son.Id SEPARATOR ',') as ArticleNumber, concat(son.SalesReturnNumber, '/',fn.StartYear,'-',fn.EndYear) as SalesReturnNumber FROM `outletsalesreturn` s inner join article a on a.Id=s.ArticleId left join outletsalesreturnnumber son on s.SalesReturnNumber=son.Id inner join party p on p.Id=son.PartyId inner join financialyear fn on fn.Id=son.FinancialYearId inner join users u on u.Id=s.UserId inner join outlet o on o.Id=s.OutletId group by s.SalesReturnNumber) as ddd where ddd.UserId = " . $request->pid . " order by ddd.Id desc) as d " . $searchstring);
-			}else{
+			} else {
 				$vnddataTotalFilter = DB::select("select count(*) as Total from (select * from (SELECT GetTotalOSROrderPieces(son.Id) as TotalSRPieces, DATE_FORMAT(son.CreatedDate, '%d/%m/%Y') as CreatedDate, son.Id, p.Name, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY son.Id SEPARATOR ',') as ArticleNumber, concat(son.SalesReturnNumber, '/',fn.StartYear,'-',fn.EndYear) as SalesReturnNumber FROM `outletsalesreturn` s inner join article a on a.Id=s.ArticleId left join outletsalesreturnnumber son on s.SalesReturnNumber=son.Id inner join party p on p.Id=son.PartyId inner join financialyear fn on fn.Id=son.FinancialYearId inner join users u on u.Id=s.UserId inner join outlet o on o.Id=s.OutletId group by s.SalesReturnNumber) as ddd order by ddd.Id desc) as d " . $searchstring);
 			}
 
@@ -2265,9 +2513,9 @@ class OutletsController extends Controller
 		}
 
 
-		if($role[0]->Role != 2){
-			$vnddata = DB::select("select d.* FROM ( SELECT * FROM ( SELECT GetTotalOSROrderPieces(son.Id) AS TotalSRPieces, DATE_FORMAT(son.CreatedDate, '%d/%m/%Y') AS CreatedDate, son.Id, p.UserId, p.Name, GROUP_CONCAT( DISTINCT CONCAT(a.ArticleNumber) ORDER BY son.Id SEPARATOR ',' ) AS ArticleNumber, CONCAT( son.SalesReturnNumber, '/', fn.StartYear, '-', fn.EndYear ) AS SalesReturnNumber FROM `outletsalesreturn` s LEFT JOIN article a ON a.Id = s.ArticleId LEFT JOIN outletsalesreturnnumber son ON s.SalesReturnNumber = son.Id LEFT JOIN party p ON p.Id = son.PartyId LEFT JOIN financialyear fn ON fn.Id = son.FinancialYearId LEFT JOIN users u ON u.Id = s.UserId LEFT JOIN outward o ON o.Id = s.OutletId GROUP BY s.SalesReturnNumber " . $order . " ) AS ddd WHERE ddd.UserId = ".$request->pid."  ) AS d" . $searchstring . " limit " . $data["start"] . "," . $length);
-		}else{
+		if ($role[0]->Role != 2) {
+			$vnddata = DB::select("select d.* FROM ( SELECT * FROM ( SELECT GetTotalOSROrderPieces(son.Id) AS TotalSRPieces, DATE_FORMAT(son.CreatedDate, '%d/%m/%Y') AS CreatedDate, son.Id, p.UserId, p.Name, GROUP_CONCAT( DISTINCT CONCAT(a.ArticleNumber) ORDER BY son.Id SEPARATOR ',' ) AS ArticleNumber, CONCAT( son.SalesReturnNumber, '/', fn.StartYear, '-', fn.EndYear ) AS SalesReturnNumber FROM `outletsalesreturn` s LEFT JOIN article a ON a.Id = s.ArticleId LEFT JOIN outletsalesreturnnumber son ON s.SalesReturnNumber = son.Id LEFT JOIN party p ON p.Id = son.PartyId LEFT JOIN financialyear fn ON fn.Id = son.FinancialYearId LEFT JOIN users u ON u.Id = s.UserId LEFT JOIN outward o ON o.Id = s.OutletId GROUP BY s.SalesReturnNumber " . $order . " ) AS ddd WHERE ddd.UserId = " . $request->pid . "  ) AS d" . $searchstring . " limit " . $data["start"] . "," . $length);
+		} else {
 			$vnddata = DB::select("select d.* from (select * from (SELECT GetTotalOSROrderPieces(son.Id) as TotalSRPieces, DATE_FORMAT(son.CreatedDate, '%d/%m/%Y') as CreatedDate, son.Id, p.Name, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY son.Id SEPARATOR ',') as ArticleNumber, concat(son.SalesReturnNumber, '/',fn.StartYear,'-',fn.EndYear) as SalesReturnNumber FROM `outletsalesreturn` s left join article a on a.Id=s.ArticleId left join outletsalesreturnnumber son on s.SalesReturnNumber=son.Id left join party p on p.Id=son.PartyId left join financialyear fn on fn.Id=son.FinancialYearId left join users u on u.Id=s.UserId left join outward o on o.Id=s.OutletId group by s.SalesReturnNumber " . $order . " ) as ddd ) as d  " . $searchstring . "limit " . $data["start"] . "," . $length);
 		}
 
@@ -2365,7 +2613,7 @@ class OutletsController extends Controller
 		}
 	}
 
-		public function GetOutletSalesReturnChallan($Id)
+	public function GetOutletSalesReturnChallan($Id)
 	{
 		$getdata = DB::select("SELECT srn.OutletPartyId FROM `outletsalesreturn` s inner join outletsalesreturnnumber srn on srn.Id=s.SalesReturnNumber where s.SalesReturnNumber ='" . $Id . "'");
 		if ($getdata[0]->OutletPartyId == 0) {
@@ -2439,40 +2687,40 @@ class OutletsController extends Controller
 				$ArticleSize = "";
 			}
 
-			
-            $numbers_array = explode(",", $NoPacks);
-            $sum = array_sum($numbers_array);
-            $TotalQty = $sum;
+
+			$numbers_array = explode(",", $NoPacks);
+			$sum = array_sum($numbers_array);
+			$TotalQty = $sum;
 
 			$numbers_colorQty = explode(",", $ArticleColor);
 
-            $numbers_packQty = explode(",", $NoPacks);
+			$numbers_packQty = explode(",", $NoPacks);
 
-            $C=array_combine($numbers_colorQty,$numbers_packQty);
+			$C = array_combine($numbers_colorQty, $numbers_packQty);
 
-            $jsonData = json_encode($C);
+			$jsonData = json_encode($C);
 
-            $arrayData = json_decode($jsonData, true);
-            $TotalCQty="";
-            $allkey="";
-            $allvalue="";
-			foreach ($arrayData as $key => $value) { 
+			$arrayData = json_decode($jsonData, true);
+			$TotalCQty = "";
+			$allkey = "";
+			$allvalue = "";
+			foreach ($arrayData as $key => $value) {
 				if (!empty($key)) {
 					$TotalCQty .= '<b>' . $key . " : " . '</b>' . $value . ", ";
 				} else {
-					$TotalCQty .= '<b>' . '--' . " : " . '</b>'. $value. ', ';
+					$TotalCQty .= '<b>' . '--' . " : " . '</b>' . $value . ', ';
 				}
 			}
 
-			$challendata[] = json_decode(json_encode(array("ColorWiseQty" => $TotalCQty,"OutletNumber" => $OutletNumber,"TotalQty" => $TotalQty , "SalesReturnNumber" => $SalesReturnNumber, "UserName" => $UserName, "SRDate" => $SRDate, "Id" => $Id, "Name" => $Name, "Address" => $Address, "Outletdata" => $outletdata, "OutletPartyName" => $OutletPartyName, "OutletPartyAddress" => $OutletPartyAddress, "OutletPartyGSTNumber" => $OutletPartyGSTNumber, "GSTNumber" => $GSTNumber, "Remark" => $Remark, "ArticleNumber" => $ArticleNumber, "Title" => $Title, "ArticleRatio" => $ArticleRatio, "QuantityInSet" => $NoPacks, "ArticleRate" => number_format($ArticleRate, 2), "Amount" => number_format($Amount, 2), "ArticleColor" => $ArticleColor, "ArticleSize" => $ArticleSize)), false);
+			$challendata[] = json_decode(json_encode(array("ColorWiseQty" => $TotalCQty, "OutletNumber" => $OutletNumber, "TotalQty" => $TotalQty, "SalesReturnNumber" => $SalesReturnNumber, "UserName" => $UserName, "SRDate" => $SRDate, "Id" => $Id, "Name" => $Name, "Address" => $Address, "Outletdata" => $outletdata, "OutletPartyName" => $OutletPartyName, "OutletPartyAddress" => $OutletPartyAddress, "OutletPartyGSTNumber" => $OutletPartyGSTNumber, "GSTNumber" => $GSTNumber, "Remark" => $Remark, "ArticleNumber" => $ArticleNumber, "Title" => $Title, "ArticleRatio" => $ArticleRatio, "QuantityInSet" => $NoPacks, "ArticleRate" => number_format($ArticleRate, 2), "Amount" => number_format($Amount, 2), "ArticleColor" => $ArticleColor, "ArticleSize" => $ArticleSize)), false);
 		}
-		$as  = array($challendata, array("TotalNoPacks" => $TotalNoPacks, "TotalAmount" => number_format($TotalAmount, 2)));
+		$as = array($challendata, array("TotalNoPacks" => $TotalNoPacks, "TotalAmount" => number_format($TotalAmount, 2)));
 		return $as;
 	}
 
 	public function intransitlistpost(Request $request)
 	{
-		$partyId =  $request->PartyId;
+		$partyId = $request->PartyId;
 		return [1, 2, 3];
 		if ($partyId == 0) {
 			return DB::select("SELECT t.*, p.Name as PartyName, o.Id as OutwardNumberId ,  o.OutwardDate, concat(o.OutwardNumber, '/',f.StartYear,'-',f.EndYear) as OutwardNo FROM `transportoutlet` t left join party p on p.Id=t.PartyId left join outwardnumber o on o.Id=t.OutwardNumberId left join financialyear f on f.Id=o.FinancialYearId");

@@ -1002,9 +1002,6 @@ class OutletsController extends Controller
 							$salesNoPacksData[] = 0;
 						}
 
-						
-
-
 					$totalPieces = array_sum($salesNoPacksData);
 					$salesNoPacksDataString = implode(',', $salesNoPacksData);
 

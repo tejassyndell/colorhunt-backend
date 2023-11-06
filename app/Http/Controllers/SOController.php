@@ -3160,6 +3160,43 @@ class SOController extends Controller
 
     public function  deleteSalesReturnRecord($id, $LoggedId)
     {
+        $r = DB::table('salesreturn')
+        ->join('salesreturnnumber', 'salesreturn.salesreturnnumber', '=', 'salesreturnnumber.Id')
+        ->where('salesreturn.Id', '=', $id)
+        ->select('salesreturn.*', 'salesreturnnumber.PartyId')
+        ->first();
+        $DeleteNoPackes = $r->NoPacks;
+        $DeleteNoPackes;
+        $ArticleId = $r->ArticleId;
+        $OutletPartyId = $r->PartyId;
+        
+        
+                // Fetch the current SalesNoPacks value
+        $currentSalesNoPacks = DB::table('artstockstatus')
+            ->where(['outletId' => $OutletPartyId])
+            ->where(['ArticleId' => $ArticleId])
+            ->value('SalesNoPacks');
+            
+        
+         $artD = DB::table('article')
+            ->where('Id', $ArticleId)
+            ->first();
+        
+        // Calculate the new SalesNoPacks value by adding the new value to the current value
+        $newSalesNoPacks = $currentSalesNoPacks + $DeleteNoPackes;
+        
+        // Perform the updateOrInsert operation with the new SalesNoPacks value
+        DB::table('artstockstatus')->updateOrInsert(
+            [
+                'outletId' => $OutletPartyId,
+                'ArticleId' => $ArticleId
+            ],
+            [
+                'SalesNoPacks' => $newSalesNoPacks,
+                'TotalPieces' => $newSalesNoPacks
+            ]
+        );
+
         $articledata = DB::select("SELECT slr.SalesReturnNumber, slr.ArticleId, slr.NoPacks, a.ArticleNumber, a.ArticleColor, a.ArticleSize, a.ArticleRatio, a.ArticleOpenFlag, c.Colorflag FROM `salesreturn` slr inner join article a on a.Id=slr.ArticleId left join po p on p.ArticleId=a.Id inner join category c on c.Id=a.CategoryId where slr.Id ='" . $id . "'");
         $SalesReturnNoPacks = $articledata[0]->NoPacks;
         $SalesReturnNumber = $articledata[0]->SalesReturnNumber;
@@ -3767,7 +3804,7 @@ class SOController extends Controller
                 'Module' => 'Sales Return',
                 'ModuleNumberId' => $sodRec[0]->SalesReturnNumberId,
                 'LogType' => 'Updated',
-                'LogDescription' => $userName->Name . ' upadated ' . $newLogDesc . ' of article ' . $artRecor->ArticleNumber . ' in SalesReturn Number ' . $sodRec[0]->SalesReturnnumber,
+                'LogDescription' => $userName->Name . ' upadated '  . ' of article ' . $artRecor->ArticleNumber . ' in SalesReturn Number ' . $sodRec[0]->SalesReturnnumber,
                 'UserId' => $userName['Id'],
                 'updated_at' => null
             ]);

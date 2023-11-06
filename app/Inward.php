@@ -8,4 +8,10 @@ class Inward extends Model
 {
     protected $table = 'inward';
     protected $fillable = ['ArticleId','NoPacks','InwardDate','GRN','Weight','SalesNoPacks','TotalSetQuantity','rejections'];
+
+   
+
+    
+    
+
 }

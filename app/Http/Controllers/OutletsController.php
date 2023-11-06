@@ -125,32 +125,51 @@ class OutletsController extends Controller
 
 
 
-	//NEW
+	// public function GetArticleofOutlet($PartyId)
+	// {
+	// 	$articlesArray = DB::select('(select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutlet` right join `outward` on `transportoutlet`.`OutwardNumberId` = `outward`.`OutwardNumberId` inner join `article` on `article`.`Id` = `outward`.`ArticleId`  where `transportoutlet`.`TransportStatus` = 1 )  union (select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutwardpacks` inner join `article` on `article`.`Id` = `transportoutwardpacks`.`ArticleId` where `transportoutwardpacks`.`OutwardId` = 0 )   order by `ArticleId` asc');
+	// 	$collectionArticles = collect($articlesArray);
+	// 	$articles = $collectionArticles->unique()->values()->all();
+	// 	foreach ($articles as $key => $article) {
+	// 		$objectArticle = $article;
+	// 		$articleArray = (array) $article;
+	// 		//$allRecords = DB::select('(select `outletsalesreturn`.`NoPacks` as `NoPacks`, 1 as type, `outletsalesreturnnumber`.`CreatedDate` as `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletsalesreturn`.`OutletPartyId` = ' . $PartyId . ')) union (select `outlet`.`NoPacks` as `NoPacks`, 1 as type, `outletnumber`.`CreatedDate` as `SortDate` from `outlet` inner join `outletnumber` on `outlet`.`OutletNumberId` = `outletnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletnumber`.`PartyId` = ' . $PartyId . ')) union (select `outward`.`NoPacks` as `NoPacks`, 0 as type, `outwardnumber`.`created_at` as `SortDate` from `outward` inner join `transportoutlet` on `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId` inner join `outwardnumber` on `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `transportoutlet`.`TransportStatus` = 1 and `outward`.`PartyId` = ' . $PartyId . ')) order by `SortDate` asc');		    
+	// 		$getdata = $this->GetOutletSingleArticle($PartyId, $articleArray['ArticleId'], '$outletId');
+	// 		if (!empty($getdata)) {
+	// 			$SalesNoPacks = $getdata[0]->SalesNoPacks;
+	// 			$numbersArray = array_map('intval', explode(',', $SalesNoPacks));
+	// 			$totalSales = array_sum($numbersArray);
+	// 			$objectArticle->COUNTVL2 = $totalSales;
+	// 		}
+	// 	}
+	// 	$jsonData = array_values($articles);
+	// 	$filteredData = array_filter($jsonData, function ($item) {
+	// 		return isset($item->COUNTVL2) && $item->COUNTVL2 !== 0;
+	// 	});
+	// 	// If you want the filtered data to be reindexed, use array_values
+	// 	$filteredData = array_values($filteredData);
+	// 	return $filteredData;
+	// }
+
+
+	//New
 
 	public function GetArticleofOutlet($PartyId)
 	{
-		$articlesArray = DB::select('(select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutlet` right join `outward` on `transportoutlet`.`OutwardNumberId` = `outward`.`OutwardNumberId` inner join `article` on `article`.`Id` = `outward`.`ArticleId`  where `transportoutlet`.`TransportStatus` = 1 )  union (select `article`.`ArticleNumber`, `article`.`Id` as `ArticleId` from `transportoutwardpacks` inner join `article` on `article`.`Id` = `transportoutwardpacks`.`ArticleId` where `transportoutwardpacks`.`OutwardId` = 0 )   order by `ArticleId` asc');
-		$collectionArticles = collect($articlesArray);
-		$articles = $collectionArticles->unique()->values()->all();
-		foreach ($articles as $key => $article) {
-			$objectArticle = $article;
-			$articleArray = (array) $article;
-			//$allRecords = DB::select('(select `outletsalesreturn`.`NoPacks` as `NoPacks`, 1 as type, `outletsalesreturnnumber`.`CreatedDate` as `SortDate` from `outletsalesreturn` inner join `outletsalesreturnnumber` on `outletsalesreturn`.`SalesReturnNumber` = `outletsalesreturnnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletsalesreturn`.`OutletPartyId` = ' . $PartyId . ')) union (select `outlet`.`NoPacks` as `NoPacks`, 1 as type, `outletnumber`.`CreatedDate` as `SortDate` from `outlet` inner join `outletnumber` on `outlet`.`OutletNumberId` = `outletnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `outletnumber`.`PartyId` = ' . $PartyId . ')) union (select `outward`.`NoPacks` as `NoPacks`, 0 as type, `outwardnumber`.`created_at` as `SortDate` from `outward` inner join `transportoutlet` on `outward`.`OutwardNumberId` = `transportoutlet`.`OutwardNumberId` inner join `outwardnumber` on `outward`.`OutwardNumberId` = `outwardnumber`.`Id` where (`ArticleId` = ' . $articleArray['ArticleId'] . ' and `transportoutlet`.`TransportStatus` = 1 and `outward`.`PartyId` = ' . $PartyId . ')) order by `SortDate` asc');		    
-			$getdata = $this->GetOutletSingleArticle($PartyId, $articleArray['ArticleId'], '$outletId');
-			if (!empty($getdata)) {
-				$SalesNoPacks = $getdata[0]->SalesNoPacks;
-				$numbersArray = array_map('intval', explode(',', $SalesNoPacks));
-				$totalSales = array_sum($numbersArray);
-				$objectArticle->COUNTVL2 = $totalSales;
-			}
-		}
-		$jsonData = array_values($articles);
+		$articlesArray = DB::select('
+        SELECT `artstockstatus`.`ArticleId`, `artstockstatus`.`ArticleNumber`, `artstockstatus`.`TotalPieces`
+        FROM `artstockstatus`
+        WHERE `artstockstatus`.`outletId` = ? 
+    	', [$PartyId]);
+
+
+		$jsonData = array_values($articlesArray);
 		$filteredData = array_filter($jsonData, function ($item) {
-			return isset($item->COUNTVL2) && $item->COUNTVL2 !== 0;
+			return isset($item->TotalPieces) && $item->TotalPieces !== "0";
 		});
-		// If you want the filtered data to be reindexed, use array_values
-		$filteredData = array_values($filteredData);
-		return $filteredData;
+		$jsonData = array_values($filteredData);
+		return $jsonData;
+	
 	}
 
 	public function GetOutletSingleArticle($PartyId, $ArtId, $OutletPartyId)

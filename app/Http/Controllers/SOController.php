@@ -3160,42 +3160,6 @@ class SOController extends Controller
 
     public function  deleteSalesReturnRecord($id, $LoggedId)
     {
-        $r = DB::table('salesreturn')
-        ->join('salesreturnnumber', 'salesreturn.salesreturnnumber', '=', 'salesreturnnumber.Id')
-        ->where('salesreturn.Id', '=', $id)
-        ->select('salesreturn.*', 'salesreturnnumber.PartyId')
-        ->first();
-        $DeleteNoPackes = $r->NoPacks;
-        $DeleteNoPackes;
-        $ArticleId = $r->ArticleId;
-        $OutletPartyId = $r->PartyId;
-        
-        
-                // Fetch the current SalesNoPacks value
-        $currentSalesNoPacks = DB::table('artstockstatus')
-            ->where(['outletId' => $OutletPartyId])
-            ->where(['ArticleId' => $ArticleId])
-            ->value('SalesNoPacks');
-            
-        
-         $artD = DB::table('article')
-            ->where('Id', $ArticleId)
-            ->first();
-        
-        // Calculate the new SalesNoPacks value by adding the new value to the current value
-        $newSalesNoPacks = $currentSalesNoPacks + $DeleteNoPackes;
-        
-        // Perform the updateOrInsert operation with the new SalesNoPacks value
-        DB::table('artstockstatus')->updateOrInsert(
-            [
-                'outletId' => $OutletPartyId,
-                'ArticleId' => $ArticleId
-            ],
-            [
-                'SalesNoPacks' => $newSalesNoPacks,
-                'TotalPieces' => $newSalesNoPacks
-            ]
-        );
 
         $articledata = DB::select("SELECT slr.SalesReturnNumber, slr.ArticleId, slr.NoPacks, a.ArticleNumber, a.ArticleColor, a.ArticleSize, a.ArticleRatio, a.ArticleOpenFlag, c.Colorflag FROM `salesreturn` slr inner join article a on a.Id=slr.ArticleId left join po p on p.ArticleId=a.Id inner join category c on c.Id=a.CategoryId where slr.Id ='" . $id . "'");
         $SalesReturnNoPacks = $articledata[0]->NoPacks;
@@ -3204,6 +3168,43 @@ class SOController extends Controller
         //echo $articledata[0]->Colorflag;
         //print_r($articledata); exit;
         if ($articledata[0]->ArticleOpenFlag == 1) {
+            $r = DB::table('salesreturn')
+            ->join('salesreturnnumber', 'salesreturn.salesreturnnumber', '=', 'salesreturnnumber.Id')
+            ->where('salesreturn.Id', '=', $id)
+            ->select('salesreturn.*', 'salesreturnnumber.PartyId')
+            ->first();
+
+            $DeleteNoPackes = $r->NoPacks;
+            $DeleteNoPackes;
+            $ArticleId = $r->ArticleId;
+            $OutletPartyId = $r->PartyId;
+            
+            
+                    // Fetch the current SalesNoPacks value
+            $currentSalesNoPacks = DB::table('artstockstatus')
+                ->where(['outletId' => $OutletPartyId])
+                ->where(['ArticleId' => $ArticleId])
+                ->value('SalesNoPacks');
+                
+            
+             $artD = DB::table('article')
+                ->where('Id', $ArticleId)
+                ->first();
+            
+            // Calculate the new SalesNoPacks value by adding the new value to the current value
+            $newSalesNoPacks = $currentSalesNoPacks + $DeleteNoPackes;
+            
+            // Perform the updateOrInsert operation with the new SalesNoPacks value
+            DB::table('artstockstatus')->updateOrInsert(
+                [
+                    'outletId' => $OutletPartyId,
+                    'ArticleId' => $ArticleId
+                ],
+                [
+                    'SalesNoPacks' => $newSalesNoPacks,
+                    'TotalPieces' => $newSalesNoPacks
+                ]
+            );
             $getdata = DB::select("SELECT NoPacks FROM `mixnopacks` where ArticleId='" . $articledata[0]->ArticleId . "'");
 
             $InwardNoPacks = $getdata[0]->NoPacks;
@@ -3259,6 +3260,7 @@ class SOController extends Controller
         } else {
             $getdata = DB::select("SELECT SalesNoPacks FROM `inward` where ArticleId='" . $articledata[0]->ArticleId . "'");
             $SalesNoPacks = $getdata[0]->SalesNoPacks;
+            
             //echo $SalesReturnNoPacks;
             //print_r($getdata); exit;
             if (strpos($SalesNoPacks, ',') !== false) {
@@ -3292,6 +3294,88 @@ class SOController extends Controller
                 }
                 $NoPacks = rtrim($NoPacks, ',');
                 $UpdateInwardNoPacks = rtrim($UpdateInwardNoPacks, ',');
+
+
+
+                //start
+                
+                $data['ArticleId'] = $articledata[0]->ArticleId ;
+                $r = DB::table('salesreturn')
+                ->join('salesreturnnumber', 'salesreturn.salesreturnnumber', '=', 'salesreturnnumber.Id')
+                ->where('salesreturn.Id', '=', $id)
+                ->select('salesreturn.*', 'salesreturnnumber.PartyId')
+                ->first();
+                $data['OutletPartyId'] = $r->PartyId;        
+        
+        $currentSalesNoPacks = DB::table('artstockstatus')
+                ->where(['outletId' => $data['OutletPartyId']])
+                ->where(['ArticleId' => $data['ArticleId']])
+                ->value('SalesNoPacks');
+            
+            // Check if $currentSalesNoPacks is not empty
+            if ($currentSalesNoPacks !== null) {
+                // Convert comma-separated values to arrays
+                $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+                $dataNoPacksNewArray = explode(',', $NoPacks);
+            
+                // Perform element-wise addition
+                $newSalesNoPacksArray = [];
+
+                for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+                    $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] + (int)$dataNoPacksNewArray[$i];
+                }
+            
+                // Convert back to comma-separated string
+                $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+                $artD = DB::table('article')
+                    ->where('Id', $data['ArticleId'])
+                    ->first();
+                // Perform the updateOrInsert operation with the new SalesNoPacks value
+                
+                $packes = $newSalesNoPacks;
+                $packesArray = explode(',', $packes);
+                $sum = array_sum($packesArray);
+                DB::table('artstockstatus')->updateOrInsert(
+                    [
+                        'outletId' => $data['OutletPartyId'],
+                        'ArticleId' => $data['ArticleId']
+                    ],
+                    [
+                        'ArticleNumber' => $artD->ArticleNumber,
+                        'SalesNoPacks' => $newSalesNoPacks,
+                        'TotalPieces' => $sum
+                       
+                    ]
+                );
+            } else {
+                $dataNoPacksNewArray = explode(',', $NoPacks);
+                // Convert back to comma-separated string
+                $newSalesNoPacks = implode(',', $dataNoPacksNewArray);
+                $artD = DB::table('article')
+                    ->where('Id', $data['ArticleId'])
+                    ->first();
+                // Perform the updateOrInsert operation with the new SalesNoPacks value
+                
+                
+                $packes = $newSalesNoPacks;
+                $packesArray = explode(',', $packes);
+                $sum = array_sum($packesArray);
+
+                DB::table('artstockstatus')->updateOrInsert(
+                    [
+                        'outletId' => $data['OutletPartyId'],
+                        'ArticleId' => $data['ArticleId']
+                    ],
+                    [
+                        'Title' => $artD->Category,
+                        'ArticleNumber' => $artD->ArticleNumber,
+                        'SalesNoPacks' => $newSalesNoPacks,
+                        'TotalPieces' => $sum
+                    ]
+                );
+            }
+
+
             } else {
                 /* echo $SalesNoPacks;
 				echo "\n";

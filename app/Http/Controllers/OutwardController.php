@@ -225,6 +225,9 @@ class OutwardController extends Controller
                 $totalPieces = array_sum($salesNoPacksData);
                 $salesNoPacksDataString = implode(',', $salesNoPacksData);
                 // Insert new record
+
+                $isOutlet = DB::select("SELECT OutletAssign FROM `party` where Id ='" . $data['PartyId'] . "'");
+                if ($isOutlet[0]->OutletAssign == 1) { 
                 DB::table('artstockstatus')->insert([
                     'outletId' => $data['PartyId'],
                     'ArticleId' => $articleId,
@@ -239,6 +242,7 @@ class OutwardController extends Controller
                     'Colorflag' => $colorflag,
                     'Subcategory' => $name,
                 ]);
+                }
             }
         } else {
             
@@ -261,6 +265,8 @@ class OutwardController extends Controller
                 $dataupdate = $data['NoPacksNew'];
                 // DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
                  // Insert new record
+                 $isOutlet = DB::select("SELECT OutletAssign FROM `party` where Id ='" . $data['PartyId'] . "'");
+                    if ($isOutlet[0]->OutletAssign == 1) { 
                  DB::table('artstockstatus')->insert([
                     'outletId' => $data['PartyId'],
                     'ArticleId' => $articleId,
@@ -275,6 +281,7 @@ class OutwardController extends Controller
                     'Colorflag' => $colorflag,
                     'Subcategory' => $name,
                 ]);
+            }
             }
         }
 
@@ -316,6 +323,8 @@ class OutwardController extends Controller
                 ->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
         } else {
             // Insert new record
+            $isOutlet = DB::select("SELECT OutletAssign FROM `party` where Id ='" . $data['PartyId'] . "'");
+            if ($isOutlet[0]->OutletAssign == 1) { 
             DB::table('artstockstatus')->insert([
                 'outletId' => $data['PartyId'],
                 'ArticleId' => $articleId,
@@ -329,6 +338,7 @@ class OutwardController extends Controller
                 'Title' => $data['Category'],
                 'Subcategory' => $name,
             ]);
+            }
         }
 
 
@@ -1153,6 +1163,8 @@ class OutwardController extends Controller
                 $totalPieces = array_sum($salesNoPacksData);
                 $salesNoPacksDataString = implode(',', $salesNoPacksData);
                 // Insert new record
+                $isOutlet = DB::select("SELECT OutletAssign FROM `party` where Id ='" . $data['PartyId'] . "'");
+                    if ($isOutlet[0]->OutletAssign == 1) { 
                 DB::table('artstockstatus')->insert([
                     'outletId' => $data['PartyId'],
                     'ArticleId' => $articleId,
@@ -1167,6 +1179,7 @@ class OutwardController extends Controller
                     'Colorflag' => $colorflag,
                     'Subcategory' => $name,
                 ]);
+            }
             }
         } else {
             $existingRecord = DB::table('artstockstatus')

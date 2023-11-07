@@ -3061,8 +3061,12 @@ class ReportController extends Controller
             $objectArticle->closing = ($objectArticle->OpeningStock + $objectArticle->totalInward) - ($objectArticle->totalOutward);
             // end range stock
             $ReceivedDate = DB::table('transportoutwardpacks')->select("transportoutwardpacks.*", DB::raw("DATE_FORMAT(CreatedDate, '%d-%m-%Y') as formatted_dob"))->where('ArticleId', $articleArray['ArticleId'])->first();
-            $objectArticle->ReceivedDate = $ReceivedDate->formatted_dob;
-        }
+            if ($ReceivedDate !== null) {
+                $objectArticle->ReceivedDate = $ReceivedDate->formatted_dob;
+            } else {
+                $objectArticle->ReceivedDate = 'N/A';
+            }
+     }
         return array("data" => array_values($articles), "startdate" => $startdate, "enddate" => $enddate);
     }
     public function outwardReport($startdate, $enddate)

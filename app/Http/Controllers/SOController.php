@@ -201,6 +201,18 @@ class SOController extends Controller
             DB::table('inward')
                 ->where('ArticleId', $data['ArticleId'])
                 ->update(['SalesNoPacks' => $SalesNoPacks]);
+
+                $SalesNoPacksArray = explode(',', $SalesNoPacks);
+                $totalPieces = array_sum($SalesNoPacksArray);
+                $articleNumber =  DB::table('article')->where(['Id'=> $data['ArticleId']])->first();
+                $article = $articleNumber->ArticleNumber;
+
+
+            DB::table('artstockstatus')
+                ->where(['ArticleId'=> $data['ArticleId'], 'outletId' => 0 , 'ArticleNumber' => $article])
+                ->update(['SalesNoPacks' => $SalesNoPacks, 'TotalPieces' => $totalPieces]);
+            
+                
             if ($sonumberdata[0]->total > 0) {
                 $nopacksadded = "";
                 if (strpos($NoPacks, ',') !== false) {
@@ -351,6 +363,17 @@ class SOController extends Controller
                 DB::table('inward')
                     ->where('ArticleId', $ArticleId)
                     ->update(['SalesNoPacks' => $AddSalesNoPacks]);
+
+                    $SalesNoPacksArray = explode(',', $AddSalesNoPacks);
+                    $totalPieces = array_sum($SalesNoPacksArray);
+                    $articleNumber =  DB::table('article')->where(['Id'=> $ArticleId])->first();
+                    $article = $articleNumber->ArticleNumber;
+    
+                DB::table('artstockstatus')
+                    ->where(['ArticleId'=> $ArticleId, 'outletId' => 0 , 'ArticleNumber' => $article ])
+                    ->update(['SalesNoPacks' => $AddSalesNoPacks, 'TotalPieces' => $totalPieces]);
+                
+        
             } else {
                 $data = DB::select("SELECT mxp.NoPacks, s.Id, s.SoNumberId, s.ArticleId, s.NoPacks as SONoPacks, s.Status FROM `so` s inner join mixnopacks mxp on mxp.ArticleId=s.ArticleId where s.Id = '" . $vl->Id . "'");
                 $ArticleId = $data[0]->ArticleId;
@@ -444,6 +467,18 @@ class SOController extends Controller
                 DB::table('inward')
                     ->where('ArticleId', $ArticleId)
                     ->update(['SalesNoPacks' => $AddSalesNoPacks]);
+
+                    
+                $SalesNoPacksArray = explode(',', $AddSalesNoPacks);
+                $totalPieces = array_sum($SalesNoPacksArray);
+                $articleNumber =  DB::table('article')->where(['Id'=> $ArticleId])->first();
+                $article = $articleNumber->ArticleNumber;
+
+            DB::table('artstockstatus')
+                ->where(['ArticleId'=> $ArticleId, 'outletId' => 0 , 'ArticleNumber' => $article ])
+                ->update(['SalesNoPacks' => $AddSalesNoPacks, 'TotalPieces' => $totalPieces]);
+            
+
                 DB::commit();
                 return response()->json("SUCCESS", 200);
             } catch (\Exception $e) {
@@ -647,6 +682,18 @@ class SOController extends Controller
                 DB::table('inward')
                     ->where('ArticleId', $data['ArticleId'])
                     ->update(['SalesNoPacks' => $UpdateInwardNoPacks]);
+
+                $SalesNoPacksArray = explode(',', $UpdateInwardNoPacks);
+                $totalPieces = array_sum($SalesNoPacksArray);
+                $articleNumber =  DB::table('article')->where(['Id'=> $data['ArticleId']])->first();
+                $article = $articleNumber->ArticleNumber;
+
+    
+                DB::table('artstockstatus')
+                    ->where(['ArticleId'=> $data['ArticleId'], 'outletId' => 0 , 'ArticleNumber' => $article ])
+                    ->update(['SalesNoPacks' => $UpdateInwardNoPacks, 'TotalPieces' => $totalPieces]);
+                
+
                 DB::table('sonumber')
                     ->where('Id', $data['SoNumberId'])
                     ->update(['SoDate' => $data['Date'], 'PartyId' =>  $data['PartyId'], 'Destination' => $data['Destination'], 'Transporter' => $data['Transporter'], 'Remarks' => $data['Remarks'], 'GSTAmount' => $data['GST'], 'GSTPercentage' => $data['GST_Percentage']]);
@@ -2370,6 +2417,7 @@ class SOController extends Controller
                                         ->first();
     
                                 // Calculate the new SalesNoPacks value by adding the new value to the current value
+                                
                                 $newSalesNoPacks = $currentSalesNoPacks - $NoPacks;
                                 
                                 // Perform the updateOrInsert operation with the new SalesNoPacks value
@@ -2389,10 +2437,38 @@ class SOController extends Controller
                     //close
                     
                     
-                    
-                    
-                    
-                    
+                //factory article stock maintain yashvi
+                                         // Fetch the current SalesNoPacks value
+                                         $currentSalesNoPacks = DB::table('artstockstatus')
+                                         ->where(['outletId' => $data['PartyId']])
+                                         ->where(['ArticleId' => $data["ArticleId"]])
+                                         ->value('SalesNoPacks');
+                                         
+                                         $artD = DB::table('article')
+                                             ->join('category', 'article.CategoryId', '=', 'category.Id')
+                                             ->where('article.Id', $data["ArticleId"])
+                                             ->first();
+         
+                                     // Calculate the new SalesNoPacks value by adding the new value to the current value
+                                     
+                                     $newSalesNoPacks = $currentSalesNoPacks + $NoPacks;
+                                     
+                                     // Perform the updateOrInsert operation with the new SalesNoPacks value
+                                     DB::table('artstockstatus')->updateOrInsert(
+                                         [
+                                             'outletId' => $data['PartyId'],
+                                             'ArticleId' => $data['ArticleId']
+                                         ],
+                                         [
+                                             'Title' => $artD->Title,
+                                             'ArticleNumber' => $artD->ArticleNumber,
+                                             'SalesNoPacks' => $newSalesNoPacks,
+                                             'TotalPieces' => $newSalesNoPacks
+                                         ]
+                                     );    
+
+
+                //close                    
                     
                     
                     DB::table('mixnopacks')
@@ -2560,7 +2636,57 @@ class SOController extends Controller
                 //Close
                 
                 
-                
+                //factory article stock maintain yashvi
+
+                $currentSalesNoPacks = DB::table('artstockstatus')
+                ->where('outletId', $data['PartyId'])
+                ->where('ArticleId', $data['ArticleId'])
+                ->value('SalesNoPacks');
+            
+                // Convert comma-separated values to arrays
+                $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+                $dataNoPacksNewArray = explode(',', $NoPacks);
+            
+                // Ensure both arrays have the same length
+                if (count($currentSalesNoPacksArray) === count($dataNoPacksNewArray)) {
+                    // Perform element-wise addition
+                    $newSalesNoPacksArray = [];
+            
+                    foreach ($dataNoPacksNewArray as $i => $value) {
+                        // Check if index exists in both arrays
+                        if (isset($currentSalesNoPacksArray[$i])) {
+                            $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] + (int)$value;
+                        }
+                    }
+            
+                    // Convert back to comma-separated string
+                    $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+            
+                    // Calculate sum of packs
+                    $packesArray = explode(',', $newSalesNoPacks);
+                    $sum = array_sum($packesArray);
+            
+                    $artD = DB::table('article')
+                        ->join('category', 'article.CategoryId', '=', 'category.Id')
+                        ->where('article.Id', $data['ArticleId'])
+                        ->first();
+            
+                    // Perform the updateOrInsert operation with the new SalesNoPacks value
+                    DB::table('artstockstatus')->updateOrInsert(
+                        [
+                            'outletId' => $data['PartyId'],
+                            'ArticleId' => $data['ArticleId']
+                        ],
+                        [
+                            'Title' => $artD->Title,
+                            'ArticleNumber' => $artD->ArticleNumber,
+                            'SalesNoPacks' => $newSalesNoPacks,
+                            'TotalPieces' => $sum
+                        ]
+                    );
+                } 
+            
+                //close
                 
                 
                 
@@ -3367,7 +3493,7 @@ class SOController extends Controller
                         'ArticleId' => $data['ArticleId']
                     ],
                     [
-                        'Title' => $artD->Category,
+                        // 'Title' => $artD->Category,
                         'ArticleNumber' => $artD->ArticleNumber,
                         'SalesNoPacks' => $newSalesNoPacks,
                         'TotalPieces' => $sum

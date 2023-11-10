@@ -393,6 +393,21 @@ class MasterController extends Controller
         }
     }
 
+    //new function 
+    public function updatecatStatus($catid)
+    
+    {
+        
+        $cat = Category::where('Id', $catid)->first();
+        if ($cat->Status == 1) {
+            Category::where('Id', $catid)->update(['Status' => 0]);
+            return response()->json(['Party' => $cat, 'status' => 'Deactive'], 200);
+        } else {
+            Category::where('Id', $catid)->update(['Status' => 1]);
+            return response()->json(['Party' => $cat, 'status' => 'Active'], 200);
+        }
+    }
+
     public function Getcategory()
     {
         return Category::orderBy('Title', 'ASC')->get();
@@ -807,6 +822,7 @@ class MasterController extends Controller
                 'OutletArticleRate' => $data['OutletArticleRate'],
                 'ContactPerson' => $data['ContactPerson'],
                 'GSTNumber' => $data['GSTNumber'],
+                'PanNumber' => $data['PanNumber'],
                 'GSTType' => $data['GSTType'],
                 'Discount' => $data['Discount'],
                 'OutletAssign' => empty($data['OutletAssign']) ? 0 : $data['OutletAssign'],
@@ -1236,6 +1252,7 @@ class MasterController extends Controller
             'PinCode' => $data['PinCode'],
             'Country' => $data['Country'],
             'GSTNumber' => $data['GSTNumber'],
+            'PanNumber' => $data['PanNumber'],
             'GSTType' => $data['GSTType'],
             'Discount' => $data['Discount'],
             'OutletAssign' => $data['OutletAssign'],
@@ -1514,46 +1531,43 @@ class MasterController extends Controller
     {
         // Validate the incoming request
         $request->validate([
-            'newImage' => 'required|image|mimes:jpeg,png,jpg,gif',
-
-
             'oldImage' => 'required|string',
         ]);
-
-        // Get the old and new image names from the request
+    
+        // Get the old image name from the request
         $oldImage = $request->input('oldImage');
-        $newImage = $request->file('newImage');
-
+    
         // Find records in the 'articlephotos' table where the JSON 'Name' column contains the old image name
         $articlePhotos = ArticlePhotos::where('Name', 'LIKE', '%"photo":"' . $oldImage . '"%')->get();
-
+    
         if ($articlePhotos->isNotEmpty()) {
             foreach ($articlePhotos as $articlePhoto) {
                 // Decode the JSON data into an associative array
                 $imageData = json_decode($articlePhoto->Name, true);
-
-                // Loop through the images and replace the old image name with the new image name
+    
+                // Loop through the images and find the old image
                 foreach ($imageData as &$image) {
                     if (isset($image['photo']) && $image['photo'] === $oldImage) {
-                        $image['photo'] = $newImage->getClientOriginalName();
+                        // Move the found image to the beginning of the array (making it the primary image)
+                        $index = array_search($image, $imageData);
+                        unset($imageData[$index]);
+                        array_unshift($imageData, $image);
                     }
                 }
-
+    
                 // Encode the modified array back to JSON and update the 'Name' column
                 $articlePhoto->Name = json_encode($imageData);
                 $articlePhoto->save();
-
-                // Move the new image to the 'uploads' folder
-                $newImage->move(public_path('uploads'), $newImage->getClientOriginalName());
             }
-
-            // Return the new image URL for the response
-            return response()->json(['newImageUrl' => asset('uploads/' . $newImage->getClientOriginalName())]);
+    
+            // Return a success response
+            return response()->json(['message' => 'Primary image updated successfully']);
         } else {
             // Handle the case where no records were found with the old image name in the JSON data
             return response()->json(['error' => 'No records found with the old image name'], 404);
         }
     }
+    
 
 
     public function GetDashboard()

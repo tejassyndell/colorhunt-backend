@@ -49,6 +49,15 @@ Route::delete('deletecategory/{id}', 'MasterController@Deletecategory');
 Route::get('getcatidwise/{id}', 'MasterController@GetcatIdWise');
 Route::post('updatecategory', 'MasterController@UpdateCategory');
 Route::get('updatecategorystatus/{catid}', 'MasterController@updatecatStatus');
+
+//Beaner API
+Route::post('addbeaner', 'MasterController@AddBeaner');
+Route::get('beanarlist', 'MasterController@GetBeaner');
+Route::post('beanerpostlist', 'MasterController@PostBeaner');
+Route::delete('deletebeaner/{id}', 'MasterController@DeleteBeaner');
+Route::get('getbeaneridwise/{id}', 'MasterController@GetBeanerIdWise');
+Route::post('updatebeaner', 'MasterController@UpdateBeaner');
+
 //Subcategory API
 Route::post('addsubcategory', 'MasterController@AddSubcategory');
 Route::get('subcategorylist', 'MasterController@GetSubcategory');

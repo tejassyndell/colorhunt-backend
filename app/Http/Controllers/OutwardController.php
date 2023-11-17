@@ -257,12 +257,10 @@ class OutwardController extends Controller
 
             if ($existingRecord) {
                 $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
-                if (!empty($getresult) && isset($getresult[0]->SalesNoPacks)) {
-                    $GetNoPacks = $getresult[0]->SalesNoPacks;
+                $GetNoPacks = $getresult[0]->GetNoPacks;
                 $dataupdate = $GetNoPacks + $data['NoPacksNew'];
                 DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
-           }
-         } else {
+            } else {
                 
                 $dataupdate = $data['NoPacksNew'];
                 // DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
@@ -311,37 +309,37 @@ class OutwardController extends Controller
         //     }
         // }
 
-        // $totalPieces = array_sum($salesNoPacksData);
-        // $salesNoPacksDataString = implode(',', $salesNoPacksData);
+        $totalPieces = array_sum($salesNoPacksData);
+        $salesNoPacksDataString = implode(',', $salesNoPacksData);
 
-        // $existingRecord = DB::table('artstockstatus')
-        //     ->where(['outletId' => $data['PartyId'], 'ArticleId' => $articleId])
-        //     ->first();
+        $existingRecord = DB::table('artstockstatus')
+            ->where(['outletId' => $data['PartyId'], 'ArticleId' => $articleId])
+            ->first();
 
-        // if ($existingRecord) {
-        //     // Update existing record
-        //     DB::table('artstockstatus')
-        //         ->where(['outletId' => $data['PartyId'], 'ArticleId' => $articleId])
-        //         ->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
-        // } else {
-        //     // Insert new record
-        //     $isOutlet = DB::select("SELECT OutletAssign FROM `party` where Id ='" . $data['PartyId'] . "'");
-        //     if ($isOutlet[0]->OutletAssign == 1) { 
-        //     DB::table('artstockstatus')->insert([
-        //         'outletId' => $data['PartyId'],
-        //         'ArticleId' => $articleId,
-        //         'ArticleNumber' => $articleNumber,
-        //         'SalesNoPacks' => $salesNoPacksDataString,
-        //         'TotalPieces' => $totalPieces,
-        //         'ArticleColor' => $data['ArticleSelectedColor'][0]['Name'],
-        //         'ArticleSize' => implode(',', array_column($data['ArticleSelectedSize'], 'Name')),
-        //         'ArticleRatio' => $data['ArticleRatio'],
-        //         'ArticleOpenFlag' => $data['ArticleOpenFlag'],
-        //         'Title' => $data['Category'],
-        //         'Subcategory' => $name,
-        //     ]);
-        //     }
-        // }
+        if ($existingRecord) {
+            // Update existing record
+            DB::table('artstockstatus')
+                ->where(['outletId' => $data['PartyId'], 'ArticleId' => $articleId])
+                ->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
+        } else {
+            // Insert new record
+            $isOutlet = DB::select("SELECT OutletAssign FROM `party` where Id ='" . $data['PartyId'] . "'");
+            if ($isOutlet[0]->OutletAssign == 1) { 
+            DB::table('artstockstatus')->insert([
+                'outletId' => $data['PartyId'],
+                'ArticleId' => $articleId,
+                'ArticleNumber' => $articleNumber,
+                'SalesNoPacks' => $salesNoPacksDataString,
+                'TotalPieces' => $totalPieces,
+                'ArticleColor' => $data['ArticleSelectedColor'][0]['Name'],
+                'ArticleSize' => implode(',', array_column($data['ArticleSelectedSize'], 'Name')),
+                'ArticleRatio' => $data['ArticleRatio'],
+                'ArticleOpenFlag' => $data['ArticleOpenFlag'],
+                'Title' => $data['Category'],
+                'Subcategory' => $name,
+            ]);
+            }
+        }
 
 
         //close
@@ -352,7 +350,7 @@ class OutwardController extends Controller
             if ($partyrecord->UserId != null) {
                 DB::beginTransaction();
                 try {
-                    $dataresult = DB::select('SELECT c.Colorflag FROM `article` a left join category c on c.Id=a.CategoryId where a.Id="' . $data['ArticleId'] . '"');
+                    $dataresult = DB::select('SELECT c.Colorflag FROM `article` a inner join category c on c.Id=a.CategoryId where a.Id="' . $data['ArticleId'] . '"');
                     $Colorflag = $dataresult[0]->Colorflag;
                     $datanopacks = DB::select('SELECT OutwardNoPacks FROM `so` where ArticleId="' . $data['ArticleId'] . '" and SoNumberId="' . $data['SoId'] . '"');
                     $search = $datanopacks[0]->OutwardNoPacks;

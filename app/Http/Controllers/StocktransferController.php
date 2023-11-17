@@ -54,11 +54,11 @@ class StocktransferController extends Controller
     }
 
     public function AddStocktransfer(Request $request)
-    {
-
+    {   
+    
         $data = $request->all();
         $ConsumeArt = Article::where('Id', $data['ArticleId'])->first();
-
+        
         $ProductionArt = Article::where('Id', $data['ProductionArticleId'])->first();
 
 
@@ -69,7 +69,7 @@ class StocktransferController extends Controller
             $ST_Number_Financial_Id = $generate_STNumber['ST_Number_Financial_Id'];
 
             $stocktransfernumberId = DB::table('stocktransfernumber')->insertGetId(
-                ['StocktransferNumber' => $ST_Number, 'Remarks' => $data['Remarks'], "FinancialYearId" => $ST_Number_Financial_Id, 'StocktransferDate' => $data['StocktransferDate'], 'UserId' => $data['UserId'], 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')]
+                ['StocktransferNumber' =>  $ST_Number, 'Remarks' => $data['Remarks'],  "FinancialYearId" => $ST_Number_Financial_Id, 'StocktransferDate' =>  $data['StocktransferDate'], 'UserId' => $data['UserId'], 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')]
             );
             $outwardRec = DB::select("select concat($ST_Number,'/', fn.StartYear,'-',fn.EndYear) as STnumber from stocktransfernumber stn inner join financialyear fn on fn.Id=stn.FinancialYearId where stn.Id= '" . $stocktransfernumberId . "'");
             if ($data['TransferType'] == '1') {
@@ -89,7 +89,7 @@ class StocktransferController extends Controller
                 $stocktransfernumberId = $data['StocktransferNumberId'];
                 DB::table('stocktransfernumber')
                     ->where('Id', $stocktransfernumberId)
-                    ->update(['StocktransferDate' => $data['StocktransferDate'], 'Remarks' => $data['Remarks'], 'UserId' => $data['UserId'], 'updated_at' => date('Y-m-d H:i:s')]);
+                    ->update(['StocktransferDate' =>  $data['StocktransferDate'], 'Remarks' => $data['Remarks'],  'UserId' => $data['UserId'], 'updated_at' => date('Y-m-d H:i:s')]);
                 $outwardRec = DB::select("select concat($ST_Number,'/', fn.StartYear,'-',fn.EndYear) as STnumber from stocktransfernumber stn inner join financialyear fn on fn.Id=stn.FinancialYearId where stn.Id= '" . $stocktransfernumberId . "'");
                 if ($data['TransferType'] == '1') {
                     UserLogs::create([
@@ -109,57 +109,57 @@ class StocktransferController extends Controller
                 $mixnopacks = DB::select("SELECT count(*) as total, Id, NoPacks FROM `mixnopacks` where ArticleId ='" . $data['ArticleId'] . "'");
                 $totalInward = 0;
                 $totalOutwards = 0;
-                $inwards = Inward::where('ArticleId', $data['ArticleId'])->get();
-                $outwards = Outward::where('ArticleId', $data['ArticleId'])->get();
+                $inwards  = Inward::where('ArticleId', $data['ArticleId'])->get();
+                $outwards  = Outward::where('ArticleId', $data['ArticleId'])->get();
                 $salesreturns = Salesreturn::where('ArticleId', $data['ArticleId'])->get();
                 $purchasereturns = Purchasereturns::where('ArticleId', $data['ArticleId'])->get();
                 $consumestocktransfers = Stocktransfer::where('ConsumedArticleId', $data['ArticleId'])->get();
                 $transferstocktransfers = Stocktransfer::where('TransferArticleId', $data['ArticleId'])->get();
                 $shortedStocks = Stockshortage::where('ArticleId', $data['ArticleId'])->get();
-                $sorecords = SO::where('ArticleId', $data['ArticleId'])->where('Status', 0)->get();
-                foreach ($inwards as $inward) {
+                $sorecords  = SO::where('ArticleId', $data['ArticleId'])->where('Status', 0)->get();
+                foreach ($inwards  as $inward) {
                     if (strpos($inward->NoPacks, ',') !== false) {
                         $totalInward = $totalInward + array_sum(explode(",", $inward->NoPacks));
                     } else {
                         $totalInward = $totalInward + $inward->NoPacks;
                     }
                 }
-                foreach ($salesreturns as $salesreturn) {
+                foreach ($salesreturns  as $salesreturn) {
                     if (strpos($salesreturn->NoPacks, ',') !== false) {
                         $totalInward = $totalInward + array_sum(explode(",", $salesreturn->NoPacks));
                     } else {
                         $totalInward = $totalInward + $salesreturn->NoPacks;
                     }
                 }
-                foreach ($outwards as $outward) {
+                foreach ($outwards  as $outward) {
                     if (strpos($outward->NoPacks, ',') !== false) {
                         $totalOutwards = $totalOutwards + array_sum(explode(",", $outward->NoPacks));
                     } else {
                         $totalOutwards = $totalOutwards + $outward->NoPacks;
                     }
                 }
-                foreach ($purchasereturns as $purchasereturn) {
+                foreach ($purchasereturns  as $purchasereturn) {
                     if (strpos($purchasereturn->ReturnNoPacks, ',') !== false) {
                         $totalOutwards = $totalOutwards + array_sum(explode(",", $purchasereturn->ReturnNoPacks));
                     } else {
                         $totalOutwards = $totalOutwards + $purchasereturn->ReturnNoPacks;
                     }
                 }
-                foreach ($consumestocktransfers as $stocktransfer) {
+                foreach ($consumestocktransfers  as $stocktransfer) {
                     if (strpos($stocktransfer->ConsumedNoPacks, ',') !== false) {
                         $totalOutwards = $totalOutwards + array_sum(explode(",", $stocktransfer->ConsumedNoPacks));
                     } else {
                         $totalOutwards = $totalOutwards + $stocktransfer->ConsumedNoPacks;
                     }
                 }
-                foreach ($transferstocktransfers as $stocktransfer) {
+                foreach ($transferstocktransfers  as $stocktransfer) {
                     if (strpos($stocktransfer->TransferNoPacks, ',') !== false) {
                         $totalInward = $totalInward + array_sum(explode(",", $stocktransfer->TransferNoPacks));
                     } else {
                         $totalInward = $totalInward + $stocktransfer->TransferNoPacks;
                     }
                 }
-                foreach ($shortedStocks as $shortedStock) {
+                foreach ($shortedStocks  as $shortedStock) {
                     if (strpos($shortedStock->NoPacks, ',') !== false) {
                         $totalOutwards = $totalOutwards + array_sum(explode(",", $shortedStock->NoPacks));
                     } else {
@@ -167,7 +167,7 @@ class StocktransferController extends Controller
                     }
                 }
                 if (!empty($sorecords)) {
-                    foreach ($sorecords as $sorecord) {
+                    foreach ($sorecords  as $sorecord) {
                         if (strpos($sorecord->NoPacks, ',') !== false) {
                             $totalOutwards = $totalInward + array_sum(explode(",", $sorecord->NoPacks));
                         } else {
@@ -175,7 +175,7 @@ class StocktransferController extends Controller
                         }
                     }
                 }
-                $TotalRemaining = $totalInward - $totalOutwards;
+                $TotalRemaining =  $totalInward - $totalOutwards;
                 if ($mixnopacks[0]->total > 0) {
                     if ($TotalRemaining >= $data['NoPacksNew']) {
                         $NoPacks = $data['NoPacksNew'];
@@ -188,7 +188,7 @@ class StocktransferController extends Controller
                         return response()->json(array("id" => "", "NoOfSetNotMatch" => "true"), 200);
                     }
                 }
-
+                
             } else {
                 $dataresult = DB::select('SELECT c.Colorflag, i.SalesNoPacks FROM `article` a inner join inward i on i.ArticleId=a.Id inner join category c on c.Id=a.CategoryId where a.Id="' . $data['ArticleId'] . '"');
                 $Colorflag = $dataresult[0]->Colorflag;
@@ -207,54 +207,54 @@ class StocktransferController extends Controller
                     foreach ($data['ArticleSelectedColor'] as $key => $vl) {
                         $numberofpacks = $vl["Id"];
 
-                        //yashvi factory art
+                         //yashvi factory art
                         $newnopacks = $data["NoPacksNew_" . $numberofpacks];
 
-                        $currentSalesNoPacks = DB::table('artstockstatus')
-                            ->where(['outletId' => 0])
+                            $currentSalesNoPacks = DB::table('artstockstatus')
+                            ->where(['outletId' =>  0])
                             ->where(['ArticleId' => $data["ArticleId"]])
                             ->value('SalesNoPacks');
-                        // Convert comma-separated values to arrays
-                        $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
-                        $dataNoPacksNewArray = explode(',', $newnopacks);
+                          // Convert comma-separated values to arrays
+                            $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+                            $dataNoPacksNewArray = explode(',', $newnopacks);
 
+                            
+                                 $artD = DB::table('article')
+                                ->join('category', 'article.CategoryId', '=', 'category.Id')
+                                ->where('article.Id', $data["ArticleId"])
+                                ->first();
 
-                        $artD = DB::table('article')
-                            ->join('category', 'article.CategoryId', '=', 'category.Id')
-                            ->where('article.Id', $data["ArticleId"])
-                            ->first();
+                                // Perform element-wise addition
+                            $newSalesNoPacksArray = [];
 
-                        // Perform element-wise addition
-                        $newSalesNoPacksArray = [];
+                            for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+                                $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$dataNoPacksNewArray[$i];
+                            }
+                             // Convert back to comma-separated string
+                             $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
 
-                        for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
-                            $newSalesNoPacksArray[$i] = (int) $currentSalesNoPacksArray[$i] - (int) $dataNoPacksNewArray[$i];
-                        }
-                        // Convert back to comma-separated string
-                        $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+                                // Perform the updateOrInsert operation with the new SalesNoPacks value
+                
+                                    $packes = $newSalesNoPacks;
+                                    $packesArray = explode(',', $packes);
+                                    $sum = array_sum($packesArray);
 
-                        // Perform the updateOrInsert operation with the new SalesNoPacks value
-
-                        $packes = $newSalesNoPacks;
-                        $packesArray = explode(',', $packes);
-                        $sum = array_sum($packesArray);
-
-
-                        // Perform the updateOrInsert operation with the new SalesNoPacks value
-                        DB::table('artstockstatus')->updateOrInsert(
-                            [
-                                'outletId' => 0,
-                                'ArticleId' => $data['ArticleId']
-                            ],
-                            [
-                                'Title' => $artD->Title,
-                                'ArticleNumber' => $artD->ArticleNumber,
-                                'SalesNoPacks' => $packesArray,
-                                'TotalPieces' => $sum
-                            ]
-                        );
-
-                        //close
+                                
+                                // Perform the updateOrInsert operation with the new SalesNoPacks value
+                                DB::table('artstockstatus')->updateOrInsert(
+                                    [
+                                        'outletId' => 0,
+                                        'ArticleId' => $data['ArticleId']
+                                    ],
+                                    [
+                                        'Title' => $artD->Title,
+                                        'ArticleNumber' => $artD->ArticleNumber,
+                                        'SalesNoPacks' => $packesArray,
+                                        'TotalPieces' => $sum
+                                    ]
+                                );
+                                
+                            //close
 
                         if ($data["NoPacksNew_" . $numberofpacks] != "") {
                             if ($stringcomma == 1) {
@@ -275,35 +275,35 @@ class StocktransferController extends Controller
                         }
                     }
                 } else {
-                    //yashvi factory art
+                        //yashvi factory art
 
-                    $currentSalesNoPacks = DB::table('artstockstatus')
-                        ->where(['outletId' => 0])
-                        ->where(['ArticleId' => $data["ArticleId"]])
-                        ->value('SalesNoPacks');
-
-                    $artD = DB::table('article')
-                        ->join('category', 'article.CategoryId', '=', 'category.Id')
-                        ->where('article.Id', $data["ArticleId"])
-                        ->first();
-                    // Calculate the new SalesNoPacks value by adding the new value to the current value                        
-                    $newSalesNoPacks = $currentSalesNoPacks - $data['NoPacksNew'];
-
-                    // Perform the updateOrInsert operation with the new SalesNoPacks value
-                    DB::table('artstockstatus')->updateOrInsert(
-                        [
+                             $currentSalesNoPacks = DB::table('artstockstatus')
+                             ->where(['outletId' =>  0])
+                             ->where(['ArticleId' => $data["ArticleId"]])
+                             ->value('SalesNoPacks');
+                                             
+                             $artD = DB::table('article')
+                            ->join('category', 'article.CategoryId', '=', 'category.Id')
+                            ->where('article.Id', $data["ArticleId"])
+                            ->first();
+                            // Calculate the new SalesNoPacks value by adding the new value to the current value                        
+                            $newSalesNoPacks = $currentSalesNoPacks - $data['NoPacksNew'];
+                                                 
+                           // Perform the updateOrInsert operation with the new SalesNoPacks value
+                           DB::table('artstockstatus')->updateOrInsert(
+                           [
                             'outletId' => 0,
                             'ArticleId' => $data['ArticleId']
-                        ],
-                        [
+                            ],
+                            [
                             'Title' => $artD->Title,
                             'ArticleNumber' => $artD->ArticleNumber,
                             'SalesNoPacks' => $newSalesNoPacks,
                             'TotalPieces' => $newSalesNoPacks
-                        ]
-                    );
-                    //close
-
+                            ]
+                            );
+                        //close
+                 
                     if (isset($data['NoPacksNew'])) {
                         $NoPacks = $data['NoPacksNew'];
                         if ($search < $data['NoPacksNew']) {
@@ -337,7 +337,7 @@ class StocktransferController extends Controller
                         ->update(['NoPacks' => $totalnopacksprod, 'UpdatedDate' => date("Y-m-d H:i:s")]);
                 }
             } else {
-
+              
                 $productiondataresult = DB::select('SELECT c.Colorflag, i.SalesNoPacks FROM `article` a inner join inward i on i.ArticleId=a.Id inner join category c on c.Id=a.CategoryId where a.Id="' . $data['ProductionArticleId'] . '"');
                 $productionColorflag = $productiondataresult[0]->Colorflag;
                 $productionsearch = $productiondataresult[0]->SalesNoPacks;
@@ -358,48 +358,48 @@ class StocktransferController extends Controller
                         $newnopacks = $data["ProductionNoPacksNew_" . $production_numberofpacks];
 
                         $currentSalesNoPacks = DB::table('artstockstatus')
-                            ->where(['outletId' => 0])
-                            ->where(['ArticleId' => $data["ProductionArticleId"]])
-                            ->value('SalesNoPacks');
+                        ->where(['outletId' =>  0])
+                        ->where(['ArticleId' => $data["ProductionArticleId"]])
+                        ->value('SalesNoPacks');
 
                         $artD = DB::table('article')
-                            ->join('category', 'article.CategoryId', '=', 'category.Id')
-                            ->where('article.Id', $data["ProductionArticleId"])
-                            ->first();
-
-                        // Convert comma-separated values to arrays
+                        ->join('category', 'article.CategoryId', '=', 'category.Id')
+                        ->where('article.Id', $data["ProductionArticleId"])
+                        ->first();
+                      
+                      // Convert comma-separated values to arrays
                         $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
                         $dataNoPacksNewArray = explode(',', $newnopacks);
 
-                        // Perform element-wise addition
+                            // Perform element-wise addition
                         $newSalesNoPacksArray = [];
 
                         for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
-                            $newSalesNoPacksArray[$i] = (int) $currentSalesNoPacksArray[$i] + (int) $dataNoPacksNewArray[$i];
+                            $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] + (int)$dataNoPacksNewArray[$i];
                         }
-                        // Convert back to comma-separated string
-                        $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+                         // Convert back to comma-separated string
+                         $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
 
-                        // Perform the updateOrInsert operation with the new SalesNoPacks value
+                            // Perform the updateOrInsert operation with the new SalesNoPacks value
+            
+                                $packes = $newSalesNoPacks;
+                                $packesArray = explode(',', $packes);
+                                $sum = array_sum($packesArray);
 
-                        $packes = $newSalesNoPacks;
-                        $packesArray = explode(',', $packes);
-                        $sum = array_sum($packesArray);
-
-
-                        // Perform the updateOrInsert operation with the new SalesNoPacks value
-                        DB::table('artstockstatus')->updateOrInsert(
-                            [
-                                'outletId' => 0,
-                                'ArticleId' => $data['ProductionArticleId']
-                            ],
-                            [
-                                'Title' => $artD->Title,
-                                'ArticleNumber' => $artD->ArticleNumber,
-                                'SalesNoPacks' => $packesArray,
-                                'TotalPieces' => $sum
-                            ]
-                        );
+                            
+                            // Perform the updateOrInsert operation with the new SalesNoPacks value
+                            DB::table('artstockstatus')->updateOrInsert(
+                                [
+                                    'outletId' => 0,
+                                    'ArticleId' => $data['ProductionArticleId']
+                                ],
+                                [ 
+                                    'Title' => $artD->Title,
+                                    'ArticleNumber' => $artD->ArticleNumber,
+                                    'SalesNoPacks' => $packesArray,
+                                    'TotalPieces' => $sum
+                                ]
+                            );
 
                         if ($data["ProductionNoPacksNew_" . $production_numberofpacks] != "") {
                             if ($productionstringcomma == 1) {
@@ -415,31 +415,31 @@ class StocktransferController extends Controller
                     }
                 } else {
                     $currentSalesNoPacks = DB::table('artstockstatus')
-                        ->where(['outletId' => 0])
-                        ->where(['ArticleId' => $data["ProductionArticleId"]])
-                        ->value('SalesNoPacks');
+                    ->where(['outletId' =>  0])
+                    ->where(['ArticleId' => $data["ProductionArticleId"]])
+                    ->value('SalesNoPacks');
 
-
+                    
                     $artD = DB::table('article')
                         ->join('category', 'article.CategoryId', '=', 'category.Id')
                         ->where('article.Id', $data["ProductionArticleId"])
                         ->first();
-                    // Calculate the new SalesNoPacks value by adding the new value to the current value                        
-                    $newSalesNoPacks = $currentSalesNoPacks + $data['ProductionNoPacksNew'];
-
-                    // Perform the updateOrInsert operation with the new SalesNoPacks value
-                    DB::table('artstockstatus')->updateOrInsert(
-                        [
-                            'outletId' => 0,
-                            'ArticleId' => $data['ProductionArticleId']
-                        ],
-                        [
-                            'Title' => $artD->Title,
-                            'ArticleNumber' => $artD->ArticleNumber,
-                            'SalesNoPacks' => $newSalesNoPacks,
-                            'TotalPieces' => $newSalesNoPacks
-                        ]
-                    );
+                        // Calculate the new SalesNoPacks value by adding the new value to the current value                        
+                        $newSalesNoPacks = $currentSalesNoPacks +  $data['ProductionNoPacksNew'];
+                        
+                        // Perform the updateOrInsert operation with the new SalesNoPacks value
+                        DB::table('artstockstatus')->updateOrInsert(
+                            [
+                                'outletId' => 0,
+                                'ArticleId' => $data['ProductionArticleId']
+                            ],
+                            [ 
+                                'Title' => $artD->Title,
+                                'ArticleNumber' => $artD->ArticleNumber,
+                                'SalesNoPacks' => $newSalesNoPacks,
+                                'TotalPieces' => $newSalesNoPacks
+                            ]
+                        );
                     if (isset($data['ProductionNoPacksNew'])) {
                         $ProductionNoPacks = $data['ProductionNoPacksNew'];
                         $Production_Destination = ($productionsearch + $data['ProductionNoPacksNew']);
@@ -464,22 +464,22 @@ class StocktransferController extends Controller
                     $arrayConsumedNoPacks = explode(',', rtrim($NoPacks, ','));
                     $newConsumedNoPacks = $preStocktransfer;
                     for ($i = 0; $i < count($arrayConsumedNoPacks); $i++) {
-                        $newConsumedNoPacks[$i] = $newConsumedNoPacks[$i] + $arrayConsumedNoPacks[$i];
+                        $newConsumedNoPacks[$i] =  $newConsumedNoPacks[$i] + $arrayConsumedNoPacks[$i];
                     }
                     $finalConsumedNoPacks = implode(",", $newConsumedNoPacks);
                 } else {
-                    $finalConsumedNoPacks = (int) $stocktransferPre->ConsumedNoPacks + (int) rtrim($NoPacks, ',');
+                    $finalConsumedNoPacks = (int)$stocktransferPre->ConsumedNoPacks + (int)rtrim($NoPacks, ',');
                 }
                 if (strpos($stocktransferPre->TransferNoPacks, ',') != false) {
                     $preStocktransferGain = explode(',', $stocktransferPre->TransferNoPacks);
                     $arrayTransferNoPacks = explode(',', rtrim($ProductionNoPacks, ','));
                     $newTransferNoPacks = $preStocktransferGain;
                     for ($i = 0; $i < count($arrayTransferNoPacks); $i++) {
-                        $newTransferNoPacks[$i] = $newTransferNoPacks[$i] + $arrayTransferNoPacks[$i];
+                        $newTransferNoPacks[$i] =  $newTransferNoPacks[$i] + $arrayTransferNoPacks[$i];
                     }
                     $finalTransferNoPacks = implode(",", $newTransferNoPacks);
                 } else {
-                    $finalTransferNoPacks = (int) $stocktransferPre->TransferNoPacks + (int) rtrim($ProductionNoPacks, ',');
+                    $finalTransferNoPacks = (int)$stocktransferPre->TransferNoPacks + (int)rtrim($ProductionNoPacks, ',');
                 }
                 Stocktransfer::where(['StocktransferNumberId' => $stocktransfernumberId, 'ConsumedArticleId' => $data['ArticleId'], 'TransferArticleId' => $data['ProductionArticleId']])
                     ->update(['ConsumedNoPacks' => $finalConsumedNoPacks, 'TotalConsumedNoPacks' => $Consumption_Source, 'TransferNoPacks' => $finalTransferNoPacks, 'TotalTransferNoPacks' => $Production_Destination]);
@@ -576,7 +576,7 @@ class StocktransferController extends Controller
                     $finalStockShortage = implode(',', $newStockShortage);
                     Stockshortage::where(['StocktransferNumberId' => $stocktransfernumberId, 'ArticleId' => $data['ArticleId']])->update(['NoPacks' => $finalStockShortage, 'TotalNoPacks' => $Consumption_Source]);
                 } else {
-                    Stockshortage::where(['StocktransferNumberId' => $stocktransfernumberId, 'ArticleId' => $data['ArticleId']])->update(['NoPacks' => (int) $stockrecordpre->NoPacks + (int) rtrim($NoPacks), 'TotalNoPacks' => $Consumption_Source]);
+                    Stockshortage::where(['StocktransferNumberId' => $stocktransfernumberId, 'ArticleId' => $data['ArticleId']])->update(['NoPacks' => (int)$stockrecordpre->NoPacks + (int)rtrim($NoPacks), 'TotalNoPacks' => $Consumption_Source]);
                 }
             } else {
                 $stocktransferadd['StocktransferNumberId'] = $stocktransfernumberId;
@@ -593,8 +593,8 @@ class StocktransferController extends Controller
 
     // public function StockshortageListFromSTNO($STNO, Request $request)
     // {
-
-
+        
+        
     //      $data = $request->all();
     //     $search = $data["search"];
     //     $startnumber = $data["start"];
@@ -623,15 +623,15 @@ class StocktransferController extends Controller
     //         case 4:
     //             $ordercolumn = "d.TransferArticle";
     //         break;
-
+            
     //         case 5:
     //             $ordercolumn = "d.TransferCategory";
     //         break;
-
+            
     //          case 6:
     //             $ordercolumn = "d.PartyDiscount";
     //         break;
-
+            
     //         default:
     //             $ordercolumn = "d.OutwardDate";
     //             break;
@@ -641,8 +641,8 @@ class StocktransferController extends Controller
     //         $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
     //     }
     //     $vnddata = DB::select("select d.* from (SELECT s.Id , s.ArticleId, s.NoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stockshortage` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId =  '" . $STNO . "') as d " );
-
-
+    
+    
 
     //     return array(
     //         'datadraw' => $data["draw"],
@@ -653,17 +653,17 @@ class StocktransferController extends Controller
     //         'search' => count($vnddata),
     //         'data' => $vnddata,
     //     );
-
-
-
-
+        
+        
+        
+        
     //     // return DB::select("SELECT s.Id , s.ArticleId, s.NoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stockshortage` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId =  '" . $STNO . "'");
     // }
 
 
     public function StockshortageListFromSTNO($STNO)
     {
-
+        
         return DB::select("SELECT s.Id , s.ArticleId, s.NoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stockshortage` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId =  '" . $STNO . "'");
     }
 
@@ -676,8 +676,8 @@ class StocktransferController extends Controller
 
     public function StocktransferListFromSTNO($STNO, Request $request)
     {
-
-
+        
+        
         $data = $request->all();
         $search = $data["search"];
         $startnumber = $data["start"];
@@ -686,7 +686,7 @@ class StocktransferController extends Controller
         $length = $data["length"];
         if ($search['value'] != null && strlen($search['value']) > 2) {
             $searchstring = "where d.ConsumedArticle like '%" . $search['value'] . "%' OR d.TransferArticle like '%" . $search['value'] . "%' OR d.TransferCategory like '%" . $search['value'] . "%' OR d.ConsumeCategory like '%" . $search['value'] . "%' ";
-            $vnddataTotalFilter = DB::select("select count(*) as Total from (SELECT s.Id , cc.Title as ConsumeCategory, tc.Title as TransferCategory,  s.ConsumedArticleId, s.ConsumedNoPacks, s.TransferArticleId , s.TransferNoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber as ConsumedArticle, aa.ArticleNumber as TransferArticle, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stocktransfer` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ConsumedArticleId left join category cc on cc.Id=a.CategoryId  inner join article aa on aa.Id=s.TransferArticleId  left join category tc on tc.Id=aa.CategoryId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId = '" . $STNO . "') as d " . $searchstring);
+            $vnddataTotalFilter = DB::select("select count(*) as Total from (SELECT s.Id , cc.Title as ConsumeCategory, tc.Title as TransferCategory,  s.ConsumedArticleId, s.ConsumedNoPacks, s.TransferArticleId , s.TransferNoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber as ConsumedArticle, aa.ArticleNumber as TransferArticle, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stocktransfer` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ConsumedArticleId left join category cc on cc.Id=a.CategoryId  inner join article aa on aa.Id=s.TransferArticleId  left join category tc on tc.Id=aa.CategoryId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId = '" . $STNO . "') as d "  . $searchstring );
             $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
         } else {
             $searchstring = "";
@@ -705,16 +705,16 @@ class StocktransferController extends Controller
                 break;
             case 4:
                 $ordercolumn = "d.TransferArticle";
-                break;
-
+            break;
+            
             case 5:
                 $ordercolumn = "d.TransferCategory";
-                break;
-
-            case 6:
+            break;
+            
+             case 6:
                 $ordercolumn = "d.PartyDiscount";
-                break;
-
+            break;
+            
             default:
                 $ordercolumn = "d.OutwardDate";
                 break;
@@ -723,9 +723,9 @@ class StocktransferController extends Controller
         if ($data["order"][0]["dir"]) {
             $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
         }
-        $vnddata = DB::select("select d.* from (SELECT s.Id , cc.Title as ConsumeCategory, tc.Title as TransferCategory,  s.ConsumedArticleId, s.ConsumedNoPacks, s.TransferArticleId , s.TransferNoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber as ConsumedArticle, aa.ArticleNumber as TransferArticle, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stocktransfer` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ConsumedArticleId left join category cc on cc.Id=a.CategoryId  inner join article aa on aa.Id=s.TransferArticleId  left join category tc on tc.Id=aa.CategoryId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId = '" . $STNO . "') as d " . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length);
-
-
+        $vnddata = DB::select("select d.* from (SELECT s.Id , cc.Title as ConsumeCategory, tc.Title as TransferCategory,  s.ConsumedArticleId, s.ConsumedNoPacks, s.TransferArticleId , s.TransferNoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber as ConsumedArticle, aa.ArticleNumber as TransferArticle, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stocktransfer` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ConsumedArticleId left join category cc on cc.Id=a.CategoryId  inner join article aa on aa.Id=s.TransferArticleId  left join category tc on tc.Id=aa.CategoryId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId = '" . $STNO . "') as d " . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length );
+    
+    
 
         return array(
             'datadraw' => $data["draw"],
@@ -736,9 +736,9 @@ class StocktransferController extends Controller
             'search' => count($vnddata),
             'data' => $vnddata,
         );
-
-
-
+        
+        
+        
         // return ($STNO);
         // return DB::select("SELECT s.Id , cc.Title as ConsumeCategory, tc.Title as TransferCategory,  s.ConsumedArticleId, s.ConsumedNoPacks, s.TransferArticleId , s.TransferNoPacks, stn.StocktransferNumber , stn.StocktransferDate, a.ArticleNumber as ConsumedArticle, aa.ArticleNumber as TransferArticle, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear FROM `stocktransfer` s inner join stocktransfernumber stn on stn.Id=s.StocktransferNumberId inner join article a on a.Id=s.ConsumedArticleId left join category cc on cc.Id=a.CategoryId  inner join article aa on aa.Id=s.TransferArticleId  left join category tc on tc.Id=aa.CategoryId inner join financialyear fn on fn.Id=stn.FinancialYearId where s.StocktransferNumberId = '" . $STNO . "'");
     }
@@ -753,16 +753,16 @@ class StocktransferController extends Controller
 
     // public function StocktransferDateFromSTNO($id, Request $request)
     // {
-
+        
     //     // (SELECT stn.StocktransferNumber, stn.StocktransferDate, stn.Remarks, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear from stocktransfernumber stn inner join financialyear fn on fn.Id=stn.FinancialYearId  where stn.Id = '" . $id . "')
-
+        
     //     $data = $request->all();
     //     $search = $data["search"];
     //     $startnumber = $data["start"];
     //     $vnddataTotal = DB::select("select count(*) as Total from( SELECT stn.StocktransferNumber, stn.StocktransferDate, stn.Remarks, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear from stocktransfernumber stn inner join financialyear fn on fn.Id=stn.FinancialYearId  where stn.Id = '" . $id . "') as d");
-
-
-
+        
+        
+        
     //     $vnTotal = $vnddataTotal[0]->Total;
     //     $length = $data["length"];
     //     if ($search['value'] != null && strlen($search['value']) > 2) {
@@ -787,8 +787,8 @@ class StocktransferController extends Controller
     //         case 4:
     //             $ordercolumn = "d.ST_Number_FinancialYear";
     //         break;
-
-
+           
+            
     //         default:
     //             $ordercolumn = "d.StocktransferDate";
     //             break;
@@ -798,8 +798,8 @@ class StocktransferController extends Controller
     //         $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
     //     }
     //     $vnddata = DB::select("select d.* from (SELECT stn.StocktransferNumber, stn.StocktransferDate, stn.Remarks, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear from stocktransfernumber stn inner join financialyear fn on fn.Id=stn.FinancialYearId  where stn.Id = '" . $id . "') as d " . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length );
-
-
+    
+    
 
     //     return array(
     //         'datadraw' => $data["draw"],
@@ -810,16 +810,16 @@ class StocktransferController extends Controller
     //         'search' => count($vnddata),
     //         'data' => $vnddata,
     //     );
-
-
+    
+        
     //     return DB::select("SELECT stn.StocktransferNumber, stn.StocktransferDate, stn.Remarks, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear from stocktransfernumber stn inner join financialyear fn on fn.Id=stn.FinancialYearId  where stn.Id = '" . $id . "'");
     // }
-
-    public function StocktransferDateFromSTNO($id)
+    
+        public function StocktransferDateFromSTNO($id)
     {
         return DB::select("SELECT stn.StocktransferNumber, stn.StocktransferDate, stn.Remarks, concat(stn.StocktransferNumber, '/',fn.StartYear,'-',fn.EndYear) as ST_Number_FinancialYear from stocktransfernumber stn inner join financialyear fn on fn.Id=stn.FinancialYearId  where stn.Id = '" . $id . "'");
     }
-
+    
 
     public function Deletestocktransfer($id, $type, $LoggedId)
     {
@@ -1053,12 +1053,12 @@ class StocktransferController extends Controller
                 }
                 $ConsumedArticleSize = rtrim($ConsumedArticleSize, ',');
                 if (strpos($ConsumedNoPacks, ',') != false) {
-                    $TotalConsumedNoPacks = $TotalConsumedNoPacks + array_sum(explode(",", $ConsumedNoPacks));
+                    $TotalConsumedNoPacks =  $TotalConsumedNoPacks + array_sum(explode(",", $ConsumedNoPacks));
                 } else {
-                    $TotalConsumedNoPacks = $TotalConsumedNoPacks + (int) $ConsumedNoPacks;
+                    $TotalConsumedNoPacks = $TotalConsumedNoPacks + (int)$ConsumedNoPacks;
                 }
             } else {
-                $TotalConsumedNoPacks = $TotalConsumedNoPacks + (int) $ConsumedNoPacks;
+                $TotalConsumedNoPacks = $TotalConsumedNoPacks + (int)$ConsumedNoPacks;
                 $ConsumedArticleColor = "";
                 $ConsumedArticleSize = "";
             }
@@ -1076,12 +1076,12 @@ class StocktransferController extends Controller
                 }
                 $TransferArticleSize = rtrim($TransferArticleSize, ',');
                 if (strpos($TransferNoPacks, ',') != false) {
-                    $TotalTransferNoPacks = $TotalTransferNoPacks + array_sum(explode(",", $TransferNoPacks));
+                    $TotalTransferNoPacks = $TotalTransferNoPacks +   array_sum(explode(",", $TransferNoPacks));
                 } else {
-                    $TotalTransferNoPacks = $TotalTransferNoPacks + (int) $TransferNoPacks;
+                    $TotalTransferNoPacks = $TotalTransferNoPacks +  (int)$TransferNoPacks;
                 }
             } else {
-                $TotalTransferNoPacks = $TotalTransferNoPacks + (int) $TransferNoPacks;
+                $TotalTransferNoPacks = $TotalTransferNoPacks +  (int)$TransferNoPacks;
                 $TransferArticleColor = "";
                 $TransferArticleSize = "";
             }
@@ -1090,7 +1090,7 @@ class StocktransferController extends Controller
             $vl->TransferArticleColor = $TransferArticleColor;
             $vl->TransferArticleSize = $TransferArticleSize;
         }
-        return ['data' => $getstchallan, 'TotalConsumedNoPacks' => $TotalConsumedNoPacks, "TotalTransferNoPacks" => $TotalTransferNoPacks];
+        return ['data' => $getstchallan,  'TotalConsumedNoPacks' => $TotalConsumedNoPacks, "TotalTransferNoPacks" => $TotalTransferNoPacks];
     }
 
     public function GetStocktransferIdWise($id)
@@ -1104,38 +1104,38 @@ class StocktransferController extends Controller
             $inwardpro = Inward::where('ArticleId', $getStockTransferData[0]->TransferArticleId)->first();
             $getStockTransferData[0]->ProSalesNoPacks = $inwardpro->SalesNoPacks;
         } else {
-            $inwards = Inward::where('ArticleId', $getStockTransferData[0]->TransferArticleId)->get();
-            $outwards = Outward::where('ArticleId', $getStockTransferData[0]->TransferArticleId)->get();
+            $inwards  = Inward::where('ArticleId', $getStockTransferData[0]->TransferArticleId)->get();
+            $outwards  = Outward::where('ArticleId', $getStockTransferData[0]->TransferArticleId)->get();
             $salesreturns = Salesreturn::where('ArticleId', $getStockTransferData[0]->TransferArticleId)->get();
             $purchasereturns = Purchasereturns::where('ArticleId', $getStockTransferData[0]->TransferArticleId)->get();
             $consumestocktransfers = Stocktransfer::where('ConsumedArticleId', $getStockTransferData[0]->TransferArticleId)->get();
             $transferstocktransfers = Stocktransfer::where('TransferArticleId', $getStockTransferData[0]->TransferArticleId)->get();
             $shortedStocks = Stockshortage::where('ArticleId', $getStockTransferData[0]->TransferArticleId)->get();
-            $sorecords = SO::where('ArticleId', $getStockTransferData[0]->TransferArticleId)->where('Status', 0)->get();
+            $sorecords  = SO::where('ArticleId', $getStockTransferData[0]->TransferArticleId)->where('Status', 0)->get();
             $SalesNoPacks = 0;
-            foreach ($inwards as $inward) {
+            foreach ($inwards  as $inward) {
                 $SalesNoPacks = $SalesNoPacks + $inward->NoPacks;
             }
-            foreach ($salesreturns as $salesreturn) {
+            foreach ($salesreturns  as $salesreturn) {
                 $SalesNoPacks = $SalesNoPacks + $salesreturn->NoPacks;
             }
-            foreach ($outwards as $outward) {
+            foreach ($outwards  as $outward) {
                 $SalesNoPacks = $SalesNoPacks - $outward->NoPacks;
             }
-            foreach ($purchasereturns as $purchasereturn) {
+            foreach ($purchasereturns  as $purchasereturn) {
                 $SalesNoPacks = $SalesNoPacks - $purchasereturn->ReturnNoPacks;
             }
-            foreach ($consumestocktransfers as $stocktransfer) {
+            foreach ($consumestocktransfers  as $stocktransfer) {
                 $SalesNoPacks = $SalesNoPacks - $stocktransfer->ConsumedNoPacks;
             }
-            foreach ($transferstocktransfers as $stocktransfer) {
+            foreach ($transferstocktransfers  as $stocktransfer) {
                 $SalesNoPacks = $SalesNoPacks + $stocktransfer->TransferNoPacks;
             }
-            foreach ($shortedStocks as $shortedStock) {
+            foreach ($shortedStocks  as $shortedStock) {
                 $SalesNoPacks = $SalesNoPacks - $shortedStock->NoPacks;
             }
             if (!empty($sorecords)) {
-                foreach ($sorecords as $sorecord) {
+                foreach ($sorecords  as $sorecord) {
                     $SalesNoPacks = $SalesNoPacks - $sorecord->OutwardNoPacks;
                 }
             }
@@ -1145,38 +1145,38 @@ class StocktransferController extends Controller
             $inwardtra = Inward::where('ArticleId', $getStockTransferData[0]->ConsumedArticleId)->first();
             $getStockTransferData[0]->ConNoPacks = $inwardtra->SalesNoPacks;
         } else {
-            $inwards = Inward::where('ArticleId', $getStockTransferData[0]->ConsumedArticleId)->get();
-            $outwards = Outward::where('ArticleId', $getStockTransferData[0]->ConsumedArticleId)->get();
+            $inwards  = Inward::where('ArticleId', $getStockTransferData[0]->ConsumedArticleId)->get();
+            $outwards  = Outward::where('ArticleId', $getStockTransferData[0]->ConsumedArticleId)->get();
             $salesreturns = Salesreturn::where('ArticleId', $getStockTransferData[0]->ConsumedArticleId)->get();
             $purchasereturns = Purchasereturns::where('ArticleId', $getStockTransferData[0]->ConsumedArticleId)->get();
             $consumestocktransfers = Stocktransfer::where('ConsumedArticleId', $getStockTransferData[0]->ConsumedArticleId)->get();
             $transferstocktransfers = Stocktransfer::where('TransferArticleId', $getStockTransferData[0]->ConsumedArticleId)->get();
             $shortedStocks = Stockshortage::where('ArticleId', $getStockTransferData[0]->ConsumedArticleId)->get();
-            $sorecords = SO::where('ArticleId', $getStockTransferData[0]->ConsumedArticleId)->where('Status', 0)->get();
+            $sorecords  = SO::where('ArticleId', $getStockTransferData[0]->ConsumedArticleId)->where('Status', 0)->get();
             $SalesNoPacks = 0;
-            foreach ($inwards as $inward) {
+            foreach ($inwards  as $inward) {
                 $SalesNoPacks = $SalesNoPacks + $inward->NoPacks;
             }
-            foreach ($salesreturns as $salesreturn) {
+            foreach ($salesreturns  as $salesreturn) {
                 $SalesNoPacks = $SalesNoPacks + $salesreturn->NoPacks;
             }
-            foreach ($outwards as $outward) {
+            foreach ($outwards  as $outward) {
                 $SalesNoPacks = $SalesNoPacks - $outward->NoPacks;
             }
-            foreach ($purchasereturns as $purchasereturn) {
+            foreach ($purchasereturns  as $purchasereturn) {
                 $SalesNoPacks = $SalesNoPacks - $purchasereturn->ReturnNoPacks;
             }
-            foreach ($consumestocktransfers as $stocktransfer) {
+            foreach ($consumestocktransfers  as $stocktransfer) {
                 $SalesNoPacks = $SalesNoPacks - $stocktransfer->ConsumedNoPacks;
             }
-            foreach ($transferstocktransfers as $stocktransfer) {
+            foreach ($transferstocktransfers  as $stocktransfer) {
                 $SalesNoPacks = $SalesNoPacks + $stocktransfer->TransferNoPacks;
             }
-            foreach ($shortedStocks as $shortedStock) {
+            foreach ($shortedStocks  as $shortedStock) {
                 $SalesNoPacks = $SalesNoPacks - $shortedStock->NoPacks;
             }
             if (!empty($sorecords)) {
-                foreach ($sorecords as $sorecord) {
+                foreach ($sorecords  as $sorecord) {
                     $SalesNoPacks = $SalesNoPacks - $sorecord->OutwardNoPacks;
                 }
             }
@@ -1192,14 +1192,14 @@ class StocktransferController extends Controller
             $ConsumeArticleId = $data['ArticleId'];
             $ProductionArticleId = $data['ProductionArticleId'];
             $stockTransferId = $data['id'];
-            $stRecord = DB::select("select st.Id, trart.Id as  TransferArticleId  , coart.Id as ConsumedArticleId ,  st.ConsumedNoPacks , st.TransferNoPacks , coart.ArticleOpenFlag as ConsumedArticleOpenFlag,   trart.ArticleOpenFlag as TransferArticleOpenFlag,   coart.ArticleRatio as ConsumeArticleRatio ,trart.ArticleRatio as TransferArticleRatio  , coart.ArticleNumber as ConsumeArticleNumber , trart.ArticleNumber as TransferArticleNumber, st.ConsumedNoPacks, st.TransferNoPacks, stn.StocktransferDate as STDate, stn.Id as StNumberId ,  concat( stn.StocktransferNumber , '/',fn.StartYear,'-',fn.EndYear) as STNumber, stn.Remarks, ccat.Title as ConsumedTitle, tcat.Title as TransferTitle, ccat.Colorflag as ConsumeColorflag , tcat.Colorflag as TransferColorflag , coart.ArticleColor as ConsumedArticleColor, coart.ArticleSize as ConsumedArticleSize, trart.ArticleColor as TransferArticleColor, trart.ArticleSize as TransferArticleSize from stocktransfer st inner join stocktransfernumber stn on stn.Id=st.StocktransferNumberId inner join users u on u.Id=stn.UserId inner join article coart on coart.Id=st.ConsumedArticleId inner join article trart on trart.Id=st.TransferArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId inner join category ccat on ccat.Id=coart.CategoryId inner join category tcat on tcat.Id=trart.CategoryId where st.Id = '" . $stockTransferId . "' ");
+            $stRecord  = DB::select("select st.Id, trart.Id as  TransferArticleId  , coart.Id as ConsumedArticleId ,  st.ConsumedNoPacks , st.TransferNoPacks , coart.ArticleOpenFlag as ConsumedArticleOpenFlag,   trart.ArticleOpenFlag as TransferArticleOpenFlag,   coart.ArticleRatio as ConsumeArticleRatio ,trart.ArticleRatio as TransferArticleRatio  , coart.ArticleNumber as ConsumeArticleNumber , trart.ArticleNumber as TransferArticleNumber, st.ConsumedNoPacks, st.TransferNoPacks, stn.StocktransferDate as STDate, stn.Id as StNumberId ,  concat( stn.StocktransferNumber , '/',fn.StartYear,'-',fn.EndYear) as STNumber, stn.Remarks, ccat.Title as ConsumedTitle, tcat.Title as TransferTitle, ccat.Colorflag as ConsumeColorflag , tcat.Colorflag as TransferColorflag , coart.ArticleColor as ConsumedArticleColor, coart.ArticleSize as ConsumedArticleSize, trart.ArticleColor as TransferArticleColor, trart.ArticleSize as TransferArticleSize from stocktransfer st inner join stocktransfernumber stn on stn.Id=st.StocktransferNumberId inner join users u on u.Id=stn.UserId inner join article coart on coart.Id=st.ConsumedArticleId inner join article trart on trart.Id=st.TransferArticleId inner join financialyear fn on fn.Id=stn.FinancialYearId inner join category ccat on ccat.Id=coart.CategoryId inner join category tcat on tcat.Id=trart.CategoryId where st.Id = '" . $stockTransferId . "' ");
             //Calculation of Consume
-            $conInwardRec = Inward::where('ArticleId', $ConsumeArticleId)->first();
+            $conInwardRec  = Inward::where('ArticleId',  $ConsumeArticleId)->first();
             if ($stRecord[0]->ConsumedArticleOpenFlag == 0) {
                 $conArticleSelectedColors = $data['ArticleSelectedColor'];
                 $oldConNopacks = explode(',', $stRecord[0]->ConsumedNoPacks);
                 $oldSalesNoPacks = explode(',', $conInwardRec->SalesNoPacks);
-                $newSalesNoPacks = $oldSalesNoPacks;
+                $newSalesNoPacks  = $oldSalesNoPacks;
                 $conCount = 0;
                 $newConsumeNoPacks = "";
 
@@ -1210,75 +1210,50 @@ class StocktransferController extends Controller
                     //yashvi factory art
 
                     $currentSalesNoPacks = DB::table('artstockstatus')
-                        ->where(['outletId' => 0])
-                        ->where(['ArticleId' => $data["ArticleId"]])
-                        ->value('SalesNoPacks');
-
+                    ->where(['outletId' =>  0])
+                    ->where(['ArticleId' => $data["ArticleId"]])
+                    ->value('SalesNoPacks');
+                  
                     $artD = DB::table('article')->join('category', 'article.CategoryId', '=', 'category.Id')
-                        ->where('article.Id', $data["ArticleId"])
-                        ->first();
+                    ->where('article.Id', $data["ArticleId"])
+                    ->first();
 
                     // Convert comma-separated values to arrays
 
                     if (is_array($currentSalesNoPacks)) {
                         $currentSalesNoPacks = implode(',', $currentSalesNoPacks);
-                    }
-                    $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
-                    if (is_array($oldConNopacks)) {
-                        $oldConNopacks = implode(',', $oldConNopacks);
-                    }
-                    $oldConNopacksArray = explode(',', $oldConNopacks);
-                    $preNoPacksNew_Array = explode(',', $preNoPacksNew_);
+                    }                    
+                $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+                $oldConNopacksArray = explode(',', $oldConNopacks);
+                $preNoPacksNew_Array = explode(',', $preNoPacksNew_);
 
-                    // Perform element-wise addition
-                    $newSalesNoPacksArray = [];
+                  // Perform element-wise addition
+                  $newSalesNoPacksArray = [];
 
-                    for ($i = 0; $i < count($preNoPacksNew_Array); $i++) {
-                        $newSalesNoPacksArray[$i] = (int) $currentSalesNoPacksArray[$i] + (int) $oldConNopacksArray[$i] - (int) $preNoPacksNew_Array[$i];
-                    }
+                  for ($i = 0; $i < count($preNoPacksNew_Array); $i++) {
+                    $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] + (int)$oldConNopacksArray[$i] - (int)$preNoPacksNew_Array[$i];
+                }
+            
+                // Convert back to comma-separated string
+                $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
 
-                    // Convert back to comma-separated string
-                    $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+                // Perform the updateOrInsert operation with the new SalesNoPacks value
+                
+                $packes = $newSalesNoPacks;
+                $packesArray = explode(',', $packes);
+                $sum = array_sum($packesArray); 
 
-                    // Perform the updateOrInsert operation with the new SalesNoPacks value
-
-                    $packes = $newSalesNoPacks;
-                    $packesArray = explode(',', $packes);
-                    $sum = array_sum($packesArray);
-
-                    // Perform the updateOrInsert operation with the new SalesNoPacks value
+                     // Perform the updateOrInsert operation with the new SalesNoPacks value
                     DB::table('artstockstatus')->updateOrInsert(
-                        ['outletId' => 0, 'ArticleId' => $data['ArticleId']],
-                        [
-                            'Title' => $artD->Title,
-                            'ArticleNumber' => $artD->ArticleNumber,
-                            'SalesNoPacks' => $packesArray,
-                            'TotalPieces' => $sum
-                        ]
+                    ['outletId' => 0,'ArticleId' => $data['ArticleId']],
+                    ['Title' => $artD->Title,'ArticleNumber' => $artD->ArticleNumber,'SalesNoPacks' => $packesArray,
+                    'TotalPieces' => $sum]
                     );
                     //CLOSE
 
-
+                         
                     if ($data["NoPacksNew_" . $conArticleSelectedColor['Id']] <= ($data["NoPacks_" . $conArticleSelectedColor['Id']] + $oldConNopacks[$conCount])) {
-                       // Make sure $newSalesNoPacks is an array
-                        if (!is_array($newSalesNoPacks)) {
-                            $newSalesNoPacks = array(); // Initialize as an empty array
-                        }
-
-                        // Convert string values to integers
-                        if (isset($newSalesNoPacks[$conCount])) {
-                            $newSalesNoPacksValue = (int)$newSalesNoPacks[$conCount];
-                        } else {
-                            $newSalesNoPacksValue = 0; // Set a default value
-                        }
-
-// Similarly, perform checks for other array accesses as needed
-                        $oldConNopacksValue = (int)$oldConNopacks[$conCount];
-                        $noPacksNewValue = (int)$data["NoPacksNew_" . $conArticleSelectedColor['Id']];
-
-                        // Perform arithmetic operations
-                        $newSalesNoPacks[$conCount] = $newSalesNoPacksValue + $oldConNopacksValue - $noPacksNewValue;
-
+                        $newSalesNoPacks[$conCount] =  ($newSalesNoPacks[$conCount] +  $oldConNopacks[$conCount]) - $data["NoPacksNew_" . $conArticleSelectedColor['Id']];
                     } else {
                         return response()->json(["status" => "failed", "articleType" => 0], 200);
                     }
@@ -1287,63 +1262,55 @@ class StocktransferController extends Controller
                     } else {
                         $newConsumeNoPacks = $newConsumeNoPacks . $data["NoPacksNew_" . $conArticleSelectedColor['Id']] . ",";
                     }
-                    $conCount = $conCount + 1;
+                    $conCount  = $conCount + 1;
 
-
+                    
                 }
-                if (is_array($newSalesNoPacks)) {
-                    $newSalesNoPacksGot = implode(',', $newSalesNoPacks);
-                } else {
-                    $newSalesNoPacksGot = ''; // or some default value
-                }
-                $newConsumeNoPacksGot = $newConsumeNoPacks;
+                $newSalesNoPacksGot = implode(',', $newSalesNoPacks);
+                $newConsumeNoPacksGot =  $newConsumeNoPacks;
             } else {
                 $oldConNopacks = explode(',', $stRecord[0]->ConsumedNoPacks);
-                //yashvi factory art
+                  //yashvi factory art
 
-                $currentSalesNoPacks = DB::table('artstockstatus')
-                    ->where(['outletId' => 0])
-                    ->where(['ArticleId' => $data["ArticleId"]])
-                    ->value('SalesNoPacks');
-
-
-                $artD = DB::table('article')->join('category', 'article.CategoryId', '=', 'category.Id')
-                    ->where('article.Id', $data["ArticleId"])
-                    ->first();
-
-                // Calculate the new SalesNoPacks value by adding the new value to the current value                        
-                $newSalesNoPacks = $currentSalesNoPacks + (int) $oldConNopacks - (int) $data["NoPacksNew"];
-
-                // Perform the updateOrInsert operation with the new SalesNoPacks value
-                DB::table('artstockstatus')->updateOrInsert(
-                    ['outletId' => 0, 'ArticleId' => $data['ArticleId']],
-                    [
-                        'Title' => $artD->Title,
-                        'ArticleNumber' => $artD->ArticleNumber,
-                        'SalesNoPacks' => $newSalesNoPacks,
-                        'TotalPieces' => $newSalesNoPacks
-                    ]
-                );
-                //CLOSE
-                if ((int) $data["NoPacksNew"] <= (int) $data["NoPacks"] + (int) $stRecord[0]->ConsumedNoPacks) {
-                    $newSalesNoPacksGot = ((int) $stRecord[0]->ConsumedNoPacks + (int) $data["NoPacks"]) - (int) $data["NoPacksNew"];
-                    $newConsumeNoPacksGot = (int) $data["NoPacksNew"];
+                  $currentSalesNoPacks = DB::table('artstockstatus')
+                  ->where(['outletId' =>  0])
+                  ->where(['ArticleId' => $data["ArticleId"]])
+                  ->value('SalesNoPacks');
+                  
+                                       
+                  $artD = DB::table('article')->join('category', 'article.CategoryId', '=', 'category.Id')
+                  ->where('article.Id', $data["ArticleId"])
+                  ->first();
+                  
+                  // Calculate the new SalesNoPacks value by adding the new value to the current value                        
+                   $newSalesNoPacks = $currentSalesNoPacks + (int)$oldConNopacks- (int)$data["NoPacksNew"];
+                                           
+                   // Perform the updateOrInsert operation with the new SalesNoPacks value
+                  DB::table('artstockstatus')->updateOrInsert(
+                  ['outletId' => 0,'ArticleId' => $data['ArticleId']],
+                  ['Title' => $artD->Title,'ArticleNumber' => $artD->ArticleNumber,'SalesNoPacks' => $newSalesNoPacks,
+                  'TotalPieces' => $newSalesNoPacks]
+                  );
+                  //CLOSE
+                if ((int)$data["NoPacksNew"] <= (int)$data["NoPacks"] + (int)$stRecord[0]->ConsumedNoPacks) {
+                    $newSalesNoPacksGot =  ((int)$stRecord[0]->ConsumedNoPacks +  (int)$data["NoPacks"]) - (int)$data["NoPacksNew"];
+                    $newConsumeNoPacksGot = (int)$data["NoPacksNew"];
                 } else {
                     return response()->json(["status" => "failed", "articleType" => 0], 200);
                 }
             }
             //Calculation of Production
-            $proInwardRec = Inward::where('ArticleId', $ProductionArticleId)->first();
+            $proInwardRec  = Inward::where('ArticleId',  $ProductionArticleId)->first();
             if ($stRecord[0]->TransferArticleOpenFlag == 0) {
                 $proArticleSelectedColors = $data['ProductionArticleSelectedColor'];
                 $oldProNopacks = explode(',', $stRecord[0]->TransferNoPacks);
                 $oldProSalesNoPacks = explode(',', $proInwardRec->SalesNoPacks);
-                $newProSalesNoPacks = $oldProSalesNoPacks;
+                $newProSalesNoPacks  = $oldProSalesNoPacks;
                 $proCount = 0;
                 $newProductionNoPacks = "";
                 foreach ($proArticleSelectedColors as $proArticleSelectedColor) {
                     if ((($data["ProductionNoPacks_" . $proArticleSelectedColor['Id']] - $oldProNopacks[$proCount]) + $data["ProductionNoPacksNew_" . $proArticleSelectedColor['Id']]) >= 0) {
-                        $newProSalesNoPacks[$proCount] = ($newProSalesNoPacks[$proCount] - $oldProSalesNoPacks[$proCount]) + $data["ProductionNoPacksNew_" . $proArticleSelectedColor['Id']];
+                        $newProSalesNoPacks[$proCount] =  ($newProSalesNoPacks[$proCount] -  $oldProSalesNoPacks[$proCount]) + $data["ProductionNoPacksNew_" . $proArticleSelectedColor['Id']];
                     } else {
                         return response()->json(["status" => "failed", "articleType" => 1], 200);
                     }
@@ -1352,105 +1319,105 @@ class StocktransferController extends Controller
                     } else {
                         $newProductionNoPacks = $newProductionNoPacks . $data["ProductionNoPacksNew_" . $proArticleSelectedColor['Id']] . ",";
                     }
-                    $proCount = $proCount + 1;
+                    $proCount  = $proCount + 1;
 
                     //YASHVI
 
 
                     $preNoPacksNew_ = $data["ProductionNoPacksNew_" . $proArticleSelectedColor['Id']];
-
+                
                     $currentSalesNoPacks = DB::table('artstockstatus')
-                        ->where(['outletId' => 0])
-                        ->where(['ArticleId' => $data["ProductionArticleId"]])
-                        ->value('SalesNoPacks');
+                    ->where(['outletId' =>  0])
+                    ->where(['ArticleId' => $data["ProductionArticleId"]])
+                    ->value('SalesNoPacks');
 
                     $artD = DB::table('article')
-                        ->join('category', 'article.CategoryId', '=', 'category.Id')
-                        ->where('article.Id', $data["ProductionArticleId"])
-                        ->first();
+                    ->join('category', 'article.CategoryId', '=', 'category.Id')
+                    ->where('article.Id', $data["ProductionArticleId"])
+                    ->first();
 
                     // Convert comma-separated values to arrays
-                    $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
-                    $oldProNopacksArray = explode(',', $oldProNopacks);
-                    $preNoPacksNew_Array = explode(',', $preNoPacksNew_);
+                $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+                $oldProNopacksArray = explode(',', $oldProNopacks);
+                $preNoPacksNew_Array = explode(',', $preNoPacksNew_);
 
-                    // Perform element-wise addition
-                    $newSalesNoPacksArray = [];
+                  // Perform element-wise addition
+                  $newSalesNoPacksArray = [];
 
-                    for ($i = 0; $i < count($preNoPacksNew_Array); $i++) {
-                        $newSalesNoPacksArray[$i] = (int) $currentSalesNoPacksArray[$i] - (int) $oldProNopacksArray[$i] + (int) $preNoPacksNew_Array[$i];
-                    }
+                  for ($i = 0; $i < count($preNoPacksNew_Array); $i++) {
+                    $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$oldProNopacksArray[$i] + (int)$preNoPacksNew_Array[$i];
+                }
+            
+                // Convert back to comma-separated string
+                $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
 
-                    // Convert back to comma-separated string
-                    $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+                // Perform the updateOrInsert operation with the new SalesNoPacks value
+                
+                $packes = $newSalesNoPacks;
+                $packesArray = explode(',', $packes);
+                $sum = array_sum($packesArray); 
+     
+                        // Perform the updateOrInsert operation with the new SalesNoPacks value
+                        DB::table('artstockstatus')->updateOrInsert(
+                            [
+                                'outletId' => 0,
+                                'ArticleId' => $data['ProductionArticleId']
+                            ],
+                            [ 
+                                'Title' => $artD->Title,
+                                'ArticleNumber' => $artD->ArticleNumber,
+                                'SalesNoPacks' => $packesArray,
+                                'TotalPieces' => $sum
+                            ]
+                        );
 
-                    // Perform the updateOrInsert operation with the new SalesNoPacks value
+                        //CLOSE
+                }
+                $newProSalesNoPacksGot = implode(',', $newProSalesNoPacks);
+                $newProductionNoPacksGot =  $newProductionNoPacks;
+            } else {
+                //YASHVI
 
-                    $packes = $newSalesNoPacks;
-                    $packesArray = explode(',', $packes);
-                    $sum = array_sum($packesArray);
+                $currentSalesNoPacks = DB::table('artstockstatus')
+                ->where(['outletId' =>  0])
+                ->where(['ArticleId' => $data["ProductionArticleId"]])
+                ->value('SalesNoPacks');
 
+                
+                $artD = DB::table('article')
+                    ->join('category', 'article.CategoryId', '=', 'category.Id')
+                    ->where('article.Id', $data["ProductionArticleId"])
+                    ->first();
+                    // Calculate the new SalesNoPacks value by adding the new value to the current value                        
+                    $newSalesNoPacks = $currentSalesNoPacks - (int)$oldConNopacks +  (int)$data["ProductionNoPacksNew"];
+                    
                     // Perform the updateOrInsert operation with the new SalesNoPacks value
                     DB::table('artstockstatus')->updateOrInsert(
                         [
                             'outletId' => 0,
                             'ArticleId' => $data['ProductionArticleId']
                         ],
-                        [
+                        [ 
                             'Title' => $artD->Title,
                             'ArticleNumber' => $artD->ArticleNumber,
-                            'SalesNoPacks' => $packesArray,
-                            'TotalPieces' => $sum
+                            'SalesNoPacks' => $newSalesNoPacks,
+                            'TotalPieces' => $newSalesNoPacks
                         ]
                     );
 
                     //CLOSE
-                }
-                $newProSalesNoPacksGot = implode(',', $newProSalesNoPacks);
-                $newProductionNoPacksGot = $newProductionNoPacks;
-            } else {
-                //YASHVI
-
-                $currentSalesNoPacks = DB::table('artstockstatus')
-                    ->where(['outletId' => 0])
-                    ->where(['ArticleId' => $data["ProductionArticleId"]])
-                    ->value('SalesNoPacks');
-
-
-                $artD = DB::table('article')
-                    ->join('category', 'article.CategoryId', '=', 'category.Id')
-                    ->where('article.Id', $data["ProductionArticleId"])
-                    ->first();
-                // Calculate the new SalesNoPacks value by adding the new value to the current value                        
-                $newSalesNoPacks = $currentSalesNoPacks - (int) $oldConNopacks + (int) $data["ProductionNoPacksNew"];
-
-                // Perform the updateOrInsert operation with the new SalesNoPacks value
-                DB::table('artstockstatus')->updateOrInsert(
-                    [
-                        'outletId' => 0,
-                        'ArticleId' => $data['ProductionArticleId']
-                    ],
-                    [
-                        'Title' => $artD->Title,
-                        'ArticleNumber' => $artD->ArticleNumber,
-                        'SalesNoPacks' => $newSalesNoPacks,
-                        'TotalPieces' => $newSalesNoPacks
-                    ]
-                );
-
-                //CLOSE
-                if (((int) $data["ProductionNoPacks"] - (int) $stRecord[0]->TransferNoPacks + (int) $data["ProductionNoPacksNew"]) >= 0) {
-                    $newProSalesNoPacksGot = ((int) $stRecord[0]->TransferNoPacks - (int) $data["ProductionNoPacks"]) + (int) $data["ProductionNoPacksNew"];
-                    $newProductionNoPacksGot = (int) $data["ProductionNoPacksNew"];
+                if (((int)$data["ProductionNoPacks"] - (int)$stRecord[0]->TransferNoPacks + (int)$data["ProductionNoPacksNew"]) >= 0) {
+                    $newProSalesNoPacksGot =  ((int)$stRecord[0]->TransferNoPacks -  (int)$data["ProductionNoPacks"]) + (int)$data["ProductionNoPacksNew"];
+                    $newProductionNoPacksGot = (int)$data["ProductionNoPacksNew"];
                 } else {
                     return response()->json(["status" => "failed", "articleType" => 1], 200);
                 }
             }
             //Updation
             if ($stRecord[0]->ConsumedArticleOpenFlag == 0) {
-
-                Inward::where('ArticleId', $ConsumeArticleId)->update([
-                    'SalesNoPacks' => $newSalesNoPacksGot
+                
+                Inward::where('ArticleId',  $ConsumeArticleId)->update([
+                    'SalesNoPacks' =>  $newSalesNoPacksGot
                 ]);
             } else {
                 DB::table('mixnopacks')->where('ArticleId', $ConsumeArticleId)->update([
@@ -1458,8 +1425,8 @@ class StocktransferController extends Controller
                 ]);
             }
             if ($stRecord[0]->TransferArticleOpenFlag == 0) {
-                $proInwardRec = Inward::where('ArticleId', $ProductionArticleId)->update([
-                    'SalesNoPacks' => $newProSalesNoPacksGot
+                $proInwardRec  = Inward::where('ArticleId',  $ProductionArticleId)->update([
+                    'SalesNoPacks' =>  $newProSalesNoPacksGot
                 ]);
             } else {
                 DB::table('mixnopacks')->where('ArticleId', $ProductionArticleId)->update([
@@ -1468,10 +1435,10 @@ class StocktransferController extends Controller
             }
             $logDesc = "";
             $ActiveStockTransfer = Stocktransfer::where('id', $stockTransferId)->first();
-            if ($ActiveStockTransfer->ConsumedNoPacks != $newConsumeNoPacksGot) {
+            if ($ActiveStockTransfer->ConsumedNoPacks  != $newConsumeNoPacksGot) {
                 $logDesc = $logDesc . 'Consumed Pieces,';
             }
-            if ($ActiveStockTransfer->TransferNoPacks != $newProductionNoPacksGot) {
+            if ($ActiveStockTransfer->TransferNoPacks  != $newProductionNoPacksGot) {
                 $logDesc = $logDesc . 'Transfer Pieces,';
             }
             $newLogDesc = rtrim($logDesc, ',');
@@ -1503,52 +1470,52 @@ class StocktransferController extends Controller
         $identifySTRecords = DB::select("select st.*, concat( stn.StocktransferNumber , '/',fn.StartYear,'-',fn.EndYear) as STNumber, trart.ArticleColor as TraArticleColor , conar.ArticleColor as ConArticleColor , trart.ArticleOpenFlag as TraArticleOpenFlag , conar.ArticleOpenFlag as ConArticleOpenFlag from stocktransfer st inner join stocktransfernumber stn on stn.Id=st.StocktransferNumberId inner join financialyear fn on fn.Id=stn.FinancialYearId inner join article conar on conar.Id=st.ConsumedArticleId inner join article trart on trart.Id=st.TransferArticleId where st.StockTransferNumberId='" . $id . "'");
         //Check Packs
         foreach ($identifySTRecords as $identifySTRecord) {
-            $TransferArticleId = $identifySTRecord->TransferArticleId;
+            $TransferArticleId =  $identifySTRecord->TransferArticleId;
             if ($identifySTRecord->TraArticleOpenFlag == 0) {
                 $traInwardRec = Inward::where('ArticleId', $TransferArticleId)->first();
                 $TraSalesNoPacks = explode(',', $traInwardRec->SalesNoPacks);
-                $TransferNoPacks = explode(',', $identifySTRecord->TransferNoPacks);
+                $TransferNoPacks =  explode(',', $identifySTRecord->TransferNoPacks);
                 $traCount = 0;
                 foreach ($TraSalesNoPacks as $TraSalesNoPack) {
                     $TraSalesNoPacks[$traCount] = $TraSalesNoPacks[$traCount] - $TransferNoPacks[$traCount];
                     if ($TraSalesNoPacks[$traCount] < 0) {
                         return response()->json(['status' => 'failed', 'GoingMinus' => true], 200);
                     }
-                    $traCount = $traCount + 1;
+                    $traCount  = $traCount + 1;
                 }
             } else {
-                $inwards = Inward::where('ArticleId', $TransferArticleId)->get();
-                $outwards = Outward::where('ArticleId', $TransferArticleId)->get();
+                $inwards  = Inward::where('ArticleId', $TransferArticleId)->get();
+                $outwards  = Outward::where('ArticleId', $TransferArticleId)->get();
                 $salesreturns = Salesreturn::where('ArticleId', $TransferArticleId)->get();
                 $purchasereturns = Purchasereturns::where('ArticleId', $TransferArticleId)->get();
                 $consumestocktransfers = Stocktransfer::where('ConsumedArticleId', $TransferArticleId)->get();
                 $transferstocktransfers = Stocktransfer::where('TransferArticleId', $TransferArticleId)->get();
                 $shortedStocks = Stockshortage::where('ArticleId', $TransferArticleId)->get();
-                $sorecords = SO::where('ArticleId', $TransferArticleId)->where('Status', 0)->get();
+                $sorecords  = SO::where('ArticleId', $TransferArticleId)->where('Status', 0)->get();
                 $SalesNoPacks = 0;
-                foreach ($inwards as $inward) {
+                foreach ($inwards  as $inward) {
                     $SalesNoPacks = $SalesNoPacks + $inward->NoPacks;
                 }
-                foreach ($salesreturns as $salesreturn) {
+                foreach ($salesreturns  as $salesreturn) {
                     $SalesNoPacks = $SalesNoPacks + $salesreturn->NoPacks;
                 }
-                foreach ($outwards as $outward) {
+                foreach ($outwards  as $outward) {
                     $SalesNoPacks = $SalesNoPacks - $outward->NoPacks;
                 }
-                foreach ($purchasereturns as $purchasereturn) {
+                foreach ($purchasereturns  as $purchasereturn) {
                     $SalesNoPacks = $SalesNoPacks - $purchasereturn->ReturnNoPacks;
                 }
-                foreach ($consumestocktransfers as $stocktransfer) {
+                foreach ($consumestocktransfers  as $stocktransfer) {
                     $SalesNoPacks = $SalesNoPacks - $stocktransfer->ConsumedNoPacks;
                 }
-                foreach ($transferstocktransfers as $stocktransfer) {
+                foreach ($transferstocktransfers  as $stocktransfer) {
                     $SalesNoPacks = $SalesNoPacks + $stocktransfer->TransferNoPacks;
                 }
-                foreach ($shortedStocks as $shortedStock) {
+                foreach ($shortedStocks  as $shortedStock) {
                     $SalesNoPacks = $SalesNoPacks - $shortedStock->NoPacks;
                 }
                 if (!empty($sorecords)) {
-                    foreach ($sorecords as $sorecord) {
+                    foreach ($sorecords  as $sorecord) {
                         $SalesNoPacks = $SalesNoPacks - $sorecord->OutwardNoPacks;
                     }
                 }
@@ -1559,107 +1526,107 @@ class StocktransferController extends Controller
         }
         //Production & Consumption deletion
         foreach ($identifySTRecords as $identifySTRecord) {
-            $TransferArticleId = $identifySTRecord->TransferArticleId;
+            $TransferArticleId =  $identifySTRecord->TransferArticleId;
             if ($identifySTRecord->TraArticleOpenFlag == 0) {
                 $traInwardRec = Inward::where('ArticleId', $TransferArticleId)->first();
                 $TraSalesNoPacks = explode(',', $traInwardRec->SalesNoPacks);
-                $TransferNoPacks = explode(',', $identifySTRecord->TransferNoPacks);
+                $TransferNoPacks =  explode(',', $identifySTRecord->TransferNoPacks);
                 $traCount = 0;
-                $newTraSalesNoPacks = $TraSalesNoPacks;
+                $newTraSalesNoPacks =  $TraSalesNoPacks;
                 foreach ($TraSalesNoPacks as $TraSalesNoPack) {
                     $newTraSalesNoPacks[$traCount] = $newTraSalesNoPacks[$traCount] - $TransferNoPacks[$traCount];
-                    $traCount = $traCount + 1;
+                    $traCount  = $traCount + 1;
                 }
-                $newTraSalesNoPacks = implode(",", $newTraSalesNoPacks);
+                $newTraSalesNoPacks =     implode(",", $newTraSalesNoPacks);
             } else {
-                $inwards = Inward::where('ArticleId', $TransferArticleId)->get();
-                $outwards = Outward::where('ArticleId', $TransferArticleId)->get();
+                $inwards  = Inward::where('ArticleId', $TransferArticleId)->get();
+                $outwards  = Outward::where('ArticleId', $TransferArticleId)->get();
                 $salesreturns = Salesreturn::where('ArticleId', $TransferArticleId)->get();
                 $purchasereturns = Purchasereturns::where('ArticleId', $TransferArticleId)->get();
                 $consumestocktransfers = Stocktransfer::where('ConsumedArticleId', $TransferArticleId)->get();
                 $transferstocktransfers = Stocktransfer::where('TransferArticleId', $TransferArticleId)->get();
                 $shortedStocks = Stockshortage::where('ArticleId', $TransferArticleId)->get();
-                $sorecords = SO::where('ArticleId', $TransferArticleId)->where('Status', 0)->get();
+                $sorecords  = SO::where('ArticleId', $TransferArticleId)->where('Status', 0)->get();
                 $SalesNoPacks = 0;
-                foreach ($inwards as $inward) {
+                foreach ($inwards  as $inward) {
                     $SalesNoPacks = $SalesNoPacks + $inward->NoPacks;
                 }
-                foreach ($salesreturns as $salesreturn) {
+                foreach ($salesreturns  as $salesreturn) {
                     $SalesNoPacks = $SalesNoPacks + $salesreturn->NoPacks;
                 }
-                foreach ($outwards as $outward) {
+                foreach ($outwards  as $outward) {
                     $SalesNoPacks = $SalesNoPacks - $outward->NoPacks;
                 }
-                foreach ($purchasereturns as $purchasereturn) {
+                foreach ($purchasereturns  as $purchasereturn) {
                     $SalesNoPacks = $SalesNoPacks - $purchasereturn->ReturnNoPacks;
                 }
-                foreach ($consumestocktransfers as $stocktransfer) {
+                foreach ($consumestocktransfers  as $stocktransfer) {
                     $SalesNoPacks = $SalesNoPacks - $stocktransfer->ConsumedNoPacks;
                 }
-                foreach ($transferstocktransfers as $stocktransfer) {
+                foreach ($transferstocktransfers  as $stocktransfer) {
                     $SalesNoPacks = $SalesNoPacks + $stocktransfer->TransferNoPacks;
                 }
-                foreach ($shortedStocks as $shortedStock) {
+                foreach ($shortedStocks  as $shortedStock) {
                     $SalesNoPacks = $SalesNoPacks - $shortedStock->NoPacks;
                 }
                 if (!empty($sorecords)) {
-                    foreach ($sorecords as $sorecord) {
+                    foreach ($sorecords  as $sorecord) {
                         $SalesNoPacks = $SalesNoPacks - $sorecord->OutwardNoPacks;
                     }
                 }
-                $newTraSalesNoPacks = $SalesNoPacks;
+                $newTraSalesNoPacks =  $SalesNoPacks;
             }
 
 
-            $ConsumedArticleId = $identifySTRecord->ConsumedArticleId;
+            $ConsumedArticleId  =  $identifySTRecord->ConsumedArticleId;
             if ($identifySTRecord->ConArticleOpenFlag == 0) {
                 $conInwardRec = Inward::where('ArticleId', $ConsumedArticleId)->first();
                 $ConSalesNoPacks = explode(',', $conInwardRec->SalesNoPacks);
-                $ConsumeNoPacks = explode(',', $identifySTRecord->ConsumedNoPacks);
+                $ConsumeNoPacks =  explode(',', $identifySTRecord->ConsumedNoPacks);
                 $conCount = 0;
-                $newConSalesNoPacks = $ConSalesNoPacks;
+                $newConSalesNoPacks =  $ConSalesNoPacks;
                 foreach ($ConSalesNoPacks as $ConSalesNoPack) {
                     $newConSalesNoPacks[$conCount] = $newConSalesNoPacks[$conCount] + $ConsumeNoPacks[$conCount];
-                    $conCount = $conCount + 1;
+                    $conCount  = $conCount + 1;
                 }
-                $newConSalesNoPacks = implode(",", $newConSalesNoPacks);
+                $newConSalesNoPacks =     implode(",", $newConSalesNoPacks);
             } else {
-                $coninwards = Inward::where('ArticleId', $ConsumedArticleId)->get();
-                $conoutwards = Outward::where('ArticleId', $ConsumedArticleId)->get();
+                $coninwards  = Inward::where('ArticleId', $ConsumedArticleId)->get();
+                $conoutwards  = Outward::where('ArticleId', $ConsumedArticleId)->get();
                 $consalesreturns = Salesreturn::where('ArticleId', $ConsumedArticleId)->get();
                 $conpurchasereturns = Purchasereturns::where('ArticleId', $ConsumedArticleId)->get();
                 $conconsumestocktransfers = Stocktransfer::where('ConsumedArticleId', $ConsumedArticleId)->get();
                 $contransferstocktransfers = Stocktransfer::where('TransferArticleId', $ConsumedArticleId)->get();
                 $conshortedStocks = Stockshortage::where('ArticleId', $ConsumedArticleId)->get();
-                $consorecords = SO::where('ArticleId', $ConsumedArticleId)->where('Status', 0)->get();
+                $consorecords  = SO::where('ArticleId', $ConsumedArticleId)->where('Status', 0)->get();
                 $conSalesNoPacks = 0;
-                foreach ($coninwards as $inward) {
+                foreach ($coninwards  as $inward) {
                     $conSalesNoPacks = $conSalesNoPacks + $inward->NoPacks;
                 }
-                foreach ($consalesreturns as $salesreturn) {
+                foreach ($consalesreturns  as $salesreturn) {
                     $conSalesNoPacks = $conSalesNoPacks + $salesreturn->NoPacks;
                 }
-                foreach ($conoutwards as $outward) {
+                foreach ($conoutwards  as $outward) {
                     $conSalesNoPacks = $conSalesNoPacks - $outward->NoPacks;
                 }
-                foreach ($conpurchasereturns as $purchasereturn) {
+                foreach ($conpurchasereturns  as $purchasereturn) {
                     $conSalesNoPacks = $conSalesNoPacks - $purchasereturn->ReturnNoPacks;
                 }
-                foreach ($conconsumestocktransfers as $stocktransfer) {
+                foreach ($conconsumestocktransfers  as $stocktransfer) {
                     $conSalesNoPacks = $conSalesNoPacks - $stocktransfer->ConsumedNoPacks;
                 }
-                foreach ($contransferstocktransfers as $stocktransfer) {
+                foreach ($contransferstocktransfers  as $stocktransfer) {
                     $conSalesNoPacks = $conSalesNoPacks + $stocktransfer->TransferNoPacks;
                 }
-                foreach ($conshortedStocks as $shortedStock) {
+                foreach ($conshortedStocks  as $shortedStock) {
                     $conSalesNoPacks = $conSalesNoPacks - $shortedStock->NoPacks;
                 }
                 if (!empty($consorecords)) {
-                    foreach ($consorecords as $sorecord) {
+                    foreach ($consorecords  as $sorecord) {
                         $conSalesNoPacks = $conSalesNoPacks - $sorecord->OutwardNoPacks;
                     }
                 }
-                $newConSalesNoPacks = $conSalesNoPacks;
+                $newConSalesNoPacks =  $conSalesNoPacks;
             }
             if ($identifySTRecord->ConArticleOpenFlag == 0) {
                 Inward::where('ArticleId', $ConsumedArticleId)->update([
@@ -1667,7 +1634,7 @@ class StocktransferController extends Controller
                 ]);
             } else {
                 DB::table('mixnopacks')->where('ArticleId', $ConsumedArticleId)->update([
-                    "NoPacks" => (int) $newConSalesNoPacks + (int) $identifySTRecord->ConsumedNoPacks
+                    "NoPacks" => (int)$newConSalesNoPacks + (int)$identifySTRecord->ConsumedNoPacks
                 ]);
             }
             if ($identifySTRecord->TraArticleOpenFlag == 0) {
@@ -1676,7 +1643,7 @@ class StocktransferController extends Controller
                 ]);
             } else {
                 DB::table('mixnopacks')->where('ArticleId', $TransferArticleId)->update([
-                    "NoPacks" => (int) $newTraSalesNoPacks - (int) $identifySTRecord->TransferNoPacks
+                    "NoPacks" => (int)$newTraSalesNoPacks - (int)$identifySTRecord->TransferNoPacks
                 ]);
             }
             Stocktransfer::where('Id', $identifySTRecord->Id)->delete();

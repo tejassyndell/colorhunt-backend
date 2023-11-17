@@ -164,6 +164,8 @@ Route::get('getoutletviewparty/{id}', 'MasterController@getoutletviewparty');
 Route::delete('deleteparty/{id}', 'MasterController@Deleteparty');
 Route::get('getpartyidwise/{id}', 'MasterController@GetPartyIdWise');
 Route::put('updateparty/{field}', 'MasterController@UpdateParty');
+Route::get('gstin-verification/{gstNumber}', 'MasterController@verify');
+
 // Api Added By Kts
 Route::get('getgeoofparties', 'MasterController@getGeoOfParties');
 Route::get('getsalespersons', 'MasterController@getSalesPersons');

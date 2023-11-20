@@ -331,7 +331,7 @@ class StocktransferController extends Controller
                             // Perform the updateOrInsert operation with the new SalesNoPacks value
             
                                 $packes = $newSalesNoPacks;
-                                $packesArray = explode(',', $packes);
+                                $packesArray = array_map('intval', explode(',', $packes));
                                 $sum = array_sum($packesArray);
 
                             
@@ -344,7 +344,7 @@ class StocktransferController extends Controller
                                 [ 
                                     'Title' => $artD->Title,
                                     'ArticleNumber' => $artD->ArticleNumber,
-                                    'SalesNoPacks' => $packesArray,
+                                    'SalesNoPacks' => implode(',', $packesArray),
                                     'TotalPieces' => $sum
                                 ]
                             );
@@ -1126,6 +1126,19 @@ class StocktransferController extends Controller
                 $conCount = 0;
                 $newConsumeNoPacks = "";
                 foreach ($conArticleSelectedColors as $conArticleSelectedColor) {
+                         
+                    if ($data["NoPacksNew_" . $conArticleSelectedColor['Id']] <= ($data["NoPacks_" . $conArticleSelectedColor['Id']] + $oldConNopacks[$conCount])) {
+                        $newSalesNoPacks[$conCount] =  ($newSalesNoPacks[$conCount] +  $oldConNopacks[$conCount]) - $data["NoPacksNew_" . $conArticleSelectedColor['Id']];
+                    } else {
+                        return response()->json(["status" => "failed", "articleType" => 0], 200);
+                    }
+                    if (count($conArticleSelectedColors) == $conCount + 1) {
+                        $newConsumeNoPacks = $newConsumeNoPacks . $data["NoPacksNew_" . $conArticleSelectedColor['Id']];
+                    } else {
+                        $newConsumeNoPacks = $newConsumeNoPacks . $data["NoPacksNew_" . $conArticleSelectedColor['Id']] . ",";
+                    }
+                    $conCount  = $conCount + 1;
+
 
                     $preNoPacksNew_ = $data["NoPacksNew_" . $conArticleSelectedColor['Id']];
                     //yashvi factory art
@@ -1145,7 +1158,7 @@ class StocktransferController extends Controller
                         $currentSalesNoPacks = implode(',', $currentSalesNoPacks);
                     }                    
                 $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
-                $oldConNopacksArray = explode(',', $oldConNopacks);
+                $oldConNopacksArray = $oldConNopacks;
                 $preNoPacksNew_Array = explode(',', $preNoPacksNew_);
 
                   // Perform element-wise addition
@@ -1156,12 +1169,13 @@ class StocktransferController extends Controller
                 }
             
                 // Convert back to comma-separated string
-                $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+                $newSalesNoPacks =  $newSalesNoPacksArray;
 
                 // Perform the updateOrInsert operation with the new SalesNoPacks value
                 
-                $packes = $newSalesNoPacks;
-                $packesArray = explode(',', $packes);
+                // $packes = $newSalesNoPacks;
+                // $packesArray = explode(',', $packes);
+                $packesArray = $newSalesNoPacks;
                 $sum = array_sum($packesArray); 
 
                      // Perform the updateOrInsert operation with the new SalesNoPacks value
@@ -1171,22 +1185,11 @@ class StocktransferController extends Controller
                     'TotalPieces' => $sum]
                     );
                     //CLOSE
-
-                         
-                    if ($data["NoPacksNew_" . $conArticleSelectedColor['Id']] <= ($data["NoPacks_" . $conArticleSelectedColor['Id']] + $oldConNopacks[$conCount])) {
-                        $newSalesNoPacks[$conCount] =  ($newSalesNoPacks[$conCount] +  $oldConNopacks[$conCount]) - $data["NoPacksNew_" . $conArticleSelectedColor['Id']];
-                    } else {
-                        return response()->json(["status" => "failed", "articleType" => 0], 200);
-                    }
-                    if (count($conArticleSelectedColors) == $conCount + 1) {
-                        $newConsumeNoPacks = $newConsumeNoPacks . $data["NoPacksNew_" . $conArticleSelectedColor['Id']];
-                    } else {
-                        $newConsumeNoPacks = $newConsumeNoPacks . $data["NoPacksNew_" . $conArticleSelectedColor['Id']] . ",";
-                    }
-                    $conCount  = $conCount + 1;
                 }
                 $newSalesNoPacksGot = implode(',', $newSalesNoPacks);
                 $newConsumeNoPacksGot =  $newConsumeNoPacks;
+
+
             } else {
                 $oldConNopacks = explode(',', $stRecord[0]->ConsumedNoPacks);
                   //yashvi factory art
@@ -1257,7 +1260,7 @@ class StocktransferController extends Controller
 
                     // Convert comma-separated values to arrays
                 $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
-                $oldProNopacksArray = explode(',', $oldProNopacks);
+                $oldProNopacksArray =  $oldProNopacks;
                 $preNoPacksNew_Array = explode(',', $preNoPacksNew_);
 
                   // Perform element-wise addition
@@ -1273,7 +1276,7 @@ class StocktransferController extends Controller
                 // Perform the updateOrInsert operation with the new SalesNoPacks value
                 
                 $packes = $newSalesNoPacks;
-                $packesArray = explode(',', $packes);
+                $packesArray = array_map('intval', explode(',', $packes));
                 $sum = array_sum($packesArray); 
      
                         // Perform the updateOrInsert operation with the new SalesNoPacks value
@@ -1285,7 +1288,7 @@ class StocktransferController extends Controller
                             [ 
                                 'Title' => $artD->Title,
                                 'ArticleNumber' => $artD->ArticleNumber,
-                                'SalesNoPacks' => $packesArray,
+                                'SalesNoPacks' =>implode(',', $packesArray),                                 ,
                                 'TotalPieces' => $sum
                             ]
                         );

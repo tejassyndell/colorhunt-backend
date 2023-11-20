@@ -698,6 +698,7 @@ class InwardController extends Controller
             $articleRecord =  Article::where('Id', $ArticleId)->first();
             if ($articleRecord->ArticleOpenFlag == 0) {
                 DB::table('articlerate')->where('ArticleId', '=', $ArticleId)->delete();
+                DB::table('artstockstatus')->where('artstockstatus.ArticleId', $ArticleId)->where('outletId', 0)->delete();
             }
             $articleopenflag = DB::select("SELECT inw.TotalSetQuantity, a.ArticleOpenFlag FROM `inward` inw inner join article a on a.Id=inw.ArticleId where inw.Id='" . $id . "'");
             if ($articleopenflag[0]->ArticleOpenFlag == 1) {
@@ -707,8 +708,51 @@ class InwardController extends Controller
                     DB::table('mixnopacks')
                         ->where('Id', $mixnopacks[0]->Id)
                         ->update(['NoPacks' => $totalnopacks, 'UpdatedDate' => date("Y-m-d H:i:s")]);
+                        
+                        
+                        ////Nitin Art Stock Status
+			
+					// Fetch the current SalesNoPacks value
+						$currentSalesNoPacks = DB::table('artstockstatus')
+							->where(['outletId' => 0])
+							->where(['ArticleId' => $ArticleId])
+							->value('SalesNoPacks');
+						
+							
+						$artD = DB::table('article')
+							->join('category', 'article.CategoryId', '=', 'category.Id')
+							->where('article.Id', $ArticleId)
+							->first();
+						
+						// Calculate the new SalesNoPacks value by adding the new value to the current value
+						if($currentSalesNoPacks == '' || $currentSalesNoPacks == null){
+						  DB::table('artstockstatus')->where('artstockstatus.ArticleId', $ArticleId)->where('outletId', 0)->delete();
+						}else{
+						    $newSalesNoPacks = $currentSalesNoPacks - $articleopenflag[0]->TotalSetQuantity;
+						}
+						
+						// Perform the updateOrInsert operation with the new SalesNoPacks value
+						DB::table('artstockstatus')->updateOrInsert(
+							[
+								'outletId' => 0,
+								'ArticleId' => $ArticleId
+							],
+							[
+								'Title' => $artD->Title,
+								'ArticleNumber' => $artD->ArticleNumber,
+								'SalesNoPacks' => $newSalesNoPacks,
+								'TotalPieces' => $newSalesNoPacks 
+							] 
+						);
+			
+			//close
                 }
+                
+                
             }
+            
+            
+            
             DB::table('inward')->where('Id', '=', $id)->delete();
             DB::table('inwardarticle')->where('InwardId', '=', $id)->delete();
         }
@@ -726,6 +770,7 @@ class InwardController extends Controller
 
         return response()->json("SUCCESS", 200);
     }
+    
     public function Cancellationinwardgrn(Request $request)
     {
         $data = $request->all();

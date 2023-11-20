@@ -202,6 +202,38 @@ class StocktransferController extends Controller
                 if ($Colorflag == 1) {
                     foreach ($data['ArticleSelectedColor'] as $key => $vl) {
                         $numberofpacks = $vl["Id"];
+
+                         //yashvi factory art
+
+                            $currentSalesNoPacks = DB::table('artstockstatus')
+                            ->where(['outletId' =>  0])
+                            ->where(['ArticleId' => $data["ArticleId"]])
+                            ->value('SalesNoPacks');
+
+                            
+                                 $artD = DB::table('article')
+                                ->join('category', 'article.CategoryId', '=', 'category.Id')
+                                ->where('article.Id', $data["ArticleId"])
+                                ->first();
+                                // Calculate the new SalesNoPacks value by adding the new value to the current value                        
+                                $newSalesNoPacks = $currentSalesNoPacks - $data["NoPacksNew_" . $numberofpacks];
+                                
+                                // Perform the updateOrInsert operation with the new SalesNoPacks value
+                                DB::table('artstockstatus')->updateOrInsert(
+                                    [
+                                        'outletId' => 0,
+                                        'ArticleId' => $data['ArticleId']
+                                    ],
+                                    [
+                                        'Title' => $artD->Title,
+                                        'ArticleNumber' => $artD->ArticleNumber,
+                                        'SalesNoPacks' => $newSalesNoPacks,
+                                        'TotalPieces' => $newSalesNoPacks
+                                    ]
+                                );
+                                
+                            //close
+
                         if ($data["NoPacksNew_" . $numberofpacks] != "") {
                             if ($stringcomma == 1) {
                                 if ($string[$key] < $data["NoPacksNew_" . $numberofpacks]) {
@@ -270,6 +302,53 @@ class StocktransferController extends Controller
                 if ($productionColorflag == 1) {
                     foreach ($data['ProductionArticleSelectedColor'] as $key => $vl) {
                         $production_numberofpacks = $vl["Id"];
+
+                        $newnopacks = $data["ProductionNoPacksNew_" . $production_numberofpacks];
+
+                        $currentSalesNoPacks = DB::table('artstockstatus')
+                        ->where(['outletId' =>  0])
+                        ->where(['ArticleId' => $data["ProductionArticleId"]])
+                        ->value('SalesNoPacks');
+
+                        $artD = DB::table('article')
+                        ->join('category', 'article.CategoryId', '=', 'category.Id')
+                        ->where('article.Id', $data["ProductionArticleId"])
+                        ->first();
+                      
+                      // Convert comma-separated values to arrays
+                        $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+                        $dataNoPacksNewArray = explode(',', $newnopacks);
+
+                            // Perform element-wise addition
+                        $newSalesNoPacksArray = [];
+
+                        for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+                            $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] + (int)$dataNoPacksNewArray[$i];
+                        }
+                         // Convert back to comma-separated string
+                         $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+
+                            // Perform the updateOrInsert operation with the new SalesNoPacks value
+            
+                                $packes = $newSalesNoPacks;
+                                $packesArray = explode(',', $packes);
+                                $sum = array_sum($packesArray);
+
+                            
+                            // Perform the updateOrInsert operation with the new SalesNoPacks value
+                            DB::table('artstockstatus')->updateOrInsert(
+                                [
+                                    'outletId' => 0,
+                                    'ArticleId' => $data['ProductionArticleId']
+                                ],
+                                [ 
+                                    'Title' => $artD->Title,
+                                    'ArticleNumber' => $artD->ArticleNumber,
+                                    'SalesNoPacks' => $packesArray,
+                                    'TotalPieces' => $sum
+                                ]
+                            );
+
                         if ($data["ProductionNoPacksNew_" . $production_numberofpacks] != "") {
                             if ($productionstringcomma == 1) {
                                 $Production_Destination .= ($productionstring[$key] + $data["ProductionNoPacksNew_" . $production_numberofpacks]) . ",";
@@ -1047,6 +1126,53 @@ class StocktransferController extends Controller
                 $conCount = 0;
                 $newConsumeNoPacks = "";
                 foreach ($conArticleSelectedColors as $conArticleSelectedColor) {
+
+                    $preNoPacksNew_ = $data["NoPacksNew_" . $conArticleSelectedColor['Id']];
+                    //yashvi factory art
+
+                    $currentSalesNoPacks = DB::table('artstockstatus')
+                    ->where(['outletId' =>  0])
+                    ->where(['ArticleId' => $data["ArticleId"]])
+                    ->value('SalesNoPacks');
+                  
+                    $artD = DB::table('article')->join('category', 'article.CategoryId', '=', 'category.Id')
+                    ->where('article.Id', $data["ArticleId"])
+                    ->first();
+
+                    // Convert comma-separated values to arrays
+
+                    if (is_array($currentSalesNoPacks)) {
+                        $currentSalesNoPacks = implode(',', $currentSalesNoPacks);
+                    }                    
+                $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+                $oldConNopacksArray = explode(',', $oldConNopacks);
+                $preNoPacksNew_Array = explode(',', $preNoPacksNew_);
+
+                  // Perform element-wise addition
+                  $newSalesNoPacksArray = [];
+
+                  for ($i = 0; $i < count($preNoPacksNew_Array); $i++) {
+                    $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] + (int)$oldConNopacksArray[$i] - (int)$preNoPacksNew_Array[$i];
+                }
+            
+                // Convert back to comma-separated string
+                $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+
+                // Perform the updateOrInsert operation with the new SalesNoPacks value
+                
+                $packes = $newSalesNoPacks;
+                $packesArray = explode(',', $packes);
+                $sum = array_sum($packesArray); 
+
+                     // Perform the updateOrInsert operation with the new SalesNoPacks value
+                    DB::table('artstockstatus')->updateOrInsert(
+                    ['outletId' => 0,'ArticleId' => $data['ArticleId']],
+                    ['Title' => $artD->Title,'ArticleNumber' => $artD->ArticleNumber,'SalesNoPacks' => $packesArray,
+                    'TotalPieces' => $sum]
+                    );
+                    //CLOSE
+
+                         
                     if ($data["NoPacksNew_" . $conArticleSelectedColor['Id']] <= ($data["NoPacks_" . $conArticleSelectedColor['Id']] + $oldConNopacks[$conCount])) {
                         $newSalesNoPacks[$conCount] =  ($newSalesNoPacks[$conCount] +  $oldConNopacks[$conCount]) - $data["NoPacksNew_" . $conArticleSelectedColor['Id']];
                     } else {
@@ -1062,6 +1188,29 @@ class StocktransferController extends Controller
                 $newSalesNoPacksGot = implode(',', $newSalesNoPacks);
                 $newConsumeNoPacksGot =  $newConsumeNoPacks;
             } else {
+                $oldConNopacks = explode(',', $stRecord[0]->ConsumedNoPacks);
+                  //yashvi factory art
+
+                  $currentSalesNoPacks = DB::table('artstockstatus')
+                  ->where(['outletId' =>  0])
+                  ->where(['ArticleId' => $data["ArticleId"]])
+                  ->value('SalesNoPacks');
+                  
+                                       
+                  $artD = DB::table('article')->join('category', 'article.CategoryId', '=', 'category.Id')
+                  ->where('article.Id', $data["ArticleId"])
+                  ->first();
+                  
+                  // Calculate the new SalesNoPacks value by adding the new value to the current value                        
+                   $newSalesNoPacks = $currentSalesNoPacks + (int)$oldConNopacks- (int)$data["NoPacksNew"];
+                                           
+                   // Perform the updateOrInsert operation with the new SalesNoPacks value
+                  DB::table('artstockstatus')->updateOrInsert(
+                  ['outletId' => 0,'ArticleId' => $data['ArticleId']],
+                  ['Title' => $artD->Title,'ArticleNumber' => $artD->ArticleNumber,'SalesNoPacks' => $newSalesNoPacks,
+                  'TotalPieces' => $newSalesNoPacks]
+                  );
+                  //CLOSE
                 if ((int)$data["NoPacksNew"] <= (int)$data["NoPacks"] + (int)$stRecord[0]->ConsumedNoPacks) {
                     $newSalesNoPacksGot =  ((int)$stRecord[0]->ConsumedNoPacks +  (int)$data["NoPacks"]) - (int)$data["NoPacksNew"];
                     $newConsumeNoPacksGot = (int)$data["NoPacksNew"];
@@ -1090,6 +1239,58 @@ class StocktransferController extends Controller
                         $newProductionNoPacks = $newProductionNoPacks . $data["ProductionNoPacksNew_" . $proArticleSelectedColor['Id']] . ",";
                     }
                     $proCount  = $proCount + 1;
+
+                    //YASHVI
+
+
+                    $preNoPacksNew_ = $data["ProductionNoPacksNew_" . $proArticleSelectedColor['Id']];
+                
+                    $currentSalesNoPacks = DB::table('artstockstatus')
+                    ->where(['outletId' =>  0])
+                    ->where(['ArticleId' => $data["ProductionArticleId"]])
+                    ->value('SalesNoPacks');
+
+                    $artD = DB::table('article')
+                    ->join('category', 'article.CategoryId', '=', 'category.Id')
+                    ->where('article.Id', $data["ProductionArticleId"])
+                    ->first();
+
+                    // Convert comma-separated values to arrays
+                $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+                $oldProNopacksArray = explode(',', $oldProNopacks);
+                $preNoPacksNew_Array = explode(',', $preNoPacksNew_);
+
+                  // Perform element-wise addition
+                  $newSalesNoPacksArray = [];
+
+                  for ($i = 0; $i < count($preNoPacksNew_Array); $i++) {
+                    $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$oldProNopacksArray[$i] + (int)$preNoPacksNew_Array[$i];
+                }
+            
+                // Convert back to comma-separated string
+                $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+
+                // Perform the updateOrInsert operation with the new SalesNoPacks value
+                
+                $packes = $newSalesNoPacks;
+                $packesArray = explode(',', $packes);
+                $sum = array_sum($packesArray); 
+     
+                        // Perform the updateOrInsert operation with the new SalesNoPacks value
+                        DB::table('artstockstatus')->updateOrInsert(
+                            [
+                                'outletId' => 0,
+                                'ArticleId' => $data['ProductionArticleId']
+                            ],
+                            [ 
+                                'Title' => $artD->Title,
+                                'ArticleNumber' => $artD->ArticleNumber,
+                                'SalesNoPacks' => $packesArray,
+                                'TotalPieces' => $sum
+                            ]
+                        );
+
+                        //CLOSE
                 }
                 $newProSalesNoPacksGot = implode(',', $newProSalesNoPacks);
                 $newProductionNoPacksGot =  $newProductionNoPacks;

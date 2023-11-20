@@ -467,6 +467,8 @@ class InwardController extends Controller
     public function UpdateInward(Request $request)
     {
 
+       
+        
         $data = $request->all();
         $dataresult = DB::select('select inw.*, a.ArticleNumber, p.PO_Number, p.Id as POID, c.Colorflag from inward inw left join article a on a.Id=inw.ArticleId left join po p on p.ArticleId=inw.ArticleId left join category c on c.Id = a.CategoryId where inw.Id="' . $data['id'] . '"');
         $Colorflag = $dataresult[0]->Colorflag;
@@ -485,6 +487,7 @@ class InwardController extends Controller
         } else {
             $NoPacks .= $data['NoPacks'];
         }
+        
         $NoPacks = rtrim($NoPacks, ',');
         $countcolor = count($data['ColorId']);
         $countration = array_sum(explode(",", $data['RatioId']));
@@ -540,6 +543,58 @@ class InwardController extends Controller
         $newLogDesc = rtrim($logDesc, ',');
         DB::beginTransaction();
         try {
+            
+            
+            
+            //Nitin Art Stock Status 
+        
+            $prePacks = $request->NoPacks; 
+            $newPakes = $NoPacks;
+            $currentSalesNoPacks = DB::table('artstockstatus')
+                    ->where(['outletId' => 0])
+                    ->where(['ArticleId' => $ArticleId])
+                    ->value('SalesNoPacks');
+                
+                    // Convert comma-separated values to arrays
+                    $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+                    $dataNoPacksNewArray = explode(',', $newPakes);
+                    $preSalesReturnNoPacksArray = explode(',', $prePacks);
+                
+                    // Perform element-wise addition
+                    $newSalesNoPacksArray = [];
+
+                    for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+                        $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$preSalesReturnNoPacksArray[$i] + (int)$dataNoPacksNewArray[$i];
+                    }
+                
+                    // Convert back to comma-separated string
+                    $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+                    $artD = DB::table('article')
+                        ->where('Id', $ArticleId)
+                        ->first();
+                    // Perform the updateOrInsert operation with the new SalesNoPacks value
+                    
+                    $packes = $newSalesNoPacks;
+                    $packesArray = explode(',', $packes);
+                    $sum = array_sum($packesArray);
+                    
+                    DB::table('artstockstatus')->updateOrInsert(
+                        [
+                            'outletId' => 0,
+                            'ArticleId' => $ArticleId
+                        ],
+                        [
+                            'ArticleNumber' => $artD->ArticleNumber,
+                            'SalesNoPacks' => $newSalesNoPacks,
+                            'TotalPieces' => $sum
+                        ]
+                    );
+           
+            //Close
+            
+            
+            
+            
             DB::table('article')
                 ->where('Id', $ArticleId)
                 ->update(['ArticleRate' => $data['Rate'], 'ArticleRatio' => $ArticleRatio, 'ArticleStatus' => $ArticleStatus, 'UpdatedDate' => date("Y-m-d H:i:s")]);
@@ -579,6 +634,7 @@ class InwardController extends Controller
             ]);
             return response()->json("SUCCESS", 200);
         } catch (\Exception $e) {
+            return $e;
             DB::rollback();
             return response()->json("Error", 200);
         }
@@ -770,7 +826,7 @@ class InwardController extends Controller
 
         return response()->json("SUCCESS", 200);
     }
-    
+
     public function Cancellationinwardgrn(Request $request)
     {
         $data = $request->all();

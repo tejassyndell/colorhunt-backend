@@ -105,7 +105,56 @@ class InwardController extends Controller
 
         $countration = array_sum(explode(",", $data['RatioId']));
         $countNoPacks = array_sum(explode(",", $NoPacks));
-        if ($Colorflag == 1) {
+        // return $NoPacks;
+        
+        
+        
+        ////Nitin Art Stock Status
+			
+					// Fetch the current SalesNoPacks value
+						$currentSalesNoPacks = DB::table('artstockstatus')
+							->where(['outletId' => 0])
+							->where(['ArticleId' => $dataresult[0]->ArticleId])
+							->value('SalesNoPacks');
+						
+							
+						$artD = DB::table('article')
+							->join('category', 'article.CategoryId', '=', 'category.Id')
+							->where('article.Id', $dataresult[0]->ArticleId)
+							->first();
+
+						
+						// Calculate the new SalesNoPacks value by adding the new value to the current value
+						if($currentSalesNoPacks == '' || $currentSalesNoPacks == null){
+						    $newSalesNoPacks = $NoPacks;
+						}else{
+						    $newSalesNoPacks = $currentSalesNoPacks + $NoPacks;
+						}
+						
+						$packes = $newSalesNoPacks;
+    					$packesArray = explode(',', $packes);
+    					$sum = array_sum($packesArray);
+						
+						// Perform the updateOrInsert operation with the new SalesNoPacks value
+						DB::table('artstockstatus')->updateOrInsert(
+							[
+								'outletId' => 0,
+								'ArticleId' => $dataresult[0]->ArticleId
+							],
+							[
+								'Title' => $artD->Title,
+								'ArticleNumber' => $artD->ArticleNumber,
+								'SalesNoPacks' => $newSalesNoPacks,
+								'TotalPieces' => $sum 
+							] 
+						);
+			
+			//close
+        
+        
+        
+        
+        if ($Colorflag == 1) { 
             $TotalSetQuantity = ($countNoPacks * $countration);
         } else {
             $TotalSetQuantity = ($countNoPacks * ($countration * $countcolor));

@@ -3050,11 +3050,27 @@ class SOController extends Controller
             if ($article->ArticleOpenFlag == 1) {
                 $mixnopacks = DB::select('SELECT NoPacks FROM `mixnopacks` where ArticleId="' . $purchaseRecord->ArticleId . '"');
                 $mixNoPacksGot = $mixnopacks[0]->NoPacks;
+                
+                
+                   //Nitin Art Stock Status
+                        $currentSalesNoPacks = DB::table('artstockstatus')
+                                ->where(['outletId' => 0])
+                                ->where(['ArticleId' => $purchaseRecord->ArticleId])
+                                ->value('SalesNoPacks');
+                        
+                        $NPacks = $currentSalesNoPacks + $mixNoPacksGot;
+                        
+                        
+                        DB::table('artstockstatus')->where('artstockstatus.ArticleId', $purchaseRecord->ArticleId)->where('outletId', 0)->update(['SalesNoPacks' => $NPacks, 'TotalPieces' => $NPacks]);
+                   //close
+                            
+                
                 DB::table('mixnopacks')
                     ->where('ArticleId', $purchaseRecord->ArticleId)
                     ->update(['NoPacks' => $mixNoPacksGot + (int)$purchaseRecord->ReturnNoPacks]);
                 $inward = Inward::where('Id', $purchaseRecord->InwardId)->update(['SalesNoPacks' => (int)$inward->SalesNoPacks + (int)$purchaseRecord->ReturnNoPacks]);
-            } else {
+            
+             } else {
                 if (strpos($inward->SalesNoPacks, ',') !== false) {
                     $SalesNoPacks = explode(',', $inward->SalesNoPacks);
                     $purchaseReturnPacksArray = explode(',', $purchaseRecord->ReturnNoPacks);
@@ -3063,9 +3079,40 @@ class SOController extends Controller
                         $SalesNoPacks[$count] = $SalesNoPacks[$count] +  $purcret;
                         $count = $count + 1;
                     }
+                    
+                    //Nitin Art Stock Status
+                        $currentSalesNoPacks = DB::table('artstockstatus')
+                            ->where(['outletId' => 0])
+                            ->where(['ArticleId' => $purchaseRecord->ArticleId])
+                            ->value('SalesNoPacks');
+                            
+                        $string = implode(',', $purchaseReturnPacksArray);
+        
+                        $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+                        $dataNoPacksNewArray = explode(',', $string);
+                    
+                        // Perform element-wise addition
+                        $newSalesNoPacksArray = [];
+        
+                        for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+                            $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] + (int)$dataNoPacksNewArray[$i];
+                        }
+                        
+                    
+                        $packes = implode(',', $newSalesNoPacksArray);
+                        
+                        $packesArray = explode(',', $packes);
+                        $sum = array_sum($packesArray);
+                        // return $sum;
+                        DB::table('artstockstatus')->where('artstockstatus.ArticleId', $purchaseRecord->ArticleId)->where('outletId', 0)->update(['SalesNoPacks' => $packes, 'TotalPieces' => $sum]);
+                        //close
+                   
+                    
+                    
                     $inward = Inward::where('Id', $purchaseRecord->InwardId)->update(['SalesNoPacks' => implode(',', $SalesNoPacks)]);
                 } else {
                     $inward = Inward::where('Id', $purchaseRecord->InwardId)->update(['SalesNoPacks' => (int)$inward->SalesNoPacks + (int)$purchaseRecord->ReturnNoPacks]);
+                    
                 }
             }
             $userName = Users::where('Id', $LoggedId)->first();

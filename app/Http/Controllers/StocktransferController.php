@@ -54,8 +54,7 @@ class StocktransferController extends Controller
     }
 
     public function AddStocktransfer(Request $request)
-    {   
-    
+    {
         $data = $request->all();
         $ConsumeArt = Article::where('Id', $data['ArticleId'])->first();
         $ProductionArt = Article::where('Id', $data['ProductionArticleId'])->first();
@@ -346,6 +345,13 @@ class StocktransferController extends Controller
                     $NoPacks = $data['NoPacksNew'];
                     $Consumption_Source = "";
                     $totalnopacks = ($mixnopacks[0]->NoPacks - $NoPacks);
+                    
+                    
+                   
+        
+            //Nitin Art Stock Status
+                    DB::table('artstockstatus')->where('artstockstatus.ArticleId', $data['ArticleId'])->where('outletId', 0)->update(['SalesNoPacks' => $totalnopacks, 'TotalPieces' => $totalnopacks]);
+           //Colse
                     DB::table('mixnopacks')
                         ->where('Id', $mixnopacks[0]->Id)
                         ->update(['NoPacks' => $totalnopacks, 'UpdatedDate' => date("Y-m-d H:i:s")]);
@@ -403,6 +409,16 @@ class StocktransferController extends Controller
                 if (empty($tmp)) {
                     return response()->json(array("id" => "", "ZeroNotAllow" => "true"), 200);
                 }
+                
+                //Nitin Art Stock Status
+                
+                    $packes = $Consumption_Source;
+					$packesArray = explode(',', $packes);
+					$sum = array_sum($packesArray);
+                
+                    DB::table('artstockstatus')->where('artstockstatus.ArticleId', $data['ArticleId'])->where('outletId', 0)->update(['SalesNoPacks' => $Consumption_Source, 'TotalPieces' => $sum]);
+                //Colse
+                
                 DB::table('inward')
                     ->where('ArticleId', $data['ArticleId'])
                     ->update(['SalesNoPacks' => $Consumption_Source, 'updated_at' => date('Y-m-d H:i:s')]);

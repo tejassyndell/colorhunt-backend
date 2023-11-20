@@ -254,7 +254,6 @@ class StocktransferController extends Controller
                         ->update(['NoPacks' => $totalnopacksprod, 'UpdatedDate' => date("Y-m-d H:i:s")]);
                 }
             } else {
-              
                 $productiondataresult = DB::select('SELECT c.Colorflag, i.SalesNoPacks FROM `article` a inner join inward i on i.ArticleId=a.Id inner join category c on c.Id=a.CategoryId where a.Id="' . $data['ProductionArticleId'] . '"');
                 $productionColorflag = $productiondataresult[0]->Colorflag;
                 $productionsearch = $productiondataresult[0]->SalesNoPacks;

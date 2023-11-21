@@ -385,14 +385,14 @@ class ReportController extends Controller
 
 
 
-        $array1 = DB::select("SELECT * from (SELECT dv.Id, dv.ArticleNumber, dv.ArticleOpenFlag, dv.SalesNoPacks, dv.TotalPieces, dv.ArticleColor, dv.ArticleSize, dv.ArticleRatio, dv.Colorflag, dv.Title, dv.BrandName, dv.Subcategory, dv.SeriesName, dv.Series, dv.StyleDescription, TotalArticleRatio, DATE_FORMAT(dv.created_at, '%d-%m-%Y') as InwardDate FROM ( SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag, inw.created_at, inw.SalesNoPacks, CountNoPacks(inw.SalesNoPacks) as TotalPieces, GROUP_CONCAT(DISTINCT CONCAT(ac.ArticleColorName) ORDER BY ac.Id SEPARATOR ',') as ArticleColor, GROUP_CONCAT(DISTINCT CONCAT(asz.ArticleSizeName) ORDER BY asz.Id SEPARATOR ',') as ArticleSize, a.ArticleRatio, cat.Colorflag, cat.Title, bn.Name as BrandName, subc.Name as Subcategory, rs.SeriesName, rs.Series, a.StyleDescription, CountNoPacks(a.ArticleRatio) as TotalArticleRatio FROM inward inw INNER JOIN article a ON a.Id = inw.ArticleId LEFT JOIN articlecolor ac ON ac.ArticleId = a.Id LEFT JOIN articlesize asz ON asz.ArticleId = a.Id INNER JOIN category cat ON cat.Id = a.CategoryId LEFT JOIN brand bn ON bn.Id = a.BrandId LEFT JOIN subcategory subc ON subc.Id = a.SubCategoryId LEFT JOIN rangeseries rs ON rs.Id = a.SeriesId WHERE a.ArticleOpenFlag = 0 GROUP BY a.Id ) dv where dv.ArticleOpenFlag = 0)v where v.TotalPieces > 0"); 
+        // $array1 = DB::select("SELECT * from (SELECT dv.Id, dv.ArticleNumber, dv.ArticleOpenFlag, dv.SalesNoPacks, dv.TotalPieces, dv.ArticleColor, dv.ArticleSize, dv.ArticleRatio, dv.Colorflag, dv.Title, dv.BrandName, dv.Subcategory, dv.SeriesName, dv.Series, dv.StyleDescription, TotalArticleRatio, DATE_FORMAT(dv.created_at, '%d-%m-%Y') as InwardDate FROM ( SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag, inw.created_at, inw.SalesNoPacks, CountNoPacks(inw.SalesNoPacks) as TotalPieces, GROUP_CONCAT(DISTINCT CONCAT(ac.ArticleColorName) ORDER BY ac.Id SEPARATOR ',') as ArticleColor, GROUP_CONCAT(DISTINCT CONCAT(asz.ArticleSizeName) ORDER BY asz.Id SEPARATOR ',') as ArticleSize, a.ArticleRatio, cat.Colorflag, cat.Title, bn.Name as BrandName, subc.Name as Subcategory, rs.SeriesName, rs.Series, a.StyleDescription, CountNoPacks(a.ArticleRatio) as TotalArticleRatio FROM inward inw INNER JOIN article a ON a.Id = inw.ArticleId LEFT JOIN articlecolor ac ON ac.ArticleId = a.Id LEFT JOIN articlesize asz ON asz.ArticleId = a.Id INNER JOIN category cat ON cat.Id = a.CategoryId LEFT JOIN brand bn ON bn.Id = a.BrandId LEFT JOIN subcategory subc ON subc.Id = a.SubCategoryId LEFT JOIN rangeseries rs ON rs.Id = a.SeriesId WHERE a.ArticleOpenFlag = 0 GROUP BY a.Id ) dv where dv.ArticleOpenFlag = 0)v where v.TotalPieces > 0"); 
     
         
-        $array2 = DB::select("SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag,  '' AS ArticleColor, '' AS ArticleSize, '' AS ArticleRatio, '' as Colorflag, '' as BrandName, '' as Subcategory, '' as SeriesName, '' as Series, '' as StyleDescription, '' as TotalArticleRatio, '' as InwardDate, mxn.NoPacks as SalesNoPacks, mxn.NoPacks as TotalPieces, c.Title FROM `mixnopacks` mxn INNER JOIN article a ON a.Id = mxn.ArticleId LEFT JOIN po p ON p.ArticleId = a.Id LEFT JOIN category c ON c.Id = a.CategoryId WHERE a.ArticleOpenFlag = 1 AND mxn.NoPacks > 0 GROUP BY a.ArticleNumber"); 
+        // $array2 = DB::select("SELECT a.Id, a.ArticleNumber, a.ArticleOpenFlag,  '' AS ArticleColor, '' AS ArticleSize, '' AS ArticleRatio, '' as Colorflag, '' as BrandName, '' as Subcategory, '' as SeriesName, '' as Series, '' as StyleDescription, '' as TotalArticleRatio, '' as InwardDate, mxn.NoPacks as SalesNoPacks, mxn.NoPacks as TotalPieces, c.Title FROM `mixnopacks` mxn INNER JOIN article a ON a.Id = mxn.ArticleId LEFT JOIN po p ON p.ArticleId = a.Id LEFT JOIN category c ON c.Id = a.CategoryId WHERE a.ArticleOpenFlag = 1 AND mxn.NoPacks > 0 GROUP BY a.ArticleNumber"); 
 
+        $array1 = DB::select("SELECT Id , ArticleId, ArticleNumber, ArticleOpenFlag, ArticleColor, ArticleSize, ArticleRatio, SalesNoPacks, TotalPieces, Colorflag, Title, BrandName, Subcategory, SeriesName, Series, StyleDescription, TotalArticleRatio, InwardDate FROM artstockstatus WHERE SalesNoPacks > 0");
 
-
-        $result = array_merge($array1, $array2);
+        $result = $array1;
 
         // // Modify the values of the merged array
         // foreach ($result as &$item) {
@@ -423,6 +423,7 @@ class ReportController extends Controller
 
             $object = (object)$vl;
 
+
             $NoPacks = $vl->SalesNoPacks;
 
             if ($vl->ArticleOpenFlag != 0) {
@@ -437,19 +438,17 @@ class ReportController extends Controller
 
                     ->join('brand', 'brand.Id', '=', 'article.BrandId')
 
-                    ->where('article.Id', $vl->Id)->first();
+                    ->where('article.Id', $vl->ArticleId)->first();
 
-                $object->Title = $article->Title;
 
-                $object->StyleDescription = $article->StyleDescription;
-
-                $object->Subcategory = $article->Subcategory;
-
-                $object->BrandName = $article->BrandName;
-
+                    $object->Title = $object->Title ?? $article->Title;
+                    $object->StyleDescription = $object->StyleDescription ?? $article->StyleDescription;
+                    $object->Subcategory = $object->Subcategory ?? $article->Subcategory;
+                    $object->BrandName = $object->BrandName ?? $article->BrandName;
+                    
             }
 
-            $sorecords  = SO::where('ArticleId', $vl->Id)->where('Status', 0)->get();
+            $sorecords  = SO::where('ArticleId', $vl->ArticleId)->where('Status', 0)->get();
 
             if (count($sorecords) > 0) {
 
@@ -464,32 +463,20 @@ class ReportController extends Controller
                     }
 
                     foreach ($sorecords as $sorecord) {
-
-
-
-                        for ($i = 0; $i < count(explode(",", $vl->SalesNoPacks)); $i++) {
-
-                            $OutwardNoPacks = explode(",", $sorecord->OutwardNoPacks);
-
+                        $OutwardNoPacks = explode(",", $sorecord->OutwardNoPacks);
+                    
+                        for ($i = 0; $i < min(count(explode(",", $vl->SalesNoPacks)), count($OutwardNoPacks)); $i++) {
                             $SalesNoPacks[$i] = (int)$SalesNoPacks[$i] + (int)$OutwardNoPacks[$i];
-
                         }
-
+                    
                         if (array_sum($SalesNoPacks) > 0) {
-
-                            $object->SoColorwise =     implode(',', $SalesNoPacks);
-
+                            $object->SoColorwise = implode(',', $SalesNoPacks);
                             $object->SoTotalQuantity = array_sum($SalesNoPacks);
-
                         } else {
-
-                            $object->SoColorwise =     "";
-
+                            $object->SoColorwise = "";
                             $object->SoTotalQuantity = "";
-
                         }
-
-                    }
+                    }                    
 
                 } else {
 

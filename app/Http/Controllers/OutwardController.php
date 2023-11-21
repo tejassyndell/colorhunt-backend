@@ -112,7 +112,8 @@ class OutwardController extends Controller
             return $array;
         }
     }
-    public function AddOutward(Request $request)
+
+        public function AddOutward(Request $request)
     {
 
         $partyid = $request->PartyId;
@@ -351,7 +352,7 @@ class OutwardController extends Controller
             if ($partyrecord->UserId != null) {
                 DB::beginTransaction();
                 try {
-                    $dataresult = DB::select('SELECT c.Colorflag FROM `article` a LEFT join category c on c.Id=a.CategoryId where a.Id="' . $data['ArticleId'] . '"');
+                    $dataresult = DB::select('SELECT c.Colorflag FROM `article` a inner join category c on c.Id=a.CategoryId where a.Id="' . $data['ArticleId'] . '"');
                     $Colorflag = $dataresult[0]->Colorflag;
                     $datanopacks = DB::select('SELECT OutwardNoPacks FROM `so` where ArticleId="' . $data['ArticleId'] . '" and SoNumberId="' . $data['SoId'] . '"');
                     $search = $datanopacks[0]->OutwardNoPacks;
@@ -600,6 +601,8 @@ class OutwardController extends Controller
             return response()->json(['errorparty' => 1], 200);
         }
     }
+
+  
     
 
     
@@ -876,9 +879,29 @@ class OutwardController extends Controller
                 }
             }
         } else {
-            $data1 = DB::select("SELECT * FROM `artstockstatus` WHERE ArticleId = {$data[0]->ArticleId} AND outletId = {$data[0]->PartyId}");
-            $dataupdate = $data[0]->NoPacks + $data1[0]->SalesNoPacks;
-            DB::table('artstockstatus')->where(['outletId' => $data[0]->PartyId, 'ArticleId' => $data[0]->ArticleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+            $data1 = DB::table('artstockstatus')
+            ->where(['outletId' => $data->PartyId])
+            ->where(['ArticleId' => $data->ArticleId])
+            ->value('SalesNoPacks');
+            
+
+            if ($data1 == null) {
+                $dataupdate = $data->NoPacks;
+            } else {
+                 $dataupdate = $data->NoPacks + $data1;
+            }
+            
+
+            DB::table('artstockstatus')->updateOrInsert(
+                [
+                    'outletId' => $data->PartyId,
+                    'ArticleId' => $data->ArticleId
+                ],
+                [
+                    'SalesNoPacks' => $dataupdate,
+                    'TotalPieces' => $dataupdate
+                ]
+            );
         }
 
         //close
@@ -1115,10 +1138,22 @@ class OutwardController extends Controller
 
             if ($existingRecord) {
                 $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
-                $GetNoPacksString = $getresult[0]->SalesNoPacks;
-                $GetNoPacksArray = explode(',', $GetNoPacksString);
-                $salesNoPacksData = [];
-                $totalPieces = 0;
+                //return $getresult;
+                if (!empty($getresult)) {
+                    // Check if $getresult is not empty before accessing its elements
+                    $GetNoPacksString = $getresult[0]->SalesNoPacks ?? '';
+                    $GetNoPacksArray = explode(',', $GetNoPacksString);
+                    $salesNoPacksData = [];
+                    $totalPieces = 0;
+            
+                    // Rest of your code...
+                } else {
+                    // Handle the case when $getresult is empty
+                    // For example, set default values or log an error message
+                    // You can assign default values to variables or handle the situation as required
+                    $GetNoPacksString = '';
+                    // ... rest of your code
+                }
 
 
                 foreach ($data['ArticleSelectedColor'] as $key => $vl) {
@@ -1193,15 +1228,26 @@ class OutwardController extends Controller
 
 
             if ($existingRecord) {
-                $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
-                $GetNoPacks = $getresult[0]->GetNoPacks;
-                $dataupdate = $GetNoPacks + $data['NoPacksNew'];
-                DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
-            } else {
-                $dataupdate = $data['NoPacks'] + $data['NoPacksNew'];
-                DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+    $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
+    
+    if (!empty($getresult)) {
+        $salesNoPacks = $getresult[0]->SalesNoPacks;
+        $dataupdate = $salesNoPacks + $data['NoPacksNew'];
+        DB::table('artstockstatus')
+            ->where(['outletId' => $data['PartyId']])
+            ->where(['ArticleId' => $articleId])
+            ->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+    } else {
+        // Handle the case where no record was found for the given conditions
+    }
+} else {
+    $dataupdate = $data['NoPacks'] + $data['NoPacksNew'];
+    DB::table('artstockstatus')
+        ->where(['outletId' => $data['PartyId']])
+        ->where(['ArticleId' => $articleId])
+        ->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+}
 
-            }
         }
 
         $dataresult = DB::select('SELECT c.Colorflag, o.NoPacks as OWNopacks, s.OutwardNoPacks FROM `outward` o inner join outwardnumber own on own.Id=o.OutwardNumberId inner join so s on s.SoNumberId=own.SoId left join po p on p.ArticleId=o.ArticleId left join article a on a.Id=o.ArticleId left join category c on c.Id=a.CategoryId where o.Id="' . $data['id'] . '" and s.ArticleId="' . $data['ArticleId'] . '"');

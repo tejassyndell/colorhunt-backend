@@ -745,7 +745,7 @@ class SOController extends Controller
         $filteredData = collect($allArts)->filter(function($item) {
             $salesNoPacks = array_map('intval', explode(',', $item->SalesNoPacks));
             $sum = array_sum($salesNoPacks);
-            return $sum !== 0;
+            return $sum > 0;
         })->values()->all();
  
  return $filteredData;

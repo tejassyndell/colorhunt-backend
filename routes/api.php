@@ -49,6 +49,7 @@ Route::delete('deletecategory/{id}', 'MasterController@Deletecategory');
 Route::get('getcatidwise/{id}', 'MasterController@GetcatIdWise');
 Route::post('updatecategory', 'MasterController@UpdateCategory');
 //Subcategory API
+
 Route::post('addsubcategory', 'MasterController@AddSubcategory');
 Route::get('subcategorylist', 'MasterController@GetSubcategory');
 Route::post('subcategorypostlist', 'MasterController@PostSubcatgegory');

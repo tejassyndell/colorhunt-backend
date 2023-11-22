@@ -766,6 +766,26 @@ class SOController extends Controller
     
     public function GetArticleSyn(Request $request)
     {
+
+        ///////////////// OPTIMIZE ////////////
+        
+		$articlesArray = DB::select('
+        SELECT `artstockstatus`.`ArticleId`, `artstockstatus`.`ArticleNumber`, `artstockstatus`.`TotalPieces`
+        FROM `artstockstatus`
+        WHERE `artstockstatus`.`outletId` = 0 
+    	');
+
+
+		$jsonData = array_values($articlesArray);
+		$filteredData = array_filter($jsonData, function ($item) {
+			return isset($item->TotalPieces) && $item->TotalPieces !== "0";
+		});
+		$jsonData = array_values($filteredData);
+		return $jsonData;
+        
+        
+        ////////////////////////////////////////
+
         //OLD
         // return DB::select('select * from (SELECT art.*, s.ArticleId, inw.NoPacks, inw.SalesNoPacks, SalesNoPacksCheck(inw.Id) as SalesNoPacksCheck From inward inw left join so s on s.ArticleId=inw.ArticleId left join article art on art.Id=inw.ArticleId group by inw.Id union all SELECT a.*, m.ArticleId, m.NoPacks, m.SalesNoPacks, 0 FROM `mixnopacks` m inner join article a on a.Id=m.ArticleId where m.NoPacks!=0) as t where  t.ArticleStatus = 1  group by t.Id');
         //OLD

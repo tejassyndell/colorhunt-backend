@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Brand;
 use App\Category;
+use App\beaner;
 use App\Color;
 use App\Subcategory;
 use App\Rangeseries;
@@ -21,6 +22,7 @@ use App\SO;
 use App\Imports\DataImport;
 use App\Inward;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Pbmedia\LaravelFFMpeg\FFMpeg;
@@ -459,6 +461,190 @@ class MasterController extends Controller
         return DB::select("select * from (SELECT (CASE WHEN p.Id IS NULL THEN '0' ELSE '1' END) as POID, c.* FROM `po` p right join category c on c.Id=p.CategoryId) as t where Id = '" . $id . "' group by Id");
     }
 
+     //new function 
+     public function updatecatStatus($catid)
+    
+     {
+         
+         $cat = Category::where('Id', $catid)->first();
+         if ($cat->Mobileapp_status == 1) {
+             Category::where('Id', $catid)->update(['Mobileapp_status' => 0]);
+             return response()->json(['Party' => $cat, 'status' => 'Deactive'], 200);
+         } else {
+             Category::where('Id', $catid)->update(['Mobileapp_status' => 1]);
+             return response()->json(['Party' => $cat, 'status' => 'Active'], 200);
+         }
+     }
+
+
+    //beaner functionality 
+
+    public function PostBeaner(Request $request)
+    {
+        $data = $request->all();
+        $search = $data["search"];
+        $startnumber = $data["start"];
+        $vnddataTotal = DB::select("SELECT count(*) as Total From beaner");
+        $length = $data["length"];
+        if ($search['value'] != null && strlen($search['value']) > 2) {
+            $searchstring = "WHERE Title like '%" . $search['value'] . "%'";
+            $vnddataTotalFilter = DB::select("SELECT count(*) as Total From beaner " . $searchstring);
+            $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
+        } else {
+            $searchstring = "";
+            $vnddataTotalFilterValue = $vnddataTotal[0]->Total;
+        }
+        $column = $data["order"][0]["column"];
+        switch ($column) {
+            case 1:
+                $ordercolumn = "image";
+                break;
+           
+            default:
+                $ordercolumn = "Title";
+                break;
+        }
+        $order = "";
+        if ($data["order"][0]["dir"]) {
+            $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
+        }
+        $vnddata = DB::select("SELECT * From beaner " . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length);
+        return array(
+            'datadraw' => $data["draw"],
+            'recordsTotal' => $vnddataTotal[0]->Total,
+            'recordsFiltered' => $vnddataTotalFilterValue,
+            'startnumber' => $startnumber,
+            'response' => 'success',
+            'search' => count($vnddata),
+            'data' => $vnddata,
+        );
+    }
+
+   // Controller method to handle Beaner addition
+
+   public function addBeaner(Request $request)
+   {
+       $data = $request->all();
+       //return $data;
+   
+       // Check if 'image' key is present in the $data array
+       if (!isset($data['image'])) {
+           return response()->json('Image key is undefined', 400);
+       }
+   
+       $dataResult = DB::select('SELECT * FROM `beaner` WHERE `image` LIKE ?', [$data['image']]);
+   
+       if ($dataResult) {
+           return response()->json('alreadyexists', 201);
+       } else {
+           $images = [];
+   
+           // Check if files are present in the request
+           if ($request->hasFile('myfile')) {
+               foreach ($request->file('myfile') as $file) {
+                   // Check if the file is valid
+                   if ($file->isValid()) {
+                       $name = $file->getClientOriginalName();
+   
+                       $randomString = $this->generateRandomString();
+   
+                       $nameExtension = $file->getClientOriginalExtension();
+   
+                       $newName = $randomString . '.' . $nameExtension;
+   
+                       // Move the file to the 'public/uploads' directory
+                       if ($file->move(public_path('uploads'), $newName)) {
+                           $images[] = $newName;
+                       } else {
+                           return response()->json('Error moving the file to the uploads directory', 500);
+                       }
+                   } else {
+                       return response()->json('Invalid file', 400);
+                   }
+               }
+           }
+   
+           if (count($images) > 0) {
+               foreach ($images as $img) {
+                   DB::table('beaner')->insert(['image' => $img]);
+               }
+   
+               return response()->json(['result' => 'true', 'image' => $img], 200);
+           } else {
+               DB::table('beaner')->insert(['image' => '']);
+               return response()->json(['result' => 'true'], 200);
+           }
+       }
+   }
+   
+
+
+   public function UpdateBeaner(Request $request)
+{
+    $data = $request->all();
+
+    // Check if 'image' key is present in the $data array
+    if (!isset($data['image'])) {
+        return response()->json('Image key is undefined', 400);
+    }
+
+    $images = [];
+
+    // Check if files are present in the request
+    if ($request->hasFile('myfile')) {
+        foreach ($request->file('myfile') as $file) {
+            // Check if the file is valid
+            if ($file->isValid()) {
+                $name = $file->getClientOriginalName();
+
+                $randomString = $this->generateRandomString();
+
+                $nameExtension = $file->getClientOriginalExtension();
+
+                $newName = $randomString . '.' . $nameExtension;
+
+                // Move the file to the 'public/uploads' directory
+                if ($file->move(public_path('uploads'), $newName)) {
+                    $images[] = $newName;
+                } else {
+                    return response()->json('Error moving the file to the uploads directory', 500);
+                }
+            } else {
+                return response()->json('Invalid file', 400);
+            }
+        }
+    }
+
+    // Use the existing image or an empty string if 'hdnImg' is not defined
+$img = isset($data['hdnImg']) ? $data['hdnImg'] : null;
+
+if (count($images) > 0) {
+    // If new images are present, update with the new image
+    foreach ($images as $img) {
+        beaner::where('id', $data['id'])->update(['image' => $img]);
+    }
+} elseif ($img !== null) {
+    // If 'hdnImg' is defined, update with the existing image
+    beaner::where('id', $data['id'])->update(['image' => $img]);
+}
+
+return response()->json(['result' => 'true', 'image' => $img], 200);
+
+    
+}
+
+
+    public function DeleteBeaner($id)
+    {
+        return DB::table('beaner')->where('Id', '=', $id)->delete();
+    }
+
+    public function GetBeanerIdWise($id)
+    {
+        return DB::select('SELECT * From beaner WHERE Id = ' . $id . '');
+    }
+
+
     public function AddBrand(Request $request)
     {
         $field = Brand::create($request->all());
@@ -807,6 +993,7 @@ class MasterController extends Controller
                 'OutletArticleRate' => $data['OutletArticleRate'],
                 'ContactPerson' => $data['ContactPerson'],
                 'GSTNumber' => $data['GSTNumber'],
+                'PanNumber' => $data['PanNumber'],
                 'GSTType' => $data['GSTType'],
                 'Discount' => $data['Discount'],
                 'OutletAssign' => empty($data['OutletAssign']) ? 0 : $data['OutletAssign'],
@@ -900,6 +1087,31 @@ class MasterController extends Controller
             'search' => count($vnddata),
             'data' => $vnddata,
         );
+    }
+
+
+    public function verify($gstNumber)
+    {
+        // Check if the GST number is valid (For example, checking the length)
+        if (strlen($gstNumber) === 15) {
+            // API endpoint for GST verification
+            $apiUrl = 'https://app.signalx.ai/apps/gst-verification/gstin-overview/' . $gstNumber;
+
+            // Make an HTTP GET request to the external API
+            $response = Http::get($apiUrl);
+
+            // Check if the request was successful (status code 200)
+            if ($response->ok()) {
+                // Return the API response as JSON
+                return $response->json();
+            } else {
+                // Return an error response if the API request fails
+                return response()->json(['error' => 'Failed to verify GST number'], $response->status());
+            }
+        } else {
+            // Return a response indicating an invalid GST number
+            return response()->json(['error' => 'Invalid GST number'], 400);
+        }
     }
 
     public function createresult($data)
@@ -1236,6 +1448,7 @@ class MasterController extends Controller
             'PinCode' => $data['PinCode'],
             'Country' => $data['Country'],
             'GSTNumber' => $data['GSTNumber'],
+            'PanNumber' => $data['PanNumber'],
             'GSTType' => $data['GSTType'],
             'Discount' => $data['Discount'],
             'OutletAssign' => $data['OutletAssign'],
@@ -1514,41 +1727,37 @@ class MasterController extends Controller
     {
         // Validate the incoming request
         $request->validate([
-            'newImage' => 'required|image|mimes:jpeg,png,jpg,gif',
-
-
             'oldImage' => 'required|string',
         ]);
-
-        // Get the old and new image names from the request
+    
+        // Get the old image name from the request
         $oldImage = $request->input('oldImage');
-        $newImage = $request->file('newImage');
-
+    
         // Find records in the 'articlephotos' table where the JSON 'Name' column contains the old image name
         $articlePhotos = ArticlePhotos::where('Name', 'LIKE', '%"photo":"' . $oldImage . '"%')->get();
-
+    
         if ($articlePhotos->isNotEmpty()) {
             foreach ($articlePhotos as $articlePhoto) {
                 // Decode the JSON data into an associative array
                 $imageData = json_decode($articlePhoto->Name, true);
-
-                // Loop through the images and replace the old image name with the new image name
+    
+                // Loop through the images and find the old image
                 foreach ($imageData as &$image) {
                     if (isset($image['photo']) && $image['photo'] === $oldImage) {
-                        $image['photo'] = $newImage->getClientOriginalName();
+                        // Move the found image to the beginning of the array (making it the primary image)
+                        $index = array_search($image, $imageData);
+                        unset($imageData[$index]);
+                        array_unshift($imageData, $image);
                     }
                 }
-
+    
                 // Encode the modified array back to JSON and update the 'Name' column
                 $articlePhoto->Name = json_encode($imageData);
                 $articlePhoto->save();
-
-                // Move the new image to the 'uploads' folder
-                $newImage->move(public_path('uploads'), $newImage->getClientOriginalName());
             }
-
-            // Return the new image URL for the response
-            return response()->json(['newImageUrl' => asset('uploads/' . $newImage->getClientOriginalName())]);
+    
+            // Return a success response
+            return response()->json(['message' => 'Primary image updated successfully']);
         } else {
             // Handle the case where no records were found with the old image name in the JSON data
             return response()->json(['error' => 'No records found with the old image name'], 404);

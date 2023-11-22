@@ -1924,6 +1924,12 @@ class OutwardController extends Controller
             }
         }
 
+                
+        if($Discount == 0 && $Discount_in_amount > 0){
+            $SubTotalAmount = $TotalAmount - $Discount_in_amount;
+           $TotalFinalAmount = $SubTotalAmount;
+       }
+
         
         // if ($Discount > 0 || $Discount != "") {
         //     $TotalFinalAmountDiscount = (($TotalAmount * $Discount) / 100);

@@ -2977,76 +2977,76 @@ class SOController extends Controller
             
             
             //Nitin Art Stock Status
-            $currentSalesNoPacks = DB::table('artstockstatus')
-                    ->where(['outletId' => 0])
-                    ->where(['ArticleId' => $data['ArticleId']])
-                    ->value('SalesNoPacks');
-                
-                // Check if $currentSalesNoPacks is not empty
-                if ($currentSalesNoPacks !== null) {
-                    // Convert comma-separated values to arrays
-                    $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
-                    $dataNoPacksNewArray = explode(',', $NoPacks);
-                
-                    // Perform element-wise addition
-                    $newSalesNoPacksArray = [];
-    
-                    for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
-                        $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$dataNoPacksNewArray[$i];
-                    }
-                
-                    // Convert back to comma-separated string
-                    $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
-                    
-                    $packes = $newSalesNoPacks;
-                    $packesArray = explode(',', $packes);
-                    $sum = array_sum($packesArray);
-                    
-                     $artD = DB::table('article')
-                                ->join('category', 'article.CategoryId', '=', 'category.Id')
-                                ->where('article.Id', $data['ArticleId'])
-                                ->first();
-    
-                    // Perform the updateOrInsert operation with the new SalesNoPacks value
-                    DB::table('artstockstatus')->updateOrInsert(
-                        [
-                            'outletId' => 0,
-                            'ArticleId' => $data['ArticleId']
-                        ],
-                        [
-                            'Title' => $artD->Title,
-                            'ArticleNumber' => $artD->ArticleNumber,
-                            'SalesNoPacks' => $newSalesNoPacks,
-                            'TotalPieces' => $sum
-                        ]
-                    );
-                } else {
-                    $dataNoPacksNewArray = explode(',', $NoPacks);
-                    // Convert back to comma-separated string
-                    $newSalesNoPacks = implode(',', $dataNoPacksNewArray);
-                    $packes = $newSalesNoPacks;
-                    $packesArray = explode(',', $packes);
-                    $sum = array_sum($packesArray);
-                     $artD = DB::table('article')
-                                ->join('category', 'article.CategoryId', '=', 'category.Id')
-                                ->where('article.Id', $data['ArticleId'])
-                                ->first();
-    
-                    // Perform the updateOrInsert operation with the new SalesNoPacks value
-                    DB::table('artstockstatus')->updateOrInsert(
-                        [
-                            'outletId' => 0,
-                            'ArticleId' => $data['ArticleId']
-                        ],
-                        [   'Title' => $artD->Title,
-                            'ArticleNumber' => $artD->ArticleNumber,
-                            'SalesNoPacks' => $newSalesNoPacks,
-                            'TotalPieces' => $sum
-                        ]
-                    );
-                }
-    
-                //Close
+			$currentSalesNoPacks = DB::table('artstockstatus')
+					->where(['outletId' => 0])
+					->where(['ArticleId' => $data['ArticleId']])
+					->value('SalesNoPacks');
+				
+				// Check if $currentSalesNoPacks is not empty
+				if ($currentSalesNoPacks !== null) {
+					// Convert comma-separated values to arrays
+					$currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+					$dataNoPacksNewArray = explode(',', $NoPacks);
+				
+					// Perform element-wise addition
+					$newSalesNoPacksArray = [];
+
+					for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+						$newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$dataNoPacksNewArray[$i];
+					}
+				
+					// Convert back to comma-separated string
+					$newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+					
+					$packes = $newSalesNoPacks;
+					$packesArray = explode(',', $packes);
+					$sum = array_sum($packesArray);
+					
+					 $artD = DB::table('article')
+								->join('category', 'article.CategoryId', '=', 'category.Id')
+								->where('article.Id', $data['ArticleId'])
+								->first();
+
+					// Perform the updateOrInsert operation with the new SalesNoPacks value
+					DB::table('artstockstatus')->updateOrInsert(
+						[
+							'outletId' => 0,
+							'ArticleId' => $data['ArticleId']
+						],
+						[
+							'Title' => $artD->Title,
+							'ArticleNumber' => $artD->ArticleNumber,
+							'SalesNoPacks' => $newSalesNoPacks,
+							'TotalPieces' => $sum
+						]
+					);
+				} else {
+					$dataNoPacksNewArray = explode(',', $NoPacks);
+					// Convert back to comma-separated string
+					$newSalesNoPacks = implode(',', $dataNoPacksNewArray);
+					$packes = $newSalesNoPacks;
+					$packesArray = explode(',', $packes);
+					$sum = array_sum($packesArray);
+					 $artD = DB::table('article')
+								->join('category', 'article.CategoryId', '=', 'category.Id')
+								->where('article.Id', $data['ArticleId'])
+								->first();
+
+					// Perform the updateOrInsert operation with the new SalesNoPacks value
+					DB::table('artstockstatus')->updateOrInsert(
+						[
+							'outletId' => 0,
+							'ArticleId' => $data['ArticleId']
+						],
+						[   'Title' => $artD->Title,
+							'ArticleNumber' => $artD->ArticleNumber,
+							'SalesNoPacks' => $newSalesNoPacks,
+							'TotalPieces' => $sum
+						]
+					);
+				}
+
+				//Close
             
             
             
@@ -3104,76 +3104,76 @@ class SOController extends Controller
             
             
             //Nitin Art Stock Status
-            $currentSalesNoPacks = DB::table('artstockstatus')
-                    ->where(['outletId' => 0])
-                    ->where(['ArticleId' => $data['ArticleId']])
-                    ->value('SalesNoPacks');
-                
-                // Check if $currentSalesNoPacks is not empty
-                if ($currentSalesNoPacks !== null) {
-                    // Convert comma-separated values to arrays
-                    $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
-                    $dataNoPacksNewArray = explode(',', $NoPacks);
-                
-                    // Perform element-wise addition
-                    $newSalesNoPacksArray = [];
-    
-                    for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
-                        $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$dataNoPacksNewArray[$i];
-                    }
-                
-                    // Convert back to comma-separated string
-                    $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
-                    
-                    $packes = $newSalesNoPacks;
-                    $packesArray = explode(',', $packes);
-                    $sum = array_sum($packesArray);
-                    
-                     $artD = DB::table('article')
-                                ->join('category', 'article.CategoryId', '=', 'category.Id')
-                                ->where('article.Id', $data['ArticleId'])
-                                ->first();
-    
-                    // Perform the updateOrInsert operation with the new SalesNoPacks value
-                    DB::table('artstockstatus')->updateOrInsert(
-                        [
-                            'outletId' => 0,
-                            'ArticleId' => $data['ArticleId']
-                        ],
-                        [
-                            'Title' => $artD->Title,
-                            'ArticleNumber' => $artD->ArticleNumber,
-                            'SalesNoPacks' => $newSalesNoPacks,
-                            'TotalPieces' => $sum
-                        ]
-                    );
-                } else {
-                    $dataNoPacksNewArray = explode(',', $NoPacks);
-                    // Convert back to comma-separated string
-                    $newSalesNoPacks = implode(',', $dataNoPacksNewArray);
-                    $packes = $newSalesNoPacks;
-                    $packesArray = explode(',', $packes);
-                    $sum = array_sum($packesArray);
-                     $artD = DB::table('article')
-                                ->join('category', 'article.CategoryId', '=', 'category.Id')
-                                ->where('article.Id', $data['ArticleId'])
-                                ->first();
-    
-                    // Perform the updateOrInsert operation with the new SalesNoPacks value
-                    DB::table('artstockstatus')->updateOrInsert(
-                        [
-                            'outletId' => 0,
-                            'ArticleId' => $data['ArticleId']
-                        ],
-                        [   'Title' => $artD->Title,
-                            'ArticleNumber' => $artD->ArticleNumber,
-                            'SalesNoPacks' => $newSalesNoPacks,
-                            'TotalPieces' => $sum
-                        ]
-                    );
-                }
-    
-                //Close
+			$currentSalesNoPacks = DB::table('artstockstatus')
+					->where(['outletId' => 0])
+					->where(['ArticleId' => $data['ArticleId']])
+					->value('SalesNoPacks');
+				
+				// Check if $currentSalesNoPacks is not empty
+				if ($currentSalesNoPacks !== null) {
+					// Convert comma-separated values to arrays
+					$currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+					$dataNoPacksNewArray = explode(',', $NoPacks);
+				
+					// Perform element-wise addition
+					$newSalesNoPacksArray = [];
+
+					for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+						$newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$dataNoPacksNewArray[$i];
+					}
+				
+					// Convert back to comma-separated string
+					$newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+					
+					$packes = $newSalesNoPacks;
+					$packesArray = explode(',', $packes);
+					$sum = array_sum($packesArray);
+					
+					 $artD = DB::table('article')
+								->join('category', 'article.CategoryId', '=', 'category.Id')
+								->where('article.Id', $data['ArticleId'])
+								->first();
+
+					// Perform the updateOrInsert operation with the new SalesNoPacks value
+					DB::table('artstockstatus')->updateOrInsert(
+						[
+							'outletId' => 0,
+							'ArticleId' => $data['ArticleId']
+						],
+						[
+							'Title' => $artD->Title,
+							'ArticleNumber' => $artD->ArticleNumber,
+							'SalesNoPacks' => $newSalesNoPacks,
+							'TotalPieces' => $sum
+						]
+					);
+				} else {
+					$dataNoPacksNewArray = explode(',', $NoPacks);
+					// Convert back to comma-separated string
+					$newSalesNoPacks = implode(',', $dataNoPacksNewArray);
+					$packes = $newSalesNoPacks;
+					$packesArray = explode(',', $packes);
+					$sum = array_sum($packesArray);
+					 $artD = DB::table('article')
+								->join('category', 'article.CategoryId', '=', 'category.Id')
+								->where('article.Id', $data['ArticleId'])
+								->first();
+
+					// Perform the updateOrInsert operation with the new SalesNoPacks value
+					DB::table('artstockstatus')->updateOrInsert(
+						[
+							'outletId' => 0,
+							'ArticleId' => $data['ArticleId']
+						],
+						[   'Title' => $artD->Title,
+							'ArticleNumber' => $artD->ArticleNumber,
+							'SalesNoPacks' => $newSalesNoPacks,
+							'TotalPieces' => $sum
+						]
+					);
+				}
+
+				//Close
             
            
            

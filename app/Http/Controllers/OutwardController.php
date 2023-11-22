@@ -1219,98 +1219,102 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
                 ->where(['outletId' => $data['PartyId'], 'ArticleId' => $articleId])
                 ->get();
 
-                if ($existingRecord) {
-                    $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
+                //working code yaashviii
+
+                // if ($existingRecord) {
+                //     $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
                     
-                    if (!empty($getresult)) {
-                        $salesNoPacks = $getresult[0]->SalesNoPacks;
-                        $dataupdate = $salesNoPacks + $data['NoPacksNew'];
-                        DB::table('artstockstatus')
-                            ->where(['outletId' => $data['PartyId']])
-                            ->where(['ArticleId' => $articleId])
-                            ->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+                //     if (!empty($getresult)) {
+                //         $salesNoPacks = $getresult[0]->SalesNoPacks;
+                //         $dataupdate = $salesNoPacks + $data['NoPacksNew'];
+                //         DB::table('artstockstatus')
+                //             ->where(['outletId' => $data['PartyId']])
+                //             ->where(['ArticleId' => $articleId])
+                //             ->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+                //     } else {
+                //         // Handle the case where no record was found for the given conditions
+                //     }
+                // } else {
+                //     $dataupdate = $data['NoPacks'] + $data['NoPacksNew'];
+                //     DB::table('artstockstatus')
+                //         ->where(['outletId' => $data['PartyId']])
+                //         ->where(['ArticleId' => $articleId])
+                //         ->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+                // }
+
+
+                                    //working code yaashviii colorwise
+            if ($existingRecord) {
+                $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
+                $GetNoPacksString = $getresult[0]->SalesNoPacks;
+                $GetNoPacksArray = explode(',', $GetNoPacksString);
+                $salesNoPacksData = [];
+                $totalPieces = 0;
+
+
+                foreach ($data['ArticleSelectedColor'] as $key => $vl) {
+                    $numberofpacks = $vl["Id"];
+                    $noPacksNewKey = 'NoPacksNew_' . $numberofpacks;
+                    $noPacksKey = 'NoPacks_' . $numberofpacks;
+
+                    if (isset($data[$noPacksNewKey]) && isset($data[$noPacksKey])) {
+                        $noPacksNewValue = (int) $data[$noPacksNewKey];
+                        $noPacksValue = (int) $data[$noPacksKey];
+                        
+                        $salesNoPacksData[] =   $noPacksNewValue;
+                        
                     } else {
-                        // Handle the case where no record was found for the given conditions
+                        $salesNoPacksData[] = 0;
                     }
-                } else {
-                    $dataupdate = $data['NoPacks'] + $data['NoPacksNew'];
-                    DB::table('artstockstatus')
-                        ->where(['outletId' => $data['PartyId']])
-                        ->where(['ArticleId' => $articleId])
-                        ->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
                 }
 
-            // if ($existingRecord) {
-            //     $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
-            //     $GetNoPacksString = $getresult[0]->SalesNoPacks;
-            //     $GetNoPacksArray = explode(',', $GetNoPacksString);
-            //     $salesNoPacksData = [];
-            //     $totalPieces = 0;
+                $totalPieces = array_sum($salesNoPacksData);
+                $salesNoPacksDataString = implode(',', $salesNoPacksData);
 
+                // Update existing record
+                DB::table('artstockstatus')
+                    ->where(['outletId' => $data['PartyId'], 'ArticleId' => $articleId])
+                    ->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
+            } else {
 
-            //     foreach ($data['ArticleSelectedColor'] as $key => $vl) {
-            //         $numberofpacks = $vl["Id"];
-            //         $noPacksNewKey = 'NoPacksNew_' . $numberofpacks;
-            //         $noPacksKey = 'NoPacks_' . $numberofpacks;
+                $salesNoPacksData = [];
+                $totalPieces = 0;
 
-            //         if (isset($data[$noPacksNewKey]) && isset($data[$noPacksKey])) {
-            //             $noPacksNewValue = (int) $data[$noPacksNewKey];
-            //             $noPacksValue = (int) $data[$noPacksKey];
-                        
-            //             $salesNoPacksData[] =   $noPacksNewValue;
-                        
-            //         } else {
-            //             $salesNoPacksData[] = 0;
-            //         }
-            //     }
+                foreach ($data['ArticleSelectedColor'] as $key => $vl) {
+                    $numberofpacks = $vl["Id"];
+                    $noPacksNewKey = 'NoPacksNew_' . $numberofpacks;
+                    $noPacksKey = 'NoPacks_' . $numberofpacks;
 
-            //     $totalPieces = array_sum($salesNoPacksData);
-            //     $salesNoPacksDataString = implode(',', $salesNoPacksData);
+                    if (isset($data[$noPacksNewKey]) && isset($data[$noPacksKey])) {
+                        $noPacksNewValue = (int) $data[$noPacksNewKey];
+                        $noPacksValue = (int) $data[$noPacksKey];
+                        $salesNoPacksData[] = abs($noPacksValue + $noPacksNewValue);
+                    } else {
+                        $salesNoPacksData[] = 0;
+                    }
+                }
 
-            //     // Update existing record
-            //     DB::table('artstockstatus')
-            //         ->where(['outletId' => $data['PartyId'], 'ArticleId' => $articleId])
-            //         ->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
-            // } else {
-
-            //     $salesNoPacksData = [];
-            //     $totalPieces = 0;
-
-            //     foreach ($data['ArticleSelectedColor'] as $key => $vl) {
-            //         $numberofpacks = $vl["Id"];
-            //         $noPacksNewKey = 'NoPacksNew_' . $numberofpacks;
-            //         $noPacksKey = 'NoPacks_' . $numberofpacks;
-
-            //         if (isset($data[$noPacksNewKey]) && isset($data[$noPacksKey])) {
-            //             $noPacksNewValue = (int) $data[$noPacksNewKey];
-            //             $noPacksValue = (int) $data[$noPacksKey];
-            //             $salesNoPacksData[] = abs($noPacksValue + $noPacksNewValue);
-            //         } else {
-            //             $salesNoPacksData[] = 0;
-            //         }
-            //     }
-
-            //     $totalPieces = array_sum($salesNoPacksData);
-            //     $salesNoPacksDataString = implode(',', $salesNoPacksData);
-            //     // Insert new record
-            //     $isOutlet = DB::select("SELECT OutletAssign FROM `party` where Id ='" . $data['PartyId'] . "'");
-            //         if ($isOutlet[0]->OutletAssign == 1) { 
-            //     DB::table('artstockstatus')->insert([
-            //         'outletId' => $data['PartyId'],
-            //         'ArticleId' => $articleId,
-            //         'ArticleNumber' => $articleNumber,
-            //         'SalesNoPacks' => $salesNoPacksDataString,
-            //         'TotalPieces' => $totalPieces,
-            //         'ArticleColor' => $data['ArticleSelectedColor'][0]['Name'],
-            //         'ArticleSize' => implode(',', array_column($data['ArticleSelectedSize'], 'Name')),
-            //         'ArticleRatio' => $data['ArticleRatio'],
-            //         'ArticleOpenFlag' => $data['ArticleOpenFlag'],
-            //         'Title' => $data['Category'],
-            //         'Colorflag' => $colorflag,
-            //         'Subcategory' => $name,
-            //     ]);
-            // }
-            // }
+                $totalPieces = array_sum($salesNoPacksData);
+                $salesNoPacksDataString = implode(',', $salesNoPacksData);
+                // Insert new record
+                $isOutlet = DB::select("SELECT OutletAssign FROM `party` where Id ='" . $data['PartyId'] . "'");
+                    if ($isOutlet[0]->OutletAssign == 1) { 
+                DB::table('artstockstatus')->insert([
+                    'outletId' => $data['PartyId'],
+                    'ArticleId' => $articleId,
+                    'ArticleNumber' => $articleNumber,
+                    'SalesNoPacks' => $salesNoPacksDataString,
+                    'TotalPieces' => $totalPieces,
+                    'ArticleColor' => $data['ArticleSelectedColor'][0]['Name'],
+                    'ArticleSize' => implode(',', array_column($data['ArticleSelectedSize'], 'Name')),
+                    'ArticleRatio' => $data['ArticleRatio'],
+                    'ArticleOpenFlag' => $data['ArticleOpenFlag'],
+                    'Title' => $data['Category'],
+                    'Colorflag' => $colorflag,
+                    'Subcategory' => $name,
+                ]);
+            }
+            }
         } else {
             $existingRecord = DB::table('artstockstatus')
                 ->where(['outletId' => $data['PartyId'], 'ArticleId' => $articleId])

@@ -2818,8 +2818,6 @@ foreach ($data as $d) {
 								'ArticleId' => $data['ArticleId']
 							],
 							[
-								'Title' => $artD->Category,
-								'ArticleNumber' => $artD->ArticleNumber,
 								'SalesNoPacks' => $newSalesNoPacks,
 								'TotalPieces' => $sum
 							   

@@ -268,30 +268,18 @@ class InwardController extends Controller
     
    
     
+  //  original inward
     public function PostInward(Request $request)
        {
            $data = $request->all();
            $search = $data["search"];
            $startnumber = $data["start"];
-           $vnddataTotal = DB::table(DB::raw('(
-            SELECT SoInwardList(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR \',\')) AS SODataCheck
-            FROM `inward` inw
-            INNER JOIN article a ON a.Id = inw.ArticleId
-            WHERE a.ArticleOpenFlag = 0 
-            GROUP BY inw.GRN
-        ) AS dd'))
-        ->select(DB::raw('COUNT(*) AS Total'))
-        ->whereRaw('dd.SODataCheck = ?', ['0'])
-        ->get();
-    
+           $vnddataTotal = DB::select("SELECT COUNT(*) AS Total FROM ( SELECT SoInwardList(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) AS SODataCheck FROM inward inw INNER JOIN article a ON a.Id = inw.ArticleId LEFT JOIN ( SELECT Id FROM article WHERE ArticleOpenFlag = 1 ) a_open ON a_open.Id = a.Id WHERE a_open.Id IS NULL GROUP BY inw.GRN ) AS dd WHERE dd.SODataCheck = 0;");
            $vnTotal = $vnddataTotal[0]->Total;
            $length = $data["length"];
            if ($search['value'] != null && strlen($search['value']) > 2) {
                $searchstring = "where f.SODataCheck=0 and (f.GRN_Number like '%" . $search['value'] . "%' OR cast(f.InwardDate as char) like '%" . $search['value'] . "%' OR  f.Name like '%" . $search['value'] . "%' OR  f.TotalInwardPieces like '%" . $search['value'] . "%' OR f.Title like '%" . $search['value'] . "%' OR f.PurchaseNumber like '%" . $search['value'] . "%' OR f.ArticleNo like '%" . $search['value'] . "%')";
-               $vnddataTotalFilter = DB::select("select count(*)
-               as Total  from (select GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, VendorName(a.Id) as Name, CountNoPacks(GROUP_CONCAT(DISTINCT CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces, inw.GRN,concat(igrn.GRN, '/',fn.StartYear,'-',fn.EndYear) as GRN_Number, concat(pn.PurchaseNumber,'/' ,fy1.StartYear,'-',fy1.EndYear) as PurchaseNumber, DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate, SoInwardList(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SODataCheck, c.Title FROM `inward` inw inner join inwardgrn igrn on igrn.Id=inw.GRN inner join financialyear fn on fn.Id=igrn.FinancialYearId inner join article a on a.Id=inw.ArticleId left join po p on p.ArticleId=a.Id left join vendor v on v.Id=p.VendorId left join so s on s.ArticleId=inw.ArticleId inner join category c on c.Id=a.CategoryId inner join purchasenumber pn on pn.Id=p.PO_Number inner join financialyear fy1 on fy1.Id=pn.FinancialYearId  where a.Id not in (SELECT Id FROM `article` where ArticleOpenFlag = 1) and s.Id IS NULL group by GRN) as f 
-               
-                " . $searchstring);
+               $vnddataTotalFilter = DB::select("select count(*) as Total  from (select GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, VendorName(a.Id) as Name, CountNoPacks(GROUP_CONCAT(DISTINCT CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces, inw.GRN,concat(igrn.GRN, '/',fn.StartYear,'-',fn.EndYear) as GRN_Number, concat(pn.PurchaseNumber,'/' ,fy1.StartYear,'-',fy1.EndYear) as PurchaseNumber, DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate, SoInwardList(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SODataCheck, c.Title FROM `inward` inw inner join inwardgrn igrn on igrn.Id=inw.GRN inner join financialyear fn on fn.Id=igrn.FinancialYearId inner join article a on a.Id=inw.ArticleId left join po p on p.ArticleId=a.Id left join vendor v on v.Id=p.VendorId left join so s on s.ArticleId=inw.ArticleId inner join category c on c.Id=a.CategoryId inner join purchasenumber pn on pn.Id=p.PO_Number inner join financialyear fy1 on fy1.Id=pn.FinancialYearId  where a.Id not in (SELECT Id FROM `article` where ArticleOpenFlag = 1) and s.Id IS NULL group by GRN) as f " . $searchstring);
                $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
            } else {
                $searchstring = "where f.SODataCheck=0";
@@ -323,74 +311,9 @@ class InwardController extends Controller
            if ($data["order"][0]["dir"]) {
                $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
            }
-           $vnddata =  DB::select("SELECT f.ArticleNo, f.Name, f.Notes, f.Cancellation, f.Id, f.GRN, f.GRN_Number, f.inwdate, f.InwardDate, f.SODataCheck, f.TotalInwardPieces, f.Title, f.PurchaseNumber
-           FROM (
-               SELECT 
-                   GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, 
-                   v.Name, 
-                   inwc.Notes, 
-                   'Cancellation' as Cancellation, 
-                   igrn.Id, 
-                   inwcl.GRN, 
-                   CONCAT(igrn.GRN, '/', fn.StartYear,'-', fn.EndYear) as GRN_Number, 
-                   igrn.InwardDate as inwdate, 
-                   DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate, 
-                   'SODataCheck' as SODataCheck, 
-                   CountNoPacks(GROUP_CONCAT(DISTINCT CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces, 
-                   (CASE WHEN c.Title IS NULL THEN cc.Title ELSE c.Title END) as Title, 
-                   (CASE WHEN pn.PurchaseNumber IS NULL THEN '0' ELSE CONCAT(pn.PurchaseNumber, '/', fy1.StartYear, '-', fy1.EndYear) END) as PurchaseNumber 
-               FROM 
-                   inwardgrn igrn 
-                   INNER JOIN inwardcancellationlogs inwcl ON igrn.Id = inwcl.GRN 
-                   INNER JOIN inwardcancellation inwc ON igrn.Id = inwc.GRN 
-                   INNER JOIN financialyear fn ON fn.Id = igrn.FinancialYearId 
-                   LEFT JOIN article a ON a.Id = inwcl.ArticleId 
-                   LEFT JOIN po p ON p.ArticleId = a.Id 
-                   LEFT JOIN vendor v ON v.Id = p.VendorId 
-                   LEFT JOIN inward inw ON inw.Id = igrn.Id 
-                   LEFT JOIN category c ON c.Id = p.CategoryId 
-                   LEFT JOIN category cc ON cc.Id = a.CategoryId 
-                   LEFT JOIN purchasenumber pn ON pn.Id = p.PO_Number 
-                   LEFT JOIN financialyear fy1 ON fy1.Id = pn.FinancialYearId 
-               GROUP BY inwc.GRN 
-           
-               UNION ALL 
-           
-               SELECT 
-                   GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, 
-                   v.Name, 
-                   '', 
-                   0 as Cancellation, 
-                   igrn.Id, 
-                   inw.GRN, 
-                   CONCAT(igrn.GRN, '/', fn.StartYear,'-', fn.EndYear) as GRN_Number, 
-                   igrn.InwardDate as inwdate, 
-                   DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate, 
-                   SoInwardList(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SODataCheck, 
-                   CountNoPacks(GROUP_CONCAT(DISTINCT CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces, 
-                   (CASE WHEN c.Title IS NULL THEN cc.Title ELSE c.Title END) as Title, 
-                   (CASE WHEN pn.PurchaseNumber IS NULL THEN '0' ELSE CONCAT(pn.PurchaseNumber, '/', fy1.StartYear, '-', fy1.EndYear) END) as PurchaseNumber 
-               FROM 
-                   inward inw 
-                   INNER JOIN inwardgrn igrn ON igrn.Id = inw.GRN 
-                   INNER JOIN financialyear fn ON fn.Id = igrn.FinancialYearId 
-                   INNER JOIN article a ON a.Id = inw.ArticleId 
-                   LEFT JOIN po p ON p.ArticleId = a.Id 
-                   LEFT JOIN vendor v ON v.Id = p.VendorId 
-                   LEFT JOIN so s ON s.ArticleId = inw.ArticleId 
-                   LEFT JOIN category c ON c.Id = p.CategoryId 
-                   LEFT JOIN category cc ON cc.Id = a.CategoryId 
-                   LEFT JOIN purchasenumber pn ON pn.Id = p.PO_Number 
-                   LEFT JOIN financialyear fy1 ON fy1.Id = pn.FinancialYearId 
-               WHERE a.Id NOT IN (SELECT Id FROM `article` WHERE ArticleOpenFlag = 1) 
-               GROUP BY inw.GRN
-           ) as f
-           " . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length);
+           $vnddata =  DB::select("select * from (select GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, v.Name, inwc.Notes,'Cancellation', igrn.Id, inwcl.GRN,concat(igrn.GRN, '/',fn.StartYear,'-',fn.EndYear) as GRN_Number,igrn.InwardDate as inwdate,DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate, 'SODataCheck', CountNoPacks(GROUP_CONCAT(DISTINCT CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces, (case when c.Title IS NULL then cc.Title else c.Title end) as Title, (case when pn.PurchaseNumber IS NULL then 0 else concat(pn.PurchaseNumber,'/' ,fy1.StartYear,'-',fy1.EndYear) end)  as PurchaseNumber FROM inwardgrn igrn inner join `inwardcancellationlogs` inwcl on igrn.Id=inwcl.GRN inner join `inwardcancellation` inwc on igrn.Id=inwc.GRN inner join financialyear fn on fn.Id=igrn.FinancialYearId left join article a on a.Id=inwcl.ArticleId left join po p on p.ArticleId=a.Id left join vendor v on v.Id=p.VendorId  left join `inward` inw  on inw.Id=igrn.Id left join category c on c.Id=p.CategoryId left join category cc on cc.Id=a.CategoryId left join purchasenumber pn on pn.Id=p.PO_Number left join financialyear fy1 on fy1.Id=pn.FinancialYearId group by inwc.GRN UNION ALL select GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, v.Name, '',0,igrn.Id, inw.GRN,concat(igrn.GRN, '/',fn.StartYear,'-',fn.EndYear) as GRN_Number,igrn.InwardDate as inwdate,DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate,SoInwardList(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SODataCheck,   CountNoPacks(GROUP_CONCAT(DISTINCT CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces,(case when c.Title IS NULL then cc.Title else c.Title end) as Title, (case when pn.PurchaseNumber IS NULL then 0 else concat(pn.PurchaseNumber,'/' ,fy1.StartYear,'-',fy1.EndYear) end)  as PurchaseNumber FROM `inward` inw inner join inwardgrn igrn on igrn.Id=inw.GRN   inner join financialyear fn on fn.Id=igrn.FinancialYearId inner join article a on a.Id=inw.ArticleId left join po p on p.ArticleId=a.Id left join vendor v on v.Id=p.VendorId  left join so s on s.ArticleId=inw.ArticleId left join category c on c.Id=p.CategoryId left join category cc on cc.Id=a.CategoryId left join purchasenumber pn on pn.Id=p.PO_Number left join financialyear fy1 on fy1.Id=pn.FinancialYearId  where a.Id not in (SELECT Id FROM `article` where ArticleOpenFlag = 1) group by inw.GRN) as f " . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length);
            $totalNoPacks = 0;
            foreach ($vnddata as $vnd) {
-
-           
-
                $grninwaards = DB::select("select NoPacks from inward where GRN=$vnd->GRN");
                foreach ($grninwaards as $grninwaard) {
                    $arrayGrninwaard = (array)$grninwaard;
@@ -402,7 +325,6 @@ class InwardController extends Controller
                    $vnd->TotalNoPacks = $totalNoPacks;
                }
                $totalNoPacks = 0;
-               
            }
            return array(
                'recordsTotal' => $vnTotal,
@@ -412,6 +334,7 @@ class InwardController extends Controller
                'data' => $vnddata,
            );
        }
+   
    
     
     

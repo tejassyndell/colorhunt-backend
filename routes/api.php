@@ -48,7 +48,18 @@ Route::post('categorypostlist', 'MasterController@Postcategory');
 Route::delete('deletecategory/{id}', 'MasterController@Deletecategory');
 Route::get('getcatidwise/{id}', 'MasterController@GetcatIdWise');
 Route::post('updatecategory', 'MasterController@UpdateCategory');
+Route::get('updatecategorystatus/{catid}', 'MasterController@updatecatStatus');
+
+//Beaner API
+Route::post('addbeaner', 'MasterController@AddBeaner');
+Route::get('beanarlist', 'MasterController@GetBeaner');
+Route::post('beanerpostlist', 'MasterController@PostBeaner');
+Route::delete('deletebeaner/{id}', 'MasterController@DeleteBeaner');
+Route::get('getbeaneridwise/{id}', 'MasterController@GetBeanerIdWise');
+Route::post('updatebeaner', 'MasterController@UpdateBeaner');
+
 //Subcategory API
+
 Route::post('addsubcategory', 'MasterController@AddSubcategory');
 Route::get('subcategorylist', 'MasterController@GetSubcategory');
 Route::post('subcategorypostlist', 'MasterController@PostSubcatgegory');
@@ -154,6 +165,7 @@ Route::get('getoutletviewparty/{id}', 'MasterController@getoutletviewparty');
 Route::delete('deleteparty/{id}', 'MasterController@Deleteparty');
 Route::get('getpartyidwise/{id}', 'MasterController@GetPartyIdWise');
 Route::put('updateparty/{field}', 'MasterController@UpdateParty');
+Route::get('gstin-verification/{gstNumber}', 'MasterController@verify');
 // Api Added By Kts
 Route::get('getgeoofparties', 'MasterController@getGeoOfParties');
 Route::get('getsalespersons', 'MasterController@getSalesPersons');

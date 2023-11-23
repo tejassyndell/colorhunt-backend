@@ -840,7 +840,10 @@ class StocktransferController extends Controller
             } else {
                 $ConsumedNoPacks .= ($string + $ConsumedDataNoPacks) . ",";
             }
-            $ConsumedNoPacks = rtrim($ConsumedNoPacks, ',');
+            $ConsumedNoPacks =  explode(',', $ConsumedNoPacks);
+            $ConsumedNoPacks = array_map('intval', $ConsumedNoPacks);
+            $sum = array_sum($ConsumedNoPacks);
+            $consumedNoPacksString = implode(',', $ConsumedNoPacks);
             $TransferColorflag = $dataresult[0]->TransferColorflag;
             $TransferArticleColor = json_decode($dataresult[0]->TransferArticleColor);
             $Transferstring = $dataresult[0]->TransferSalesNoPacks;
@@ -885,6 +888,17 @@ class StocktransferController extends Controller
                 DB::table('inward')
                     ->where('ArticleId', $TransferArticleId)
                     ->update(['SalesNoPacks' => $TransferNoPacks]);
+
+                DB::table('artstockstatus')
+                    ->where( 'outletId',0)
+                    ->where('ArticleId', $ConsumedArticleId)
+                    ->update(['SalesNoPacks' => $consumedNoPacksString , 'TotalPieces' => $sum]);
+                
+                DB::table('artstockstatus')
+                    ->where( 'outletId',0)
+                    ->where('ArticleId', $TransferArticleId)
+                    ->update(['SalesNoPacks' => $TransferNoPacks , 'TotalPieces' => $TransferNoPacks]);
+                
                 UserLogs::create([
                     'Module' => 'Stock Transfer',
                     'ModuleNumberId' => $stocktransferRec[0]->StockTransferNumberId,

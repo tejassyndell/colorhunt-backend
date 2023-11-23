@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use App\Outward;
 use App\Transportoutlet;
@@ -116,46 +117,44 @@ class OutwardController extends Controller
         public function AddOutward(Request $request)
     {
 
+        
+        //SENDING NOTIFICATION...
+        
         $partyid = $request->PartyId;
-
-        // $registrationToken = "SELECT token FROM `party` WHERE token != '0';";
-        // $title = '$request->input()';
-        // $body = '$request-';
-
-        // if (!$this->isExpoPushToken($registrationToken)) {
-        //     return response()->json(['error' => 'Invalid Expo Push Token'], 400);
-        // }
-
-        // $message = [
-        //     'to' => $registrationToken,
-        //     'sound' => 'default',
-        //     'title' => $title ?: 'Notification Title',
-        //     'body' => $body ?: 'Notification Body',
-        //     'priority' => 'high',
-        //     'data' => ['additionalData' => 'optional data'],
-        // ];
-
-        // try {
-        //     $response = $this->sendPushNotifications([$message]);
-        //     \Log::info("Notification sent unsuccessfully: " . json_encode($response));
-        //     return response()->json(['message' => 'Notification sent successfully'], 200);
-        // } catch (\Exception $e) {
-        //     \Log::error("Error sending notification: " . $e->getMessage());
-        //     return response()->json(['error' => 'Internal Server Error'], 500);
-        // }
-
-
-
-
-
-
-
-
+        $registrationToken = DB::select("SELECT token FROM `party` WHERE Id = " . $partyid);
+        // return '[' . $registrationToken . ']' ;
+        
+        
+        $registrationToken = [$registrationToken[0]->token];
+        $art = DB::select("SELECT ArticleNumber FROM `article` WHERE Id = " . $request->ArticleId);
+        
+        // API endpoint
+        $apiEndpoint = 'https://colorhunt-server.sincprojects.com/pushnotification';
+        
+        // API parameters
+        $data = [
+            "body" => "colorhunt",
+            "registrationToken" => $registrationToken,
+            "title" => "Article " . $art[0]->ArticleNumber . " is outwarded "
+        ];
+        
+        // Make API call
+        $response = Http::post($apiEndpoint, $data);
+        
+        // Check for success
+        if ($response->successful()) {
+            // API call successful
+            $responseData = $response->json();
+            // Process $responseData as needed
+        } else {
+            // API call failed
+            $errorData = $response->json();
+            // Handle the error
+        }
+        
+        // NOTIFICATION COMPLETED
 
 
-
-
-        ///////////////////////////////////////////////////////////////////////////////////////
         $data = $request->all();
 
         //using for outletrepot yashvi
@@ -255,36 +254,89 @@ class OutwardController extends Controller
             $name = $result[0]->Name;
             $colorflag = $result[0]->Colorflag;
 
-            if ($existingRecord) {
-                $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
-                if (!empty($getresult) && isset($getresult[0]->SalesNoPacks)) {
-                    $GetNoPacks = $getresult[0]->SalesNoPacks;
-                $dataupdate = $GetNoPacks + $data['NoPacksNew'];
-                DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
-           }
-         } else {
+            // if ($existingRecord) {
+            //     $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
                 
-                $dataupdate = $data['NoPacksNew'];
-                // DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
-                 // Insert new record
-                 $isOutlet = DB::select("SELECT OutletAssign FROM `party` where Id ='" . $data['PartyId'] . "'");
-                    if ($isOutlet[0]->OutletAssign == 1) { 
-                 DB::table('artstockstatus')->insert([
-                    'outletId' => $data['PartyId'],
-                    'ArticleId' => $articleId,
-                    'ArticleNumber' => $articleNumber,
-                    'SalesNoPacks' =>  $dataupdate,
-                    'TotalPieces' =>  $dataupdate,
-                    'ArticleColor' => $data['ArticleSelectedColor'][0]['Name'],
-                    'ArticleSize' => implode(',', array_column($data['ArticleSelectedSize'], 'Name')),
-                    'ArticleRatio' => $data['ArticleRatio'],
-                    'ArticleOpenFlag' => $data['ArticleOpenFlag'],
-                    'Title' => $data['Category'],
-                    'Colorflag' => $colorflag,
-                    'Subcategory' => $name,
-                ]);
-            }
-            }
+            //     if (!empty($getresult)) {
+            //         $GetNoPacks = $getresult[0]->SalesNoPacks; // Use "SalesNoPacks" instead of "GetNoPacks"
+            //         $dataupdate = $GetNoPacks + $data['NoPacksNew'];
+            //         DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+            //     } else {
+            //         // Handle the case where $getresult is empty
+            //     }
+            // } else {
+            //     $dataupdate = $data['NoPacksNew'];
+                
+            //     // DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+                
+            //     // Insert new record
+            //     $isOutlet = DB::select("SELECT OutletAssign FROM `party` where Id ='" . $data['PartyId'] . "'");
+                
+            //     if (!empty($isOutlet) && $isOutlet[0]->OutletAssign == 1) {
+            //         DB::table('artstockstatus')->insert([
+            //             'outletId' => $data['PartyId'],
+            //             'ArticleId' => $articleId,
+            //             'ArticleNumber' => $articleNumber,
+            //             'SalesNoPacks' => $dataupdate,
+            //             'TotalPieces' => $dataupdate,
+            //             'ArticleColor' => $data['ArticleSelectedColor'][0]['Name'],
+            //             'ArticleSize' => implode(',', array_column($data['ArticleSelectedSize'], 'Name')),
+            //             'ArticleRatio' => $data['ArticleRatio'],
+            //             'ArticleOpenFlag' => $data['ArticleOpenFlag'],
+            //             'Title' => $data['Category'],
+            //             'Colorflag' => $colorflag,
+            //             'Subcategory' => $name,
+            //         ]);
+            //     }
+            // }
+
+            $salesNoPacksData = []; // Initialize the variable as an empty array
+
+if ($existingRecord) {
+    $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
+    
+    if (!empty($getresult)) {
+        $GetNoPacks = $getresult[0]->SalesNoPacks;
+        $dataupdate = $GetNoPacks + $data['NoPacksNew'];
+        
+        DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+        
+        $salesNoPacksData[] = $dataupdate; // Add the value to the array
+    } else {
+        // Handle the case where $getresult is empty
+    }
+} else {
+    $dataupdate = $data['NoPacksNew'];
+    
+    // DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+    
+    // Insert new record
+    $isOutlet = DB::select("SELECT OutletAssign FROM `party` where Id ='" . $data['PartyId'] . "'");
+    
+    if (!empty($isOutlet) && $isOutlet[0]->OutletAssign == 1) {
+        DB::table('artstockstatus')->insert([
+            'outletId' => $data['PartyId'],
+            'ArticleId' => $articleId,
+            'ArticleNumber' => $articleNumber,
+            'SalesNoPacks' => $dataupdate,
+            'TotalPieces' => $dataupdate,
+            'ArticleColor' => $data['ArticleSelectedColor'][0]['Name'],
+            'ArticleSize' => implode(',', array_column($data['ArticleSelectedSize'], 'Name')),
+            'ArticleRatio' => $data['ArticleRatio'],
+            'ArticleOpenFlag' => $data['ArticleOpenFlag'],
+            'Title' => $data['Category'],
+            'Colorflag' => $colorflag,
+            'Subcategory' => $name,
+        ]);
+
+        $salesNoPacksData[] = $dataupdate; // Add the value to the array
+    }
+}
+
+$totalPieces = array_sum($salesNoPacksData);
+$salesNoPacksDataString = implode(',', $salesNoPacksData);
+
+            
         }
 
 
@@ -716,13 +768,13 @@ class OutwardController extends Controller
         $data = $request->all();
         $search = $data['dataTablesParameters']["search"];
         $startnumber = $data['dataTablesParameters']["start"];
-        $vnddataTotal = DB::select("select count(*) as Total from (SELECT own.Id, p.Name, own.SoId, o.OutwardNumberId FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId inner join party p on p.Id=sn.PartyId inner join users u on u.Id=sn.UserId inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId order by o.Id desc) as d");
+        $vnddataTotal = DB::select("select count(*) as Total from (SELECT own.Id, o.OutwardNumberId FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId  inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId order by o.Id desc) as d");
         $vntotal = $vnddataTotal[0]->Total;
         $length = $data['dataTablesParameters']["length"];
         $wherecustom = "";
-        if ($search['value'] != null && strlen($search['value']) > 2) {
-            $searchstring = "where d.OutwardNumber like '%" . $search['value'] . "%' OR d.SoNumber like '%" . $search['value'] . "%' OR cast(d.OutwardDate as char) like '%" . $search['value'] . "%' OR d.Name like '%" . $search['value'] . "%' OR d.ArticleNumber like '%" . $search['value'] . "%'";
-            $vnddataTotalFilter = DB::select("select count(*) as Total from (SELECT sn.UserId, own.Id, p.Name, own.SoId, o.OutwardNumberId, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, DATE_FORMAT(own.OutwardDate, \"%d/%m/%Y\") as OutwardDate, concat(IFNULL(partyuser.Name,u.Name),sn.SoNumber, '/',fn.StartYear,'-',fn.EndYear) as SoNumber FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId inner join party p on p.Id=sn.PartyId  left join users partyuser on partyuser.Id=p.UserId  inner join users u on u.Id=sn.UserId inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId order by o.Id desc) as d " . $searchstring);
+        if ($search['value'] !== null && strlen($search['value']) > 2)             {
+            $searchstring = "WHERE d.OutwardNumber LIKE :search OR d.SoNumber LIKE :search OR cast(d.OutwardDate as char) LIKE :search OR d.Name LIKE :search OR d.ArticleNumber LIKE :search";
+            $vnddataTotalFilter = DB::select("SELECT COUNT(*) as Total FROM (SELECT ... ) as d " . $searchstring, ['search' => '%' . $search['value'] . '%']);            
             $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
         } else {
             $searchstring = "";
@@ -742,15 +794,49 @@ class OutwardController extends Controller
             case 5:
                 $ordercolumn = "date(d.owdate)";
                 break;
-            default:
-                $ordercolumn = "date(d.owdate)";
-                break;
         }
+        
         $order = "";
         if ($data['dataTablesParameters']["order"][0]["dir"]) {
-            $order = "order by " . $ordercolumn . " " . $data['dataTablesParameters']["order"][0]["dir"];
+            $order = "ORDER BY " . $ordercolumn . " " . $data['dataTablesParameters']["order"][0]["dir"];
         }
-        $vnddata = DB::select("select d.* from (SELECT CountNoPacks(GROUP_CONCAT(CONCAT(o.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalOutwardPieces, o.NoPacks ,  o.OutwardRate , u.Name as UserName ,  p.UserId as PartyUserId, sn.UserId, own.Id, p.Name, own.SoId, o.OutwardNumberId, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, own.OutwardDate as owdate, DATE_FORMAT(own.OutwardDate, '%d/%m/%Y') as OutwardDate, concat(IFNULL(partyuser.Name,u.Name),sn.SoNumber, '/',fn.StartYear,'-',fn.EndYear) as SoNumber FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId inner join party p on p.Id=sn.PartyId left join users partyuser on partyuser.Id=p.UserId inner join users u on u.Id=sn.UserId inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId) as d " . $wherecustom . " " . $searchstring . " " . $order . " limit " . $data['dataTablesParameters']["start"] . "," . $length);
+        $vnddata = DB::select("select d.* from (SELECT CountNoPacks(GROUP_CONCAT(CONCAT(o.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalOutwardPieces,   own.Id, p.Name, own.SoId, o.OutwardNumberId, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, DATE_FORMAT(own.OutwardDate, '%d/%m/%Y') as OutwardDate, concat(IFNULL(partyuser.Name,u.Name),sn.SoNumber, '/',fn.StartYear,'-',fn.EndYear) as SoNumber FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId inner join party p on p.Id=sn.PartyId left join users partyuser on partyuser.Id=p.UserId inner join users u on u.Id=sn.UserId inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId) as d " . $wherecustom . " " . $searchstring . " " . $order . " limit " . $data['dataTablesParameters']["start"] . "," . $length);
+        // $vnddata = DB::select("select d.* from (SELECT CountNoPacks(GROUP_CONCAT(CONCAT(o.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalOutwardPieces, o.NoPacks ,  o.OutwardRate , u.Name as UserName ,  p.UserId as PartyUserId, sn.UserId, own.Id, p.Name, own.SoId, o.OutwardNumberId, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, own.OutwardDate as owdate, DATE_FORMAT(own.OutwardDate, '%d/%m/%Y') as OutwardDate, concat(IFNULL(partyuser.Name,u.Name),sn.SoNumber, '/',fn.StartYear,'-',fn.EndYear) as SoNumber FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId inner join party p on p.Id=sn.PartyId left join users partyuser on partyuser.Id=p.UserId inner join users u on u.Id=sn.UserId inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId) as d " . $wherecustom . " " . $searchstring . " " . $order . " limit " . $data['dataTablesParameters']["start"] . "," . $length);
+    //     $vnddata = DB::select("
+    //     SELECT
+    //         d.*
+    //     FROM
+    //         (
+    //             SELECT
+    //                 CountNoPacks(GROUP_CONCAT(CONCAT(o.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalOutwardPieces,
+    //                 own.Id,
+    //                 p.Name,
+    //                 own.SoId,
+    //                 o.OutwardNumberId,
+    //                 GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber,
+    //                 CONCAT(own.OutwardNumber, '/', fn.StartYear, '-', fn.EndYear) as OutwardNumber,
+    //                 DATE_FORMAT(own.OutwardDate, '%d/%m/%Y') as OutwardDate,
+    //                 CONCAT(IFNULL(partyuser.Name, u.Name), sn.SoNumber, '/', fn.StartYear, '-', fn.EndYear) as SoNumber
+    //             FROM
+    //                 `outward` o
+    //                 INNER JOIN article a ON a.Id=o.ArticleId
+    //                 LEFT JOIN outwardnumber own ON o.OutwardNumberId=own.Id
+    //                 INNER JOIN sonumber sn ON sn.Id=own.SoId
+    //                 INNER JOIN party p ON p.Id=sn.PartyId
+    //                 LEFT JOIN users partyuser ON partyuser.Id=p.UserId
+    //                 INNER JOIN users u ON u.Id=sn.UserId
+    //                 INNER JOIN financialyear fn ON fn.Id=own.FinancialYearId
+    //                 INNER JOIN financialyear fn1 ON fn1.Id=sn.FinancialYearId
+    //             GROUP BY
+    //                 o.OutwardNumberId
+    //         ) as d
+    //     $wherecustom
+    //     $searchstring
+    //     $order
+    //     LIMIT
+    //         $length
+    // ");
+    
         $TotalAmount = 0;
         $totalPacks = 0;
         foreach ($vnddata as $vnd) {
@@ -824,10 +910,10 @@ class OutwardController extends Controller
             $totalPacks = 0;
         }
         return array(
-            'datadraw' => $data['dataTablesParameters']["draw"],
-            'recordsTotal' => $vntotal,
-            'recordsFiltered' => $vnddataTotalFilterValue,
-            'response' => 'success',
+            // 'datadraw' => $data['dataTablesParameters']["draw"],
+            // 'recordsTotal' => $vntotal,
+            'recordsFiltered' => $vnddataTotalFilterValue, //pagination
+            // 'response' => 'success',
             'startnumber' => $startnumber,
             'search' => count($vnddata),
             'data' => $vnddata,
@@ -902,6 +988,7 @@ class OutwardController extends Controller
                     'TotalPieces' => $dataupdate
                 ]
             );
+            // DB::table('artstockstatus')->where(['outletId' => $data[0]->PartyId, 'ArticleId' => $data[0]->ArticleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
         }
 
         //close
@@ -1136,6 +1223,31 @@ class OutwardController extends Controller
                 ->where(['outletId' => $data['PartyId'], 'ArticleId' => $articleId])
                 ->get();
 
+                //working code yaashviii
+
+                // if ($existingRecord) {
+                //     $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
+                    
+                //     if (!empty($getresult)) {
+                //         $salesNoPacks = $getresult[0]->SalesNoPacks;
+                //         $dataupdate = $salesNoPacks + $data['NoPacksNew'];
+                //         DB::table('artstockstatus')
+                //             ->where(['outletId' => $data['PartyId']])
+                //             ->where(['ArticleId' => $articleId])
+                //             ->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+                //     } else {
+                //         // Handle the case where no record was found for the given conditions
+                //     }
+                // } else {
+                //     $dataupdate = $data['NoPacks'] + $data['NoPacksNew'];
+                //     DB::table('artstockstatus')
+                //         ->where(['outletId' => $data['PartyId']])
+                //         ->where(['ArticleId' => $articleId])
+                //         ->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+                // }
+
+
+                                    //working code yaashviii colorwise
             if ($existingRecord) {
                 $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
                 //return $getresult;
@@ -1228,26 +1340,18 @@ class OutwardController extends Controller
 
 
             if ($existingRecord) {
-    $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
-    
-    if (!empty($getresult)) {
-        $salesNoPacks = $getresult[0]->SalesNoPacks;
-        $dataupdate = $salesNoPacks + $data['NoPacksNew'];
-        DB::table('artstockstatus')
-            ->where(['outletId' => $data['PartyId']])
-            ->where(['ArticleId' => $articleId])
-            ->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
-    } else {
-        // Handle the case where no record was found for the given conditions
-    }
-} else {
-    $dataupdate = $data['NoPacks'] + $data['NoPacksNew'];
-    DB::table('artstockstatus')
-        ->where(['outletId' => $data['PartyId']])
-        ->where(['ArticleId' => $articleId])
-        ->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
-}
-
+                $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
+            
+                if (!empty($getresult)) {
+                    $GetNoPacks = $getresult[0]->SalesNoPacks; // Assuming SalesNoPacks is the correct property name
+                    $dataupdate = $GetNoPacks + $data['NoPacksNew'];
+                    DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+                } else {
+                    $dataupdate = $data['NoPacks'] + $data['NoPacksNew'];
+                    DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
+                }
+            }
+            
         }
 
         $dataresult = DB::select('SELECT c.Colorflag, o.NoPacks as OWNopacks, s.OutwardNoPacks FROM `outward` o inner join outwardnumber own on own.Id=o.OutwardNumberId inner join so s on s.SoNumberId=own.SoId left join po p on p.ArticleId=o.ArticleId left join article a on a.Id=o.ArticleId left join category c on c.Id=a.CategoryId where o.Id="' . $data['id'] . '" and s.ArticleId="' . $data['ArticleId'] . '"');

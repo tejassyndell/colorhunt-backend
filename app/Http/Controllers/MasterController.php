@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Brand;
 use App\beaner;
 use App\Category;
+
 use App\Color;
 use App\Subcategory;
 use App\Rangeseries;
@@ -475,6 +476,8 @@ class MasterController extends Controller
     {
         return DB::select("select * from (SELECT (CASE WHEN p.Id IS NULL THEN '0' ELSE '1' END) as POID, c.* FROM `po` p right join category c on c.Id=p.CategoryId) as t where Id = '" . $id . "' group by Id");
     }
+
+     
 
     //beaner functionality 
 

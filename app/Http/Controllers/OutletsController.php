@@ -1949,7 +1949,7 @@ foreach ($data as $d) {
 				$vnddataTotalFilterValue = $vntotal;
 			}
 		} else {
-			$vnddataTotal = DB::select("select count(*) as Total from (select d.*, GROUP_CONCAT(DISTINCT CONCAT(d.ArticleNumber1) ORDER BY d.Id SEPARATOR ',') as ArticleNumber from (SELECT oln.Id, p.Name as PartyName, p.Id as PartyId,a.ArticleNumber as ArticleNumber1,  pp.Name as OutletName, DATE_FORMAT(oln.OutletDate, '%d/%m/%Y') as cdate, concat(Replace(partyuser.Name,' ',''),oln.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutletNumber FROM `outlet` o inner join article a on a.Id=o.ArticleId inner join outletnumber oln on oln.Id=o.OutletNumberId inner join financialyear fn on fn.Id=oln.FinancialYearId left join party p on p.Id=oln.PartyId left join users partyuser on oln.PartyId=partyuser.PartyId  left join party pp on pp.Id=oln.OutletPartyId inner join users u on u.Id=oln.UserId) as d group by d.Id) as d where PartyId='" . $userrole[0]->PartyId . "'");
+			$vnddataTotal = DB::select("select count(*) as Total from (select d.*, GROUP_CONCAT(DISTINCT CONCAT(d.ArticleNumber1) ORDER BY d.Id SEPARATOR ',') as ArticleNumber from (SELECT oln.Id, p.Name as PartyName, p.Id as PartyId,  pp.Name as OutletName, DATE_FORMAT(oln.OutletDate, '%d/%m/%Y') as cdate, concat(Replace(partyuser.Name,' ',''),oln.OutletNumber, '/',fn.StartYear,'-',fn.EndYear) as OutletNumber FROM `outlet` o inner join article a on a.Id=o.ArticleId inner join outletnumber oln on oln.Id=o.OutletNumberId inner join financialyear fn on fn.Id=oln.FinancialYearId left join party p on p.Id=oln.PartyId left join users partyuser on oln.PartyId=partyuser.PartyId  left join party pp on pp.Id=oln.OutletPartyId inner join users u on u.Id=oln.UserId) as d group by d.Id) as d where PartyId='" . $userrole[0]->PartyId . "'");
 			$vntotal = $vnddataTotal[0]->Total;
 			$length = $data['dataTablesParameters']["length"];
 			if ($search['value'] != null && strlen($search['value']) > 2) {
@@ -2683,62 +2683,175 @@ foreach ($data as $d) {
 		);
 	}
 
+
 	public function DeleteOutletSalesReturn($id, $LoggedId)
-{
-	$articledata = DB::select("SELECT slr.SalesReturnNumber, slr.ArticleId, slr.NoPacks, a.ArticleNumber, a.ArticleColor, a.ArticleSize, a.ArticleRatio, a.ArticleOpenFlag, c.Colorflag FROM `outletsalesreturn` slr inner join article a on a.Id=slr.ArticleId left join po p on p.ArticleId=a.Id inner join category c on c.Id=a.CategoryId where slr.Id ='" . $id . "'");
-	$SalesReturnNoPacks = $articledata[0]->NoPacks;
-	$SalesReturnNumber = $articledata[0]->SalesReturnNumber;
-	$userName = Users::where('Id', $LoggedId)->first();
-	$sodRec = DB::select("select a.ArticleNumber, sn.Id as OutletSalesReturnNumberId, concat(sn.SalesReturnNumber,'/', fn.StartYear,'-',fn.EndYear) as OutletSalesReturnnumber from outletsalesreturn s inner join outletsalesreturnnumber sn on sn.Id=s.SalesReturnNumber inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=sn.FinancialYearId where s.Id= '" . $id . "'");
-	
-	if ($articledata[0]->ArticleOpenFlag == 1) {
+	{
+		$articledata = DB::select("SELECT slr.SalesReturnNumber, slr.ArticleId, slr.NoPacks, a.ArticleNumber, a.ArticleColor, a.ArticleSize, a.ArticleRatio, a.ArticleOpenFlag, c.Colorflag FROM `outletsalesreturn` slr inner join article a on a.Id=slr.ArticleId left join po p on p.ArticleId=a.Id inner join category c on c.Id=a.CategoryId where slr.Id ='" . $id . "'");
+		$SalesReturnNoPacks = $articledata[0]->NoPacks;
+		$SalesReturnNumber = $articledata[0]->SalesReturnNumber;
+		$userName = Users::where('Id', $LoggedId)->first();
+		$sodRec = DB::select("select a.ArticleNumber, sn.Id as OutletSalesReturnNumberId, concat(sn.SalesReturnNumber,'/', fn.StartYear,'-',fn.EndYear) as OutletSalesReturnnumber from outletsalesreturn s inner join outletsalesreturnnumber sn on sn.Id=s.SalesReturnNumber inner join article a on a.Id=s.ArticleId inner join financialyear fn on fn.Id=sn.FinancialYearId where s.Id= '" . $id . "'");
 		
-		$getdata = DB::select("SELECT NoPacks FROM `mixnopacks` where ArticleId='" . $articledata[0]->ArticleId . "'");
-		$InwardNoPacks = $getdata[0]->NoPacks;
-		$NoPacks = $SalesReturnNoPacks;
-		if ($InwardNoPacks < $NoPacks) {
-			return response()->json(array("Alreadyexist" => "true"), 200);
+		if ($articledata[0]->ArticleOpenFlag == 1) {
+			
+			$getdata = DB::select("SELECT NoPacks FROM `mixnopacks` where ArticleId='" . $articledata[0]->ArticleId . "'");
+			$InwardNoPacks = $getdata[0]->NoPacks;
+			$NoPacks = $SalesReturnNoPacks;
+			if ($InwardNoPacks < $NoPacks) {
+				return response()->json(array("Alreadyexist" => "true"), 200);
+			} else {
+				$totalnopacks = ($InwardNoPacks - $NoPacks);
+				DB::beginTransaction();
+				try {
+					
+					
+					
+				
+				//Nitin Art Stock Status
+			
+						$r = DB::table('outletsalesreturn')->where('Id', '=', $id)->first();
+						$DeleteNoPackes = $r->NoPacks;
+						$ArticleId = $r->ArticleId;
+						$OutletPartyId = $r->OutletPartyId;
+						
+						
+								// Fetch the current SalesNoPacks value
+						$currentSalesNoPacks = DB::table('artstockstatus')
+							->where(['outletId' => $OutletPartyId])
+							->where(['ArticleId' => $ArticleId])
+							->value('SalesNoPacks');
+						
+						 $artD = DB::table('article')
+							->where('Id', $ArticleId)
+							->first();
+						
+						// Calculate the new SalesNoPacks value by adding the new value to the current value
+						$newSalesNoPacks = $currentSalesNoPacks - $DeleteNoPackes;
+						
+						// Perform the updateOrInsert operation with the new SalesNoPacks value
+						DB::table('artstockstatus')->updateOrInsert(
+							[
+								'outletId' => $OutletPartyId,
+								'ArticleId' => $ArticleId
+							],
+							[
+								'SalesNoPacks' => $newSalesNoPacks,
+								'TotalPieces' => $newSalesNoPacks
+							]
+						);
+					//Colse
+					
+					
+					
+					
+					UserLogs::create([
+						'Module' => 'Outlet Sales Return',
+						'ModuleNumberId' => $sodRec[0]->OutletSalesReturnNumberId,
+						'LogType' => 'Deleted',
+						'LogDescription' => $userName->Name . " " . 'deleted article ' . $sodRec[0]->ArticleNumber . ' from OutletSalesReturn Number ' . $sodRec[0]->OutletSalesReturnnumber,
+						'UserId' => $userName->Id,
+						'updated_at' => null
+					]);
+					DB::table('mixnopacks')
+						->where('ArticleId', $articledata[0]->ArticleId)
+						->update(['NoPacks' => $totalnopacks]);
+					DB::table('outletsalesreturn')
+						->where('Id', '=', $id)
+						->delete();
+					DB::table('outletsalesreturnpacks')
+						->where('SalesReturnId', '=', $id)
+						->delete();
+					DB::commit();
+					return response()->json(array("id" => "SUCCESS"), 200);
+				} catch (\Exception $e) {
+					DB::rollback();
+					return response()->json(array("id" => ""), 200);
+				}
+			}
 		} else {
-			$totalnopacks = ($InwardNoPacks - $NoPacks);
 			DB::beginTransaction();
 			try {
 				
 				
 				
-			
-			//Nitin Art Stock Status
-		
+				
+				//Nitin Art Stock Status
 					$r = DB::table('outletsalesreturn')->where('Id', '=', $id)->first();
-					$DeleteNoPackes = $r->NoPacks;
-					$ArticleId = $r->ArticleId;
-					$OutletPartyId = $r->OutletPartyId;
 					
-					
-							// Fetch the current SalesNoPacks value
-					$currentSalesNoPacks = DB::table('artstockstatus')
-						->where(['outletId' => $OutletPartyId])
-						->where(['ArticleId' => $ArticleId])
+						$NoPacks = $r->NoPacks;
+						$data['ArticleId'] = $r->ArticleId;
+						$data['OutletPartyId'] = $r->OutletPartyId;
+				
+				
+				
+				$currentSalesNoPacks = DB::table('artstockstatus')
+						->where(['outletId' => $data['OutletPartyId']])
+						->where(['ArticleId' => $data['ArticleId']])
 						->value('SalesNoPacks');
 					
-					 $artD = DB::table('article')
-						->where('Id', $ArticleId)
-						->first();
+					// Check if $currentSalesNoPacks is not empty
+					if ($currentSalesNoPacks !== null) {
+						// Convert comma-separated values to arrays
+						$currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+						$dataNoPacksNewArray = explode(',', $NoPacks);
 					
-					// Calculate the new SalesNoPacks value by adding the new value to the current value
-					$newSalesNoPacks = $currentSalesNoPacks - $DeleteNoPackes;
+						// Perform element-wise addition
+						$newSalesNoPacksArray = [];
+	
+						for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+							$newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$dataNoPacksNewArray[$i];
+						}
 					
-					// Perform the updateOrInsert operation with the new SalesNoPacks value
-					DB::table('artstockstatus')->updateOrInsert(
-						[
-							'outletId' => $OutletPartyId,
-							'ArticleId' => $ArticleId
-						],
-						[
-							'SalesNoPacks' => $newSalesNoPacks,
-							'TotalPieces' => $newSalesNoPacks
-						]
-					);
-				//Colse
+						// Convert back to comma-separated string
+						$newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+						$artD = DB::table('article')
+							->where('Id', $data['ArticleId'])
+							->first();
+						// Perform the updateOrInsert operation with the new SalesNoPacks value
+						
+						$packes = $newSalesNoPacks;
+						$packesArray = explode(',', $packes);
+						$sum = array_sum($packesArray);
+						DB::table('artstockstatus')->updateOrInsert(
+							[
+								'outletId' => $data['OutletPartyId'],
+								'ArticleId' => $data['ArticleId']
+							],
+							[
+								'SalesNoPacks' => $newSalesNoPacks,
+								'TotalPieces' => $sum
+							   
+							]
+						);
+					} else {
+						$dataNoPacksNewArray = explode(',', $NoPacks);
+						// Convert back to comma-separated string
+						$newSalesNoPacks = implode(',', $dataNoPacksNewArray);
+						$artD = DB::table('article')
+							->where('Id', $data['ArticleId'])
+							->first();
+						// Perform the updateOrInsert operation with the new SalesNoPacks value
+						
+						
+						$packes = $newSalesNoPacks;
+						$packesArray = explode(',', $packes);
+						$sum = array_sum($packesArray);
+	
+						DB::table('artstockstatus')->updateOrInsert(
+							[
+								'outletId' => $data['OutletPartyId'],
+								'ArticleId' => $data['ArticleId']
+							],
+							[
+								'Title' => $artD->Category,
+								'ArticleNumber' => $artD->ArticleNumber,
+								'SalesNoPacks' => $newSalesNoPacks,
+								'TotalPieces' => $sum
+							]
+						);
+					}
+	
+					//Close
 				
 				
 				
@@ -2751,134 +2864,20 @@ foreach ($data as $d) {
 					'UserId' => $userName->Id,
 					'updated_at' => null
 				]);
-				DB::table('mixnopacks')
-					->where('ArticleId', $articledata[0]->ArticleId)
-					->update(['NoPacks' => $totalnopacks]);
-				DB::table('outletsalesreturn')
-					->where('Id', '=', $id)
-					->delete();
 				DB::table('outletsalesreturnpacks')
 					->where('SalesReturnId', '=', $id)
 					->delete();
+				DB::table('outletsalesreturn')
+					->where('Id', '=', $id)
+					->delete();
 				DB::commit();
-				return response()->json(array("id" => "SUCCESS"), 200);
+				return response()->json(array("SRNumberId" => $SalesReturnNumber, "id" => "SUCCESS"), 200);
 			} catch (\Exception $e) {
 				DB::rollback();
 				return response()->json(array("id" => ""), 200);
 			}
 		}
-	} else {
-		DB::beginTransaction();
-		try {
-			
-			
-			
-			
-			//Nitin Art Stock Status
-				$r = DB::table('outletsalesreturn')->where('Id', '=', $id)->first();
-				
-					$NoPacks = $r->NoPacks;
-					$data['ArticleId'] = $r->ArticleId;
-					$data['OutletPartyId'] = $r->OutletPartyId;
-			
-			
-			
-			$currentSalesNoPacks = DB::table('artstockstatus')
-					->where(['outletId' => $data['OutletPartyId']])
-					->where(['ArticleId' => $data['ArticleId']])
-					->value('SalesNoPacks');
-				
-				// Check if $currentSalesNoPacks is not empty
-				if ($currentSalesNoPacks !== null) {
-					// Convert comma-separated values to arrays
-					$currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
-					$dataNoPacksNewArray = explode(',', $NoPacks);
-				
-					// Perform element-wise addition
-					$newSalesNoPacksArray = [];
-
-					for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
-						$newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$dataNoPacksNewArray[$i];
-					}
-				
-					// Convert back to comma-separated string
-					$newSalesNoPacks = implode(',', $newSalesNoPacksArray);
-					$artD = DB::table('article')
-						->where('Id', $data['ArticleId'])
-						->first();
-					// Perform the updateOrInsert operation with the new SalesNoPacks value
-					
-					$packes = $newSalesNoPacks;
-					$packesArray = explode(',', $packes);
-					$sum = array_sum($packesArray);
-					DB::table('artstockstatus')->updateOrInsert(
-						[
-							'outletId' => $data['OutletPartyId'],
-							'ArticleId' => $data['ArticleId']
-						],
-						[
-							'Title' => $artD->Category,
-							'ArticleNumber' => $artD->ArticleNumber,
-							'SalesNoPacks' => $newSalesNoPacks,
-							'TotalPieces' => $sum
-						   
-						]
-					);
-				} else {
-					$dataNoPacksNewArray = explode(',', $NoPacks);
-					// Convert back to comma-separated string
-					$newSalesNoPacks = implode(',', $dataNoPacksNewArray);
-					$artD = DB::table('article')
-						->where('Id', $data['ArticleId'])
-						->first();
-					// Perform the updateOrInsert operation with the new SalesNoPacks value
-					
-					
-					$packes = $newSalesNoPacks;
-					$packesArray = explode(',', $packes);
-					$sum = array_sum($packesArray);
-
-					DB::table('artstockstatus')->updateOrInsert(
-						[
-							'outletId' => $data['OutletPartyId'],
-							'ArticleId' => $data['ArticleId']
-						],
-						[
-							'Title' => $artD->Category,
-							'ArticleNumber' => $artD->ArticleNumber,
-							'SalesNoPacks' => $newSalesNoPacks,
-							'TotalPieces' => $sum
-						]
-					);
-				}
-
-				//Close
-			
-			
-			
-			
-			UserLogs::create([
-				'Module' => 'Outlet Sales Return',
-				'ModuleNumberId' => $sodRec[0]->OutletSalesReturnNumberId,
-				'LogType' => 'Deleted',
-				'LogDescription' => $userName->Name . " " . 'deleted article ' . $sodRec[0]->ArticleNumber . ' from OutletSalesReturn Number ' . $sodRec[0]->OutletSalesReturnnumber,
-				'UserId' => $userName->Id,
-				'updated_at' => null
-			]);
-			DB::table('outletsalesreturnpacks')
-				->where('SalesReturnId', '=', $id)
-				->delete();
-			DB::table('outletsalesreturn')
-				->where('Id', '=', $id)
-				->delete();
-			DB::commit();
-			return response()->json(array("SRNumberId" => $SalesReturnNumber, "id" => "SUCCESS"), 200);
-		} catch (\Exception $e) {
-			DB::rollback();
-			return response()->json(array("id" => ""), 200);
-		}
 	}
-}
 
 
 	public function GetOutletSalesReturnChallan($Id)

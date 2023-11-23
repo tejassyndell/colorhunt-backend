@@ -59,6 +59,7 @@ Route::get('getbeaneridwise/{id}', 'MasterController@GetBeanerIdWise');
 Route::post('updatebeaner', 'MasterController@UpdateBeaner');
 
 //Subcategory API
+
 Route::post('addsubcategory', 'MasterController@AddSubcategory');
 Route::get('subcategorylist', 'MasterController@GetSubcategory');
 Route::post('subcategorypostlist', 'MasterController@PostSubcatgegory');
@@ -165,7 +166,6 @@ Route::delete('deleteparty/{id}', 'MasterController@Deleteparty');
 Route::get('getpartyidwise/{id}', 'MasterController@GetPartyIdWise');
 Route::put('updateparty/{field}', 'MasterController@UpdateParty');
 Route::get('gstin-verification/{gstNumber}', 'MasterController@verify');
-
 // Api Added By Kts
 Route::get('getgeoofparties', 'MasterController@getGeoOfParties');
 Route::get('getsalespersons', 'MasterController@getSalesPersons');
@@ -227,7 +227,7 @@ Route::get('stocktransferlist/{userid}', 'StocktransferController@Getstocktransf
 Route::put('updatestocktransfer/{field}', 'StocktransferController@Updatestocktransfer');
 Route::post('stocktransferpostlist', 'StocktransferController@PostStocktransfer');
 Route::post('stocktransferlistfromstno/{id}', 'StocktransferController@StocktransferListFromSTNO');
-Route::post('stockshortagelistfromstno/{id}', 'StocktransferController@StockshortageListFromSTNO');
+Route::get('stockshortagelistfromstno/{id}', 'StocktransferController@StockshortageListFromSTNO');
 Route::get('stocktransferfromstno/{id}', 'StocktransferController@StocktransferDateFromSTNO');
 Route::delete('deletestocktransfer/{id}/{type}/{LoggedId}', 'StocktransferController@Deletestocktransfer');
 //Ourward API

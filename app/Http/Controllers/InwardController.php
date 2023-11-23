@@ -105,7 +105,56 @@ class InwardController extends Controller
 
         $countration = array_sum(explode(",", $data['RatioId']));
         $countNoPacks = array_sum(explode(",", $NoPacks));
-        if ($Colorflag == 1) {
+        // return $NoPacks;
+        
+        
+        
+        ////Nitin Art Stock Status
+			
+					// Fetch the current SalesNoPacks value
+						$currentSalesNoPacks = DB::table('artstockstatus')
+							->where(['outletId' => 0])
+							->where(['ArticleId' => $dataresult[0]->ArticleId])
+							->value('SalesNoPacks');
+						
+							
+						$artD = DB::table('article')
+							->join('category', 'article.CategoryId', '=', 'category.Id')
+							->where('article.Id', $dataresult[0]->ArticleId)
+							->first();
+
+						
+						// Calculate the new SalesNoPacks value by adding the new value to the current value
+						if($currentSalesNoPacks == '' || $currentSalesNoPacks == null){
+						    $newSalesNoPacks = $NoPacks;
+						}else{
+						    $newSalesNoPacks = $currentSalesNoPacks + $NoPacks;
+						}
+						
+						$packes = $newSalesNoPacks;
+    					$packesArray = explode(',', $packes);
+    					$sum = array_sum($packesArray);
+						
+						// Perform the updateOrInsert operation with the new SalesNoPacks value
+						DB::table('artstockstatus')->updateOrInsert(
+							[
+								'outletId' => 0,
+								'ArticleId' => $dataresult[0]->ArticleId
+							],
+							[
+								'Title' => $artD->Title,
+								'ArticleNumber' => $artD->ArticleNumber,
+								'SalesNoPacks' => $newSalesNoPacks,
+								'TotalPieces' => $sum 
+							] 
+						);
+			
+			//close
+        
+        
+        
+        
+        if ($Colorflag == 1) { 
             $TotalSetQuantity = ($countNoPacks * $countration);
         } else {
             $TotalSetQuantity = ($countNoPacks * ($countration * $countcolor));
@@ -418,6 +467,8 @@ class InwardController extends Controller
     public function UpdateInward(Request $request)
     {
 
+       
+        
         $data = $request->all();
         $dataresult = DB::select('select inw.*, a.ArticleNumber, p.PO_Number, p.Id as POID, c.Colorflag from inward inw left join article a on a.Id=inw.ArticleId left join po p on p.ArticleId=inw.ArticleId left join category c on c.Id = a.CategoryId where inw.Id="' . $data['id'] . '"');
         $Colorflag = $dataresult[0]->Colorflag;
@@ -436,6 +487,7 @@ class InwardController extends Controller
         } else {
             $NoPacks .= $data['NoPacks'];
         }
+        
         $NoPacks = rtrim($NoPacks, ',');
         $countcolor = count($data['ColorId']);
         $countration = array_sum(explode(",", $data['RatioId']));
@@ -491,6 +543,58 @@ class InwardController extends Controller
         $newLogDesc = rtrim($logDesc, ',');
         DB::beginTransaction();
         try {
+            
+            
+            
+            //Nitin Art Stock Status 
+        
+            $prePacks = $request->NoPacks; 
+            $newPakes = $NoPacks;
+            $currentSalesNoPacks = DB::table('artstockstatus')
+                    ->where(['outletId' => 0])
+                    ->where(['ArticleId' => $ArticleId])
+                    ->value('SalesNoPacks');
+                
+                    // Convert comma-separated values to arrays
+                    $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+                    $dataNoPacksNewArray = explode(',', $newPakes);
+                    $preSalesReturnNoPacksArray = explode(',', $prePacks);
+                
+                    // Perform element-wise addition
+                    $newSalesNoPacksArray = [];
+
+                    for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+                        $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$preSalesReturnNoPacksArray[$i] + (int)$dataNoPacksNewArray[$i];
+                    }
+                
+                    // Convert back to comma-separated string
+                    $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+                    $artD = DB::table('article')
+                        ->where('Id', $ArticleId)
+                        ->first();
+                    // Perform the updateOrInsert operation with the new SalesNoPacks value
+                    
+                    $packes = $newSalesNoPacks;
+                    $packesArray = explode(',', $packes);
+                    $sum = array_sum($packesArray);
+                    
+                    DB::table('artstockstatus')->updateOrInsert(
+                        [
+                            'outletId' => 0,
+                            'ArticleId' => $ArticleId
+                        ],
+                        [
+                            'ArticleNumber' => $artD->ArticleNumber,
+                            'SalesNoPacks' => $newSalesNoPacks,
+                            'TotalPieces' => $sum
+                        ]
+                    );
+           
+            //Close
+            
+            
+            
+            
             DB::table('article')
                 ->where('Id', $ArticleId)
                 ->update(['ArticleRate' => $data['Rate'], 'ArticleRatio' => $ArticleRatio, 'ArticleStatus' => $ArticleStatus, 'UpdatedDate' => date("Y-m-d H:i:s")]);
@@ -530,6 +634,7 @@ class InwardController extends Controller
             ]);
             return response()->json("SUCCESS", 200);
         } catch (\Exception $e) {
+            return $e;
             DB::rollback();
             return response()->json("Error", 200);
         }
@@ -546,9 +651,53 @@ class InwardController extends Controller
         $articleRecord =  Article::where('Id', $ArticleId)->first();
         if ($articleRecord->ArticleOpenFlag == 0) {
             DB::table('articlerate')->where('ArticleId', '=', $ArticleId)->delete();
+            DB::table('artstockstatus')->where('artstockstatus.ArticleId', $ArticleId)->where('outletId', 0)->delete();
         }
         $articleopenflag = DB::select("SELECT inw.TotalSetQuantity, a.ArticleOpenFlag FROM `inward` inw inner join article a on a.Id=inw.ArticleId where inw.Id='" . $id . "'");
+        $mixnopacks = DB::select("SELECT count(*) as total, Id, NoPacks FROM `mixnopacks` where ArticleId ='" . $ArticleId . "'");
+            
+            
         if ($articleopenflag[0]->ArticleOpenFlag == 1) {
+            
+            
+            ////Nitin Art Stock Status
+			
+					// Fetch the current SalesNoPacks value
+						$currentSalesNoPacks = DB::table('artstockstatus')
+							->where(['outletId' => 0])
+							->where(['ArticleId' => $ArticleId])
+							->value('SalesNoPacks');
+						
+							
+						$artD = DB::table('article')
+							->join('category', 'article.CategoryId', '=', 'category.Id')
+							->where('article.Id', $ArticleId)
+							->first();
+						
+						// Calculate the new SalesNoPacks value by adding the new value to the current value
+						if($currentSalesNoPacks == '' || $currentSalesNoPacks == null){
+						  DB::table('artstockstatus')->where('artstockstatus.ArticleId', $ArticleId)->where('outletId', 0)->delete();
+						}else{
+						    $newSalesNoPacks = $currentSalesNoPacks - $articleopenflag[0]->TotalSetQuantity;
+						}
+						
+						// Perform the updateOrInsert operation with the new SalesNoPacks value
+						DB::table('artstockstatus')->updateOrInsert(
+							[
+								'outletId' => 0,
+								'ArticleId' => $ArticleId
+							],
+							[
+								'Title' => $artD->Title,
+								'ArticleNumber' => $artD->ArticleNumber,
+								'SalesNoPacks' => $newSalesNoPacks,
+								'TotalPieces' => $newSalesNoPacks 
+							] 
+						);
+			
+			//close
+            
+            
             $mixnopacks = DB::select("SELECT count(*) as total, Id, NoPacks FROM `mixnopacks` where ArticleId ='" . $ArticleId . "'");
             if ($mixnopacks[0]->total > 0) {
                 $totalnopacks = ($mixnopacks[0]->NoPacks - $articleopenflag[0]->TotalSetQuantity);
@@ -556,6 +705,7 @@ class InwardController extends Controller
                     ->where('Id', $mixnopacks[0]->Id)
                     ->update(['NoPacks' => $totalnopacks, 'UpdatedDate' => date("Y-m-d H:i:s")]);
             }
+            
         }
         $userName = Users::where('Id', $LoggedId)->first();
         $inwardRec = DB::select("select ig.Id as GrnId, a.ArticleNumber,concat(ig.GRN,'/', fn.StartYear,'-',fn.EndYear) as GRNnumber from inward i inner join inwardgrn ig on ig.Id=i.GRN inner join article a on a.Id=i.ArticleId inner join financialyear fn on fn.Id=ig.FinancialYearId where i.Id= '" . $id . "'");
@@ -604,6 +754,7 @@ class InwardController extends Controller
             $articleRecord =  Article::where('Id', $ArticleId)->first();
             if ($articleRecord->ArticleOpenFlag == 0) {
                 DB::table('articlerate')->where('ArticleId', '=', $ArticleId)->delete();
+                DB::table('artstockstatus')->where('artstockstatus.ArticleId', $ArticleId)->where('outletId', 0)->delete();
             }
             $articleopenflag = DB::select("SELECT inw.TotalSetQuantity, a.ArticleOpenFlag FROM `inward` inw inner join article a on a.Id=inw.ArticleId where inw.Id='" . $id . "'");
             if ($articleopenflag[0]->ArticleOpenFlag == 1) {
@@ -613,8 +764,51 @@ class InwardController extends Controller
                     DB::table('mixnopacks')
                         ->where('Id', $mixnopacks[0]->Id)
                         ->update(['NoPacks' => $totalnopacks, 'UpdatedDate' => date("Y-m-d H:i:s")]);
+                        
+                        
+                        ////Nitin Art Stock Status
+			
+					// Fetch the current SalesNoPacks value
+						$currentSalesNoPacks = DB::table('artstockstatus')
+							->where(['outletId' => 0])
+							->where(['ArticleId' => $ArticleId])
+							->value('SalesNoPacks');
+						
+							
+						$artD = DB::table('article')
+							->join('category', 'article.CategoryId', '=', 'category.Id')
+							->where('article.Id', $ArticleId)
+							->first();
+						
+						// Calculate the new SalesNoPacks value by adding the new value to the current value
+						if($currentSalesNoPacks == '' || $currentSalesNoPacks == null){
+						  DB::table('artstockstatus')->where('artstockstatus.ArticleId', $ArticleId)->where('outletId', 0)->delete();
+						}else{
+						    $newSalesNoPacks = $currentSalesNoPacks - $articleopenflag[0]->TotalSetQuantity;
+						}
+						
+						// Perform the updateOrInsert operation with the new SalesNoPacks value
+						DB::table('artstockstatus')->updateOrInsert(
+							[
+								'outletId' => 0,
+								'ArticleId' => $ArticleId
+							],
+							[
+								'Title' => $artD->Title,
+								'ArticleNumber' => $artD->ArticleNumber,
+								'SalesNoPacks' => $newSalesNoPacks,
+								'TotalPieces' => $newSalesNoPacks 
+							] 
+						);
+			
+			//close
                 }
+                
+                
             }
+            
+            
+            
             DB::table('inward')->where('Id', '=', $id)->delete();
             DB::table('inwardarticle')->where('InwardId', '=', $id)->delete();
         }
@@ -632,6 +826,7 @@ class InwardController extends Controller
 
         return response()->json("SUCCESS", 200);
     }
+
     public function Cancellationinwardgrn(Request $request)
     {
         $data = $request->all();

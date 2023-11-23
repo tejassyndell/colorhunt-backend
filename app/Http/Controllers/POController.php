@@ -988,15 +988,65 @@ public function approvedarticallist($id)
         $artRecor = Article::where('Id', $data['ArticleId'])->first();
         $userName = Users::where('Id', $data['UserId'])->first();
         $purRetRec = DB::select("select pn.Id as PurchaseReturnNumberId, concat(pn.PurchaseReturnNumber,'/', fn.StartYear,'-',fn.EndYear) as PurchaseReturnnumber from purchasereturnnumber pn inner join financialyear fn on fn.Id=pn.FinancialYearId where pn.Id= '" . $data['PRNumberId'] . "'");
-
-
-
+    
+    
+    
         $purchaseReturnRec = DB::select("select pr.Id as purchasereturnId, pr.ReturnNoPacks , pr.TotalNoPacks ,pr.PurchaseReturnNumber ,  inw.SalesNoPacks, inw.Id as InwardId from  purchasereturn pr inner join inward inw on inw.Id=pr.InwardId where  pr.PurchaseReturnNumber=" . $data['PRNumberId'] . " and pr.ArticleId=" . $data['ArticleId']);
         if ($data['ArticleOpenFlag'] == 1) {
             $noPacks = (int)$data['NoPacks'];
             $NoPacksNew = (int)$data['NoPacksNew'];
             $returnsPacks  = $purchaseReturnRec[0]->ReturnNoPacks;
             if ($NoPacksNew <= $noPacks + (int)$returnsPacks) {
+                
+                
+                //Nitin Art Stock Status 
+        
+            $prePacks = $returnsPacks; 
+            $newPakes = $NoPacksNew;
+            $currentSalesNoPacks = DB::table('artstockstatus')
+                    ->where(['outletId' => 0])
+                    ->where(['ArticleId' => $data['ArticleId']])
+                    ->value('SalesNoPacks');
+                
+                    // Convert comma-separated values to arrays
+                    $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+                    $dataNoPacksNewArray = explode(',', $newPakes);
+                    $preSalesReturnNoPacksArray = explode(',', $prePacks);
+                
+                    // Perform element-wise addition
+                    $newSalesNoPacksArray = [];
+    
+                    for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+                        $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] + (int)$preSalesReturnNoPacksArray[$i] - (int)$dataNoPacksNewArray[$i];
+                    }
+                
+                    // Convert back to comma-separated string
+                    $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+                    $artD = DB::table('article')
+                        ->where('Id', $data['ArticleId'])
+                        ->first();
+                    // Perform the updateOrInsert operation with the new SalesNoPacks value
+                    
+                    $packes = $newSalesNoPacks;
+                    $packesArray = explode(',', $packes);
+                    $sum = array_sum($packesArray);
+                    
+                    DB::table('artstockstatus')->updateOrInsert(
+                        [
+                            'outletId' => 0,
+                            'ArticleId' => $data['ArticleId']
+                        ],
+                        [
+                            'ArticleNumber' => $artD->ArticleNumber,
+                            'SalesNoPacks' => $newSalesNoPacks,
+                            'TotalPieces' => $sum
+                        ]
+                    );
+           
+            //Close
+                
+                
+                
                 $newInwardSalesNoPacks = ((int)$purchaseReturnRec[0]->SalesNoPacks  + (int)$returnsPacks) - $NoPacksNew;
                 // Inward::where('Id', $purchaseReturnRec[0]->InwardId)->update([
                 //     'SalesNoPacks' => $newInwardSalesNoPacks
@@ -1036,10 +1086,10 @@ public function approvedarticallist($id)
             $salesNoPacks = explode(",", $purchaseReturnRec[0]->SalesNoPacks);
             $newsalesNoPacks = $salesNoPacks;
             $articleSelectedColors = $data['ArticleSelectedColor'];
-
+    
             $newReturnNoPacks = "";
             $count = 0;
-
+    
             foreach ($articleSelectedColors as $articleSelectedColor) {
                 $newsalesNoPacks[$count] = ($salesNoPacks[$count] + $returnNoPacks[$count]) - $data["NoPacksNew_" . $articleSelectedColor['Id']];
                 if ($data["NoPacksNew_" . $articleSelectedColor['Id']] > ($salesNoPacks[$count] + $returnNoPacks[$count])) {
@@ -1052,6 +1102,63 @@ public function approvedarticallist($id)
                 }
                 $count  = $count + 1;
             }
+            
+            
+            
+            //Nitin Art Stock Status 
+        
+            $prePacks = $returnNoPacks; 
+            $newPakes = $newsalesNoPacks;
+            $currentSalesNoPacks = DB::table('artstockstatus')
+                    ->where(['outletId' => 0])
+                    ->where(['ArticleId' => $data['ArticleId']])
+                    ->value('SalesNoPacks');
+                    
+                    
+                
+                    // Convert comma-separated values to arrays
+                    $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+                    $dataNoPacksNewArray = explode(',', $newReturnNoPacks);
+                    $preSalesReturnNoPacksArray = explode(',', implode(',', $prePacks));
+                
+                
+                // return $preSalesReturnNoPacksArray;
+                
+                    // Perform element-wise addition
+                    $newSalesNoPacksArray = [];
+    
+                    for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+                        $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] + (int)$preSalesReturnNoPacksArray[$i] - (int)$dataNoPacksNewArray[$i];
+                    }
+                
+                    // Convert back to comma-separated string
+                    $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+                    $artD = DB::table('article')
+                        ->where('Id', $data['ArticleId'])
+                        ->first();
+                    // Perform the updateOrInsert operation with the new SalesNoPacks value
+                    
+                    $packes = $newSalesNoPacks;
+                    $packesArray = explode(',', $packes);
+                    $sum = array_sum($packesArray);
+                    
+                    DB::table('artstockstatus')->updateOrInsert(
+                        [
+                            'outletId' => 0,
+                            'ArticleId' => $data['ArticleId']
+                        ],
+                        [
+                            'ArticleNumber' => $artD->ArticleNumber,
+                            'SalesNoPacks' => $newSalesNoPacks,
+                            'TotalPieces' => $sum
+                        ]
+                    );
+           
+            //Close
+                
+            
+            
+            
             $newRemainingPacks = explode(",", (int)$purchaseReturnRec[0]->TotalNoPacks);
             $countRem = 0;
             foreach ($newRemainingPacks as $newRemainingPack) {

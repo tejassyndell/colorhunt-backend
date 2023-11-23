@@ -770,7 +770,33 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
         $wherecustom = "";
         if ($search['value'] != null && strlen($search['value']) > 2) {
             $searchstring = "where d.OutwardNumber like '%" . $search['value'] . "%' OR d.SoNumber like '%" . $search['value'] . "%' OR cast(d.OutwardDate as char) like '%" . $search['value'] . "%' OR d.Name like '%" . $search['value'] . "%' OR d.ArticleNumber like '%" . $search['value'] . "%'";
-            $vnddataTotalFilter = DB::select("select count(*) as Total from (SELECT sn.UserId, own.Id, p.Name, own.SoId, o.OutwardNumberId, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, DATE_FORMAT(own.OutwardDate, \"%d/%m/%Y\") as OutwardDate, concat(IFNULL(partyuser.Name,u.Name),sn.SoNumber, '/',fn.StartYear,'-',fn.EndYear) as SoNumber FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId inner join party p on p.Id=sn.PartyId  left join users partyuser on partyuser.Id=p.UserId  inner join users u on u.Id=sn.UserId inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId order by o.Id desc) as d " . $searchstring);
+            // $vnddataTotalFilter = DB::select("select count(*) as Total from (SELECT sn.UserId, own.Id, p.Name, own.SoId, o.OutwardNumberId, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, DATE_FORMAT(own.OutwardDate, \"%d/%m/%Y\") as OutwardDate, concat(IFNULL(partyuser.Name,u.Name),sn.SoNumber, '/',fn.StartYear,'-',fn.EndYear) as SoNumber FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId inner join party p on p.Id=sn.PartyId  left join users partyuser on partyuser.Id=p.UserId  inner join users u on u.Id=sn.UserId inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId order by o.Id desc) as d " . $searchstring);
+            
+            $vnddataTotalFilter = DB::select("
+    SELECT 
+        COUNT(*) AS Total
+    FROM (
+        SELECT 
+            sn.UserId, own.Id, p.Name, own.SoId, o.OutwardNumberId,
+            GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber,
+            CONCAT(own.OutwardNumber, '/', fn.StartYear,'-', fn.EndYear) as OutwardNumber,
+            DATE_FORMAT(own.OutwardDate, \"%d/%m/%Y\") as OutwardDate,
+            CONCAT(IFNULL(partyuser.Name, u.Name), sn.SoNumber, '/', fn.StartYear,'-', fn.EndYear) as SoNumber
+        FROM 
+            `outward` o
+            INNER JOIN `article` a ON a.Id = o.ArticleId
+            LEFT JOIN `outwardnumber` own ON o.OutwardNumberId = own.Id
+            INNER JOIN `sonumber` sn ON sn.Id = own.SoId
+            INNER JOIN `party` p ON p.Id = sn.PartyId
+            LEFT JOIN `users` partyuser ON partyuser.Id = p.UserId
+            INNER JOIN `users` u ON u.Id = sn.UserId
+            INNER JOIN `financialyear` fn ON fn.Id = own.FinancialYearId
+            INNER JOIN `financialyear` fn1 ON fn1.Id = sn.FinancialYearId
+        GROUP BY o.OutwardNumberId
+        ORDER BY o.Id DESC
+    ) AS d $searchstring
+");
+
             $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
         } else {
             $searchstring = "";

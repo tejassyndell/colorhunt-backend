@@ -1,0 +1,125 @@
+<div *ngIf="accessdenied;then other_content else content"></div>
+<ng-template #content>
+  <div class="animated fadeIn">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="table-title"><i class="fa fa-align-justify"></i> Article Images List</div>
+            <div class="pull-right" *ngIf='isAdd==1'>
+              <!-- <a type="submit" [routerLink]="['/articlephotos/']" class="btn btn-primary">Add Article
+                Photos</a> -->
+                <button class="btn btn-primary" [routerLink]="['/articlephotos']">Add Article Photos</button>
+                <!-- <button class="btn btn-primary" (click)="articlePhotos()">Add Article Photos</button> -->
+            </div>
+          </div>
+          <div class="col-md-12 pt-3 pb-3">
+            <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="row-border hover">
+              <thead class="thead-dark">
+                <tr>
+                  <th>Article Number</th>
+                  <th>Article Photos</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let val of articlephotolist;">
+                  <td>{{val.ArticleNumber}}</td>
+                  <td>
+                    <ng-container *ngIf="val.Name != null; else defaultImage">
+                      <div class="horizontal-images">
+                        <div *ngFor="let imageUrl of val.Name">
+                          <img width="100" height="100" [src]="imageUrl" alt="Article Photo">
+                        </div>
+                      </div>
+                    </ng-container>
+                    <ng-template #defaultImage>
+                      <img width="100" height="100" [src]="BaseURL + '/uploads/default-art-photo.png'" alt="Default Image">
+                    </ng-template>
+                  </td>
+                  
+                  
+                  
+                  <td>
+                    
+                    <button type="button" *ngIf='isEdit==1' class="btn btn-primary mr-1"
+                    (click)="edit(val.ArticlesId )">
+                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                </button>
+
+                    <button type="button" *ngIf='isDelete==1' class="btn btn-danger mr-1" (click)="delete(val.id)">
+                      <i class="fa fa-trash-o" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showArticlePhotosLogs==true"
+        style="position: fixed;top: 0;z-index: 10000;left: 0;width: 100%;display: flex;justify-content: center;align-items: center;height: 100vh; background: #000000b3;">
+        <div class="card" style="width: 77%;">
+            <i (click)="goBack()" class="fa fa-times"
+                style="font-size: 25px;position: absolute;top: -22px;right: -20px;color: black;cursor: pointer;height: 45px;justify-content: center;width: 45px;border-radius: 50%;box-shadow: 0px 4px 25px 16px rgb(0 0 0 / 7%);background: white;align-items: center;display: flex;box-shadow: beige;"></i>
+
+            <div class="card-header">
+                <div class="table-title"><i class="fa fa-align-justify"></i> Article Photos Logs</div>
+            </div>
+            <div class="col-md-12 pt-3 pb-3" style="max-height: 729px; height: 100%; overflow: scroll;">
+                <table class="w-100 dataTable row-border hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>No</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>User Name</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Log Type</th>
+                            <th>Log Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let val of ArticlePhotosLogsData;let i = index">
+                            <td>{{ i + 1}}</td>
+                            <td>{{val.CreatedDate}}</td>
+                            <td>{{val.CreatedTime}}</td>
+                            <td>{{val.Name}}</td>
+                            <td>{{ val.Role }}</td>
+                            <td *ngIf="val.Status == 1">Active</td>
+                            <td *ngIf="val.Status == 0">Inactive</td>
+                            <td>{{ val.LogType }}</td>
+                            <td>{{ val.LogDescription }}</td>
+                        </tr>
+                        <tr *ngIf="ArticlePhotosLogsData?.length == 0">
+                            <td colspan="8" class="no-data-available text-center">No data available in table!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</ng-template>
+
+
+<ng-template #other_content>
+  <div class="col-sm-12 col-md-12">
+    <div class="card text-white bg-info text-center">
+      <div class="card-body">
+        <blockquote class="card-bodyquote">
+          <h3>Rights that are not assignable</h3>
+          <footer>Please contact <cite title="Source Title">Admin</cite></footer>
+        </blockquote>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ngx-spinner bdColor="rgba(51,51,51,0.8)" size="medium" color="#fff" type="ball-scale-multiple">
+  <p style="font-size: 20px; color: white">Loading...</p>
+</ngx-spinner>

@@ -322,7 +322,7 @@ class InwardController extends Controller
            $data = $request->all();
            $search = $data["search"];
            $startnumber = $data["start"];
-           $vnddataTotal = DB::select("SELECT COUNT(*) AS Total FROM ( SELECT SoInwardList(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) AS SODataCheck FROM `inward` inw INNER JOIN article a ON a.Id = inw.ArticleId WHERE a.ArticleOpenFlag = 0  GROUP BY inw.GRN ) AS dd WHERE dd.SODataCheck = 0;");
+           $vnddataTotal = DB::select("SELECT COUNT(*) as Total FROM ( SELECT SoInwardList(GROUP_CONCAT(CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SODataCheck FROM `inward` inw INNER JOIN article a ON a.Id = inw.ArticleId WHERE NOT EXISTS ( SELECT 1 FROM article a2 WHERE a2.Id = a.Id AND a2.ArticleOpenFlag = 1 ) GROUP BY inw.GRN ) as dd WHERE dd.SODataCheck = 0");
            $vnTotal = $vnddataTotal[0]->Total;
            $length = $data["length"];
            if ($search['value'] != null && strlen($search['value']) > 2) {
@@ -400,7 +400,7 @@ class InwardController extends Controller
            f.PurchaseNumber 
        FROM (
            SELECT 
-               GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, 
+               GROUP_CONCAT(CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, 
                v.Name, 
                inwc.Notes, 
                'Cancellation' as Cancellation, 
@@ -410,14 +410,14 @@ class InwardController extends Controller
                igrn.InwardDate as inwdate, 
                DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate, 
                'SODataCheck' as SODataCheck, 
-               CountNoPacks(GROUP_CONCAT(DISTINCT CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces, 
+               CountNoPacks(GROUP_CONCAT(CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces, 
                COALESCE(c.Title, cc.Title) as Title, 
-               COALESCE(CONCAT(pn.PurchaseNumber,'/' ,fy1.StartYear,'-',fy1.EndYear), 0) as PurchaseNumber 
+               COALESCE(CONCAT(pn.PurchaseNumber,'/', fy1.StartYear,'-', fy1.EndYear), 0) as PurchaseNumber 
            FROM inwardgrn igrn 
            INNER JOIN `inwardcancellationlogs` inwcl ON igrn.Id = inwcl.GRN 
            INNER JOIN `inwardcancellation` inwc ON igrn.Id = inwc.GRN 
            INNER JOIN financialyear fn ON fn.Id = igrn.FinancialYearId 
-           LEFT JOIN article a ON a.Id = inwcl.ArticleId AND a.ArticleOpenFlag != 1 
+           LEFT JOIN article a ON a.Id = inwcl.ArticleId 
            LEFT JOIN po p ON p.ArticleId = a.Id 
            LEFT JOIN vendor v ON v.Id = p.VendorId  
            LEFT JOIN `inward` inw ON inw.Id = igrn.Id 
@@ -425,38 +425,47 @@ class InwardController extends Controller
            LEFT JOIN category cc ON cc.Id = a.CategoryId 
            LEFT JOIN purchasenumber pn ON pn.Id = p.PO_Number 
            LEFT JOIN financialyear fy1 ON fy1.Id = pn.FinancialYearId 
+           WHERE NOT EXISTS (
+               SELECT 1 
+               FROM article a2 
+               WHERE a2.Id = inwcl.ArticleId AND a2.ArticleOpenFlag = 1
+           )
            GROUP BY inwc.GRN 
        
            UNION ALL 
        
            SELECT 
-    GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, 
-    v.Name, 
-    '' as Notes, 
-    0 as Cancellation, 
-    igrn.Id, 
-    inw.GRN, 
-    CONCAT(igrn.GRN, '/', fn.StartYear,'-', fn.EndYear) as GRN_Number, 
-    igrn.InwardDate as inwdate, 
-    DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate, 
-    SoInwardList(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SODataCheck, 
-    CountNoPacks(GROUP_CONCAT(DISTINCT CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces, 
-    COALESCE(c.Title, cc.Title) as Title, 
-    COALESCE(CONCAT(pn.PurchaseNumber,'/' ,fy1.StartYear,'-',fy1.EndYear), '0') as PurchaseNumber 
-FROM `inward` inw 
-INNER JOIN inwardgrn igrn ON igrn.Id = inw.GRN 
-INNER JOIN financialyear fn ON fn.Id = igrn.FinancialYearId 
-INNER JOIN article a ON a.Id = inw.ArticleId AND a.ArticleOpenFlag != 1 
-LEFT JOIN po p ON p.ArticleId = a.Id 
-LEFT JOIN vendor v ON v.Id = p.VendorId  
-LEFT JOIN so s ON s.ArticleId = inw.ArticleId 
-LEFT JOIN category c ON c.Id = p.CategoryId 
-LEFT JOIN category cc ON cc.Id = a.CategoryId 
-LEFT JOIN purchasenumber pn ON pn.Id = p.PO_Number 
-LEFT JOIN financialyear fy1 ON fy1.Id = pn.FinancialYearId  
-GROUP BY inw.GRN
-
+               GROUP_CONCAT(CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, 
+               v.Name, 
+               '' as Notes, 
+               0 as Cancellation, 
+               igrn.Id, 
+               inw.GRN, 
+               CONCAT(igrn.GRN, '/', fn.StartYear,'-', fn.EndYear) as GRN_Number, 
+               igrn.InwardDate as inwdate, 
+               DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate, 
+               SoInwardList(GROUP_CONCAT(CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SODataCheck, 
+               CountNoPacks(GROUP_CONCAT(CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces, 
+               COALESCE(c.Title, cc.Title) as Title, 
+               COALESCE(CONCAT(pn.PurchaseNumber,'/', fy1.StartYear,'-', fy1.EndYear), '0') as PurchaseNumber 
+           FROM `inward` inw 
+           INNER JOIN inwardgrn igrn ON igrn.Id = inw.GRN 
+           INNER JOIN financialyear fn ON fn.Id = igrn.FinancialYearId 
+           INNER JOIN article a ON a.Id = inw.ArticleId 
+           LEFT JOIN po p ON p.ArticleId = a.Id 
+           LEFT JOIN vendor v ON v.Id = p.VendorId  
+           LEFT JOIN category c ON c.Id = p.CategoryId 
+           LEFT JOIN category cc ON cc.Id = a.CategoryId 
+           LEFT JOIN purchasenumber pn ON pn.Id = p.PO_Number 
+           LEFT JOIN financialyear fy1 ON fy1.Id = pn.FinancialYearId  
+           WHERE NOT EXISTS (
+               SELECT 1 
+               FROM article a2 
+               WHERE a2.Id = inw.ArticleId AND a2.ArticleOpenFlag = 1
+           )
+           GROUP BY inw.GRN
        ) AS f
+       
        " . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length);
            $totalNoPacks = 0;
            foreach ($vnddata as $vnd) {

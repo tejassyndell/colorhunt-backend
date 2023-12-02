@@ -764,13 +764,39 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
         $data = $request->all();
         $search = $data['dataTablesParameters']["search"];
         $startnumber = $data['dataTablesParameters']["start"];
-        $vnddataTotal = DB::select("select count(*) as Total from (SELECT own.Id, o.OutwardNumberId FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId  inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId order by o.Id desc) as d");
+        $vnddataTotal = DB::select("select count(*) as Total from (SELECT own.Id, p.Name, own.SoId, o.OutwardNumberId FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId inner join party p on p.Id=sn.PartyId inner join users u on u.Id=sn.UserId inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId order by o.Id desc) as d");
         $vntotal = $vnddataTotal[0]->Total;
         $length = $data['dataTablesParameters']["length"];
         $wherecustom = "";
-        if ($search['value'] !== null && strlen($search['value']) > 2)             {
-            $searchstring = "WHERE d.OutwardNumber LIKE :search OR d.SoNumber LIKE :search OR cast(d.OutwardDate as char) LIKE :search OR d.Name LIKE :search OR d.ArticleNumber LIKE :search";
-            $vnddataTotalFilter = DB::select("SELECT COUNT(*) as Total FROM (SELECT ... ) as d " . $searchstring, ['search' => '%' . $search['value'] . '%']);            
+        if ($search['value'] != null && strlen($search['value']) > 2) {
+            $searchstring = "where d.OutwardNumber like '%" . $search['value'] . "%' OR d.SoNumber like '%" . $search['value'] . "%' OR cast(d.OutwardDate as char) like '%" . $search['value'] . "%' OR d.Name like '%" . $search['value'] . "%' OR d.ArticleNumber like '%" . $search['value'] . "%'";
+            // $vnddataTotalFilter = DB::select("select count(*) as Total from (SELECT sn.UserId, own.Id, p.Name, own.SoId, o.OutwardNumberId, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, DATE_FORMAT(own.OutwardDate, \"%d/%m/%Y\") as OutwardDate, concat(IFNULL(partyuser.Name,u.Name),sn.SoNumber, '/',fn.StartYear,'-',fn.EndYear) as SoNumber FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId inner join party p on p.Id=sn.PartyId  left join users partyuser on partyuser.Id=p.UserId  inner join users u on u.Id=sn.UserId inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId order by o.Id desc) as d " . $searchstring);
+            
+            $vnddataTotalFilter = DB::select("
+            SELECT 
+                COUNT(*) AS Total
+            FROM (
+                SELECT 
+                    sn.UserId, own.Id, p.Name, own.SoId, o.OutwardNumberId,
+                    GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber,
+                    CONCAT(own.OutwardNumber, '/', fn.StartYear,'-', fn.EndYear) as OutwardNumber,
+                    DATE_FORMAT(own.OutwardDate, \"%d/%m/%Y\") as OutwardDate,
+                    CONCAT(IFNULL(partyuser.Name, u.Name), sn.SoNumber, '/', fn.StartYear,'-', fn.EndYear) as SoNumber
+                FROM 
+                    `outward` o
+                    INNER JOIN `article` a ON a.Id = o.ArticleId
+                    LEFT JOIN `outwardnumber` own ON o.OutwardNumberId = own.Id
+                    INNER JOIN `sonumber` sn ON sn.Id = own.SoId
+                    INNER JOIN `party` p ON p.Id = sn.PartyId
+                    LEFT JOIN `users` partyuser ON partyuser.Id = p.UserId
+                    INNER JOIN `users` u ON u.Id = sn.UserId
+                    INNER JOIN `financialyear` fn ON fn.Id = own.FinancialYearId
+                    INNER JOIN `financialyear` fn1 ON fn1.Id = sn.FinancialYearId
+                GROUP BY o.OutwardNumberId
+                ORDER BY o.Id DESC
+            ) AS d $searchstring
+        ");
+
             $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
         } else {
             $searchstring = "";
@@ -790,130 +816,125 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
             case 5:
                 $ordercolumn = "date(d.owdate)";
                 break;
+            default:
+                $ordercolumn = "date(d.owdate)";
+                break;
         }
-        
         $order = "";
         if ($data['dataTablesParameters']["order"][0]["dir"]) {
-            $order = "ORDER BY " . $ordercolumn . " " . $data['dataTablesParameters']["order"][0]["dir"];
+            $order = "order by " . $ordercolumn . " " . $data['dataTablesParameters']["order"][0]["dir"];
         }
-        $vnddata = DB::select("select d.* from (SELECT CountNoPacks(GROUP_CONCAT(CONCAT(o.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalOutwardPieces,   own.Id, p.Name, own.SoId, o.OutwardNumberId, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, DATE_FORMAT(own.OutwardDate, '%d/%m/%Y') as OutwardDate, concat(IFNULL(partyuser.Name,u.Name),sn.SoNumber, '/',fn.StartYear,'-',fn.EndYear) as SoNumber FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId inner join party p on p.Id=sn.PartyId left join users partyuser on partyuser.Id=p.UserId inner join users u on u.Id=sn.UserId inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId) as d " . $wherecustom . " " . $searchstring . " " . $order . " limit " . $data['dataTablesParameters']["start"] . "," . $length);
-        // $vnddata = DB::select("select d.* from (SELECT CountNoPacks(GROUP_CONCAT(CONCAT(o.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalOutwardPieces, o.NoPacks ,  o.OutwardRate , u.Name as UserName ,  p.UserId as PartyUserId, sn.UserId, own.Id, p.Name, own.SoId, o.OutwardNumberId, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, own.OutwardDate as owdate, DATE_FORMAT(own.OutwardDate, '%d/%m/%Y') as OutwardDate, concat(IFNULL(partyuser.Name,u.Name),sn.SoNumber, '/',fn.StartYear,'-',fn.EndYear) as SoNumber FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId inner join party p on p.Id=sn.PartyId left join users partyuser on partyuser.Id=p.UserId inner join users u on u.Id=sn.UserId inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId) as d " . $wherecustom . " " . $searchstring . " " . $order . " limit " . $data['dataTablesParameters']["start"] . "," . $length);
-    //     $vnddata = DB::select("
-    //     SELECT
-    //         d.*
-    //     FROM
-    //         (
-    //             SELECT
-    //                 CountNoPacks(GROUP_CONCAT(CONCAT(o.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalOutwardPieces,
-    //                 own.Id,
-    //                 p.Name,
-    //                 own.SoId,
-    //                 o.OutwardNumberId,
-    //                 GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber,
-    //                 CONCAT(own.OutwardNumber, '/', fn.StartYear, '-', fn.EndYear) as OutwardNumber,
-    //                 DATE_FORMAT(own.OutwardDate, '%d/%m/%Y') as OutwardDate,
-    //                 CONCAT(IFNULL(partyuser.Name, u.Name), sn.SoNumber, '/', fn.StartYear, '-', fn.EndYear) as SoNumber
-    //             FROM
-    //                 `outward` o
-    //                 INNER JOIN article a ON a.Id=o.ArticleId
-    //                 LEFT JOIN outwardnumber own ON o.OutwardNumberId=own.Id
-    //                 INNER JOIN sonumber sn ON sn.Id=own.SoId
-    //                 INNER JOIN party p ON p.Id=sn.PartyId
-    //                 LEFT JOIN users partyuser ON partyuser.Id=p.UserId
-    //                 INNER JOIN users u ON u.Id=sn.UserId
-    //                 INNER JOIN financialyear fn ON fn.Id=own.FinancialYearId
-    //                 INNER JOIN financialyear fn1 ON fn1.Id=sn.FinancialYearId
-    //             GROUP BY
-    //                 o.OutwardNumberId
-    //         ) as d
-    //     $wherecustom
-    //     $searchstring
-    //     $order
-    //     LIMIT
-    //         $length
-    // ");
+        // $vnddata = DB::select("select d.* from (SELECT CountNoPacks(GROUP_CONCAT(CONCAT(o.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalOutwardPieces,   own.Id, p.Name, own.SoId, o.OutwardNumberId, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, DATE_FORMAT(own.OutwardDate, '%d/%m/%Y') as OutwardDate, concat(IFNULL(partyuser.Name,u.Name),sn.SoNumber, '/',fn.StartYear,'-',fn.EndYear) as SoNumber FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId inner join party p on p.Id=sn.PartyId left join users partyuser on partyuser.Id=p.UserId inner join users u on u.Id=sn.UserId inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId) as d " . $wherecustom . " " . $searchstring . " " . $order . " limit " . $data['dataTablesParameters']["start"] . "," . $length);
+        $rawQuery = "
+        SELECT
+            CountNoPacks(GROUP_CONCAT(CONCAT(o.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalOutwardPieces,
+            own.Id,
+            p.Name,
+            own.SoId,
+            o.OutwardNumberId,
+            GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber,
+            CONCAT(own.OutwardNumber, '/', fn.StartYear, '-', fn.EndYear) as OutwardNumber,
+            DATE_FORMAT(own.OutwardDate, '%d/%m/%Y') as OutwardDate,
+            CONCAT(IFNULL(partyuser.Name, u.Name), sn.SoNumber, '/', fn.StartYear, '-', fn.EndYear) as SoNumber
+        FROM
+            `outward` o
+            INNER JOIN article a ON a.Id = o.ArticleId
+            LEFT JOIN outwardnumber own ON o.OutwardNumberId = own.Id
+            INNER JOIN sonumber sn ON sn.Id = own.SoId
+            INNER JOIN party p ON p.Id = sn.PartyId
+            LEFT JOIN users partyuser ON partyuser.Id = p.UserId
+            INNER JOIN users u ON u.Id = sn.UserId
+            INNER JOIN financialyear fn ON fn.Id = own.FinancialYearId
+            INNER JOIN financialyear fn1 ON fn1.Id = sn.FinancialYearId
+        GROUP BY
+            o.OutwardNumberId
+        " . $wherecustom . " " . $searchstring . " " . $order . " LIMIT " . $data['dataTablesParameters']["start"] . "," . $length;
     
-        $TotalAmount = 0;
-        $totalPacks = 0;
-        foreach ($vnddata as $vnd) {
-            $vnd->TotalOutwardPieces = 0;
-            $outwards = Outward::where('OutwardNumberId', $vnd->OutwardNumberId)->get();
-            foreach ($outwards as $outward) {
-                if (strpos($outward->NoPacks, ',') !== false) {
-                    $totalPacks = $totalPacks + array_sum(explode(",", $outward->NoPacks));
-                    foreach (explode(",", $outward->NoPacks) as $pack) {
-                        if ($outward->PartyDiscount) {
-                            $partyDiscountAmount = (($pack * $outward->OutwardRate * $outward->PartyDiscount) / 100);
-                            $AmountWithPartyDiscount = $pack * $outward->OutwardRate - $partyDiscountAmount;
-                            $TotalAmount = $TotalAmount + $AmountWithPartyDiscount;
-                        } else {
-                            $TotalAmount = $TotalAmount + ($pack * $outward->OutwardRate);
-                        }
-                    }
-                } else {
-                    $totalPacks = $totalPacks + (int) $outward->NoPacks;
-                    if ($outward->PartyDiscount) {
-                        $partyDiscountAmount = ((($outward->NoPacks * $outward->OutwardRate) * $outward->PartyDiscount) / 100);
-                        $AmountWithPartyDiscount = $outward->NoPacks * $outward->OutwardRate - $partyDiscountAmount;
-                        $TotalAmount = $TotalAmount + $AmountWithPartyDiscount;
-                    } else {
-                        $TotalAmount = $TotalAmount + ($outward->NoPacks * $outward->OutwardRate);
-                    }
-                }
-            }
-
-            $outwardData = OutwardNumber::where('Id', $vnd->OutwardNumberId)->first();
-            $TotalAmount = $TotalAmount - $outwardData->Discount_amount;
-
-
-            if (!is_null($outwardData->GSTPercentage)) {
-                $GSTValue = (($TotalAmount * $outwardData->GSTPercentage) / 100);
-                $TotalAmount = $TotalAmount + $GSTValue;
-            }
-
-            // if($outwardData->Discount_amount > 0 || $outwardData->Discount_amount != Null){
-            //     if (!is_null($outwardData->GSTPercentage)) {
-            //         $GSTValue = (($TotalAmount * $outwardData->GSTPercentage) / 100);
-            //         $TotalAmount = $TotalAmount + $GSTValue;
-            //     }
-            // }else{
-            //     if (!is_null($outwardData->GSTPercentage)) {
-            //         $GSTValue = (($TotalAmount * $outwardData->GSTPercentage) / 100);
-            //         $TotalAmount = $TotalAmount + $GSTValue;
-            //     }
-            // }
-
-            if ($outwardData->Discount != 0) {
-                $discountValue = (($TotalAmount * $outwardData->Discount) / 100);
-                $TotalAmount = $TotalAmount - $discountValue;
-            }
-            if (!is_null($outwardData->GSTAmount)) {
-                $TotalAmount = $TotalAmount + $outwardData->GSTAmount;
-            }
-            $totalRoundoffAmmount = $this->splitter(number_format($TotalAmount, 2, '.', ''));
-
-            $vnds = $totalRoundoffAmmount['TotalRoundAmount'];
-            $vnds = str_replace(',', '', $vnds); // Remove the comma from the string
-            $vnds = floatval($vnds); // Convert the string to a float
-
-
-            $vnd->TotalAmount = $vnds;
-
-            // return $vnds - $outwardData->Discount_amount;
-
-            $vnd->TotalOutwardPieces = $totalPacks;
+        // Remove 'd.' from the ORDER BY clause
+        $rawQuery = str_replace('order by d.OutwardNumberId', 'order by OutwardNumberId', $rawQuery);
+        
+        $vnddata = DB::select($rawQuery);
+        
             $TotalAmount = 0;
             $totalPacks = 0;
-        }
-        return array(
-            // 'datadraw' => $data['dataTablesParameters']["draw"],
-            // 'recordsTotal' => $vntotal,
-            'recordsFiltered' => $vnddataTotalFilterValue, //pagination
-            // 'response' => 'success',
-            'startnumber' => $startnumber,
-            'search' => count($vnddata),
-            'data' => $vnddata,
-        );
+            foreach ($vnddata as $vnd) {
+                $vnd->TotalOutwardPieces = 0;
+                $outwards = Outward::where('OutwardNumberId', $vnd->OutwardNumberId)->get();
+                foreach ($outwards as $outward) {
+                    if (strpos($outward->NoPacks, ',') !== false) {
+                        $packs = explode(",", $outward->NoPacks);
+                    } else {
+                        $packs = [(int) $outward->NoPacks];
+                    }
+                    
+                    $totalPacks += array_sum($packs);
+                    
+                    foreach ($packs as $pack) {
+                        $amountWithoutDiscount = $pack * $outward->OutwardRate;
+                    
+                        if ($outward->PartyDiscount) {
+                            $partyDiscountAmount = ($amountWithoutDiscount * $outward->PartyDiscount) / 100;
+                            $AmountWithPartyDiscount = $amountWithoutDiscount - $partyDiscountAmount;
+                            $TotalAmount += $AmountWithPartyDiscount;
+                        } else {
+                            $TotalAmount += $amountWithoutDiscount;
+                        }
+                    }
+                    
+                }
+
+                $outwardData = OutwardNumber::where('Id', $vnd->OutwardNumberId)->first();
+                $TotalAmount = $TotalAmount - $outwardData->Discount_amount;
+
+
+                if (!is_null($outwardData->GSTPercentage)) {
+                    $GSTValue = (($TotalAmount * $outwardData->GSTPercentage) / 100);
+                    $TotalAmount = $TotalAmount + $GSTValue;
+                }
+
+                // if($outwardData->Discount_amount > 0 || $outwardData->Discount_amount != Null){
+                //     if (!is_null($outwardData->GSTPercentage)) {
+                //         $GSTValue = (($TotalAmount * $outwardData->GSTPercentage) / 100);
+                //         $TotalAmount = $TotalAmount + $GSTValue;
+                //     }
+                // }else{
+                //     if (!is_null($outwardData->GSTPercentage)) {
+                //         $GSTValue = (($TotalAmount * $outwardData->GSTPercentage) / 100);
+                //         $TotalAmount = $TotalAmount + $GSTValue;
+                //     }
+                // }
+
+                if ($outwardData->Discount != 0) {
+                    $discountValue = (($TotalAmount * $outwardData->Discount) / 100);
+                    $TotalAmount = $TotalAmount - $discountValue;
+                }
+                if (!is_null($outwardData->GSTAmount)) {
+                    $TotalAmount = $TotalAmount + $outwardData->GSTAmount;
+                }
+                $totalRoundoffAmmount = $this->splitter(number_format($TotalAmount, 2, '.', ''));
+
+                $vnds = $totalRoundoffAmmount['TotalRoundAmount'];
+                $vnds = str_replace(',', '', $vnds); // Remove the comma from the string
+                $vnds = floatval($vnds); // Convert the string to a float
+
+
+                $vnd->TotalAmount = $vnds;
+
+                // return $vnds - $outwardData->Discount_amount;
+
+                $vnd->TotalOutwardPieces = $totalPacks;
+                $TotalAmount = 0;
+                $totalPacks = 0;
+            }
+            return array(
+                'datadraw' => $data['dataTablesParameters']["draw"],
+                'recordsTotal' => $vntotal,
+                'recordsFiltered' => $vnddataTotalFilterValue,
+                'response' => 'success',
+                'startnumber' => $startnumber,
+                'search' => count($vnddata),
+                'data' => $vnddata,
+            );
     }
 
     public function Deleteoutward($id, $ArticleId, $LoggedId)

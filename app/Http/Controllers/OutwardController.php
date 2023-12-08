@@ -826,7 +826,7 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
         }
         // $vnddata = DB::select("select d.* from (SELECT CountNoPacks(GROUP_CONCAT(CONCAT(o.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalOutwardPieces,   own.Id, p.Name, own.SoId, o.OutwardNumberId, GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY own.Id SEPARATOR ',') as ArticleNumber, concat(own.OutwardNumber, '/',fn.StartYear,'-',fn.EndYear) as OutwardNumber, DATE_FORMAT(own.OutwardDate, '%d/%m/%Y') as OutwardDate, concat(IFNULL(partyuser.Name,u.Name),sn.SoNumber, '/',fn.StartYear,'-',fn.EndYear) as SoNumber FROM `outward` o inner join article a on a.Id=o.ArticleId left join outwardnumber own on o.OutwardNumberId=own.Id inner join sonumber sn on sn.Id=own.SoId inner join party p on p.Id=sn.PartyId left join users partyuser on partyuser.Id=p.UserId inner join users u on u.Id=sn.UserId inner join financialyear fn on fn.Id=own.FinancialYearId inner join financialyear fn1 on fn1.Id=sn.FinancialYearId group by o.OutwardNumberId) as d " . $wherecustom . " " . $searchstring . " " . $order . " limit " . $data['dataTablesParameters']["start"] . "," . $length);
         $rawQuery = "
-        SELECT
+        select * from ( SELECT
             CountNoPacks(GROUP_CONCAT(CONCAT(o.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalOutwardPieces,
             own.Id,
             p.Name,
@@ -847,7 +847,7 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
             INNER JOIN financialyear fn ON fn.Id = own.FinancialYearId
             INNER JOIN financialyear fn1 ON fn1.Id = sn.FinancialYearId
         GROUP BY
-            o.OutwardNumberId
+            o.OutwardNumberId ) as d
         " . $wherecustom . " " . $searchstring . " " . $order . " LIMIT " . $data['dataTablesParameters']["start"] . "," . $length;
     
     // Remove 'd.' from the ORDER BY clause

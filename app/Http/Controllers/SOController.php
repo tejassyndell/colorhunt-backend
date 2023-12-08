@@ -770,7 +770,7 @@ class SOController extends Controller
         ///////////////// OPTIMIZE ////////////
         
 		$articlesArray = DB::select('
-        SELECT `artstockstatus`.`ArticleId`, `artstockstatus`.`ArticleNumber`, `artstockstatus`.`TotalPieces`
+        SELECT `artstockstatus`.`ArticleId` as `Id`, `artstockstatus`.`ArticleNumber`, `artstockstatus`.`TotalPieces`
         FROM `artstockstatus`
         WHERE `artstockstatus`.`outletId` = 0 
     	');

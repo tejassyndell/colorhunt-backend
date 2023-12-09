@@ -1267,8 +1267,12 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
                                     //working code yaashviii colorwise
             if ($existingRecord) {
                 $getresult = DB::select("SELECT SalesNoPacks FROM `artstockstatus` WHERE outletId = '" . $data["PartyId"] . "' AND ArticleId = " . $articleId);
-                $GetNoPacksString = $getresult[0]->SalesNoPacks;
-                $GetNoPacksArray = explode(',', $GetNoPacksString);
+                if (!empty($getresult)) {
+                    $GetNoPacksString = $getresult[0]->SalesNoPacks;
+                    $GetNoPacksArray = explode(',', $GetNoPacksString);
+                } else {
+                    $GetNoPacksArray = '';
+                }
                 $salesNoPacksData = [];
                 $totalPieces = 0;
 

@@ -379,13 +379,22 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
             // Insert new record
             $isOutlet = DB::select("SELECT OutletAssign FROM `party` where Id ='" . $data['PartyId'] . "'");
             if ($isOutlet[0]->OutletAssign == 1) { 
+
+                                
+                if (isset($data['ArticleSelectedColor'][0]['Name'])) {
+                    $color = $data['ArticleSelectedColor'][0]['Name'];
+                } else {
+                    $color = '';
+                }
+                
+
             DB::table('artstockstatus')->insert([
                 'outletId' => $data['PartyId'],
                 'ArticleId' => $articleId,
                 'ArticleNumber' => $articleNumber,
                 'SalesNoPacks' => $salesNoPacksDataString,
                 'TotalPieces' => $totalPieces,
-                'ArticleColor' => $data['ArticleSelectedColor'][0]['Name'],
+                'ArticleColor' => $color,
                 'ArticleSize' => implode(',', array_column($data['ArticleSelectedSize'], 'Name')),
                 'ArticleRatio' => $data['ArticleRatio'],
                 'ArticleOpenFlag' => $data['ArticleOpenFlag'],

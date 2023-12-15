@@ -2097,36 +2097,37 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
         }
 
         
-        // if ($Discount > 0 || $Discount != "") {
-        //     $TotalFinalAmountDiscount = (($TotalAmount * $Discount) / 100);
-        //     $SubTotalAmount = $TotalAmount - $TotalFinalAmountDiscount;
-        //     $TotalFinalAmount = $SubTotalAmount;
-        // } else {
-        //     if ($TotalFinalAmount == 0) {
-        //         $TotalFinalAmount = $TotalAmount;
+        if ($Discount > 0 || $Discount != "") {
+            $TotalFinalAmountDiscount = (($TotalAmount * $Discount) / 100);
+            $SubTotalAmount = $TotalAmount - $TotalFinalAmountDiscount;
+            $TotalFinalAmount = $SubTotalAmount;
+        } else {
+            if ($TotalFinalAmount == 0) {
+                $TotalFinalAmount = $TotalAmount;
+            }
+        }
+
+        if ($Discount_in_amount > 0 || $Discount_in_amount != "") {
+            $SubTotalAmount = $TotalAmount - $Discount_in_amount;
+            $TotalFinalAmount = $SubTotalAmount;
+        } 
+
+        // if ($GSTPercentage != "" || $GSTAmount != "") {
+        //     if ($GSTPercentage > 0) {
+        //         $GSTLabel = "GST " . $GSTPercentage . "%";
+        //         $GSTValue = (($TotalFinalAmount * $GSTPercentage) / 100);
+        //         $CGSTValue = ($GSTValue / 2);
+        //         $SGSTValue = ($GSTValue / 2);
+        //         $TotalGSTValue = round(($GSTValue / 2), 2) * 2;
+        //         $TotalFinalAmount = ($TotalFinalAmount + $TotalGSTValue);
+        //     } else {
+        //         $GSTValue = number_format($GSTAmount, 2);
+        //         $GSTValue1 = $GSTAmount;
+        //         $TotalFinalAmount = ($TotalFinalAmount + $GSTValue1);
+        //         $GSTLabel = "GST Amount";
         //     }
         // }
 
-        // if ($Discount_in_amount > 0 || $Discount_in_amount != "") {
-        //     $SubTotalAmount = $TotalAmount - $Discount_in_amount;
-        //     $TotalFinalAmount = $SubTotalAmount;
-        // } 
-
-        if ($GSTPercentage != "" || $GSTAmount != "") {
-            if ($GSTPercentage > 0) {
-                $GSTLabel = "GST " . $GSTPercentage . "%";
-                $GSTValue = (($TotalFinalAmount * $GSTPercentage) / 100);
-                $CGSTValue = ($GSTValue / 2);
-                $SGSTValue = ($GSTValue / 2);
-                $TotalGSTValue = round(($GSTValue / 2), 2) * 2;
-                $TotalFinalAmount = ($TotalFinalAmount + $TotalGSTValue);
-            } else {
-                $GSTValue = number_format($GSTAmount, 2);
-                $GSTValue1 = $GSTAmount;
-                $TotalFinalAmount = ($TotalFinalAmount + $GSTValue1);
-                $GSTLabel = "GST Amount";
-            }
-        }
         $SubtotalStatus = 0;
         if (is_float($TotalFinalAmount)) {
             $SubtotalStatus = 1;

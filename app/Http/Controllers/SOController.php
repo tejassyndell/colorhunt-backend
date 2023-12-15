@@ -2660,8 +2660,14 @@ class SOController extends Controller
                             // Perform element-wise addition
                             $newSalesNoPacksArray = [];
     
-                            for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
-                                $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$dataNoPacksNewArray[$i];
+                            if($currentSalesNoPacksArray == [""]){
+                                for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+                                    $newSalesNoPacksArray[$i] = 0 - (int)$dataNoPacksNewArray[$i];
+                                }
+                            }else{
+                                    for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+                                    $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$dataNoPacksNewArray[$i];
+                                }
                             }
                         
                             // Convert back to comma-separated string

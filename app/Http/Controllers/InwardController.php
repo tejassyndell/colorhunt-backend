@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use App\Inward;
 use App\Article;
 use App\UserLogs;
@@ -106,55 +107,55 @@ class InwardController extends Controller
         $countration = array_sum(explode(",", $data['RatioId']));
         $countNoPacks = array_sum(explode(",", $NoPacks));
         // return $NoPacks;
-        
-        
-        
-        ////Nitin Art Stock Status
-			
-					// Fetch the current SalesNoPacks value
-						$currentSalesNoPacks = DB::table('artstockstatus')
-							->where(['outletId' => 0])
-							->where(['ArticleId' => $dataresult[0]->ArticleId])
-							->value('SalesNoPacks');
-						
-							
-						$artD = DB::table('article')
-							->join('category', 'article.CategoryId', '=', 'category.Id')
-							->where('article.Id', $dataresult[0]->ArticleId)
-							->first();
 
-						
-						// Calculate the new SalesNoPacks value by adding the new value to the current value
-						if($currentSalesNoPacks == '' || $currentSalesNoPacks == null){
-						    $newSalesNoPacks = $NoPacks;
-						}else{
-						    $newSalesNoPacks = $currentSalesNoPacks + $NoPacks;
-						}
-						
-						$packes = $newSalesNoPacks;
-    					$packesArray = explode(',', $packes);
-    					$sum = array_sum($packesArray);
-						
-						// Perform the updateOrInsert operation with the new SalesNoPacks value
-						DB::table('artstockstatus')->updateOrInsert(
-							[
-								'outletId' => 0,
-								'ArticleId' => $dataresult[0]->ArticleId
-							],
-							[
-								'Title' => $artD->Title,
-								'ArticleNumber' => $artD->ArticleNumber,
-								'SalesNoPacks' => $newSalesNoPacks,
-								'TotalPieces' => $sum 
-							] 
-						);
-			
-			//close
-        
-        
-        
-        
-        if ($Colorflag == 1) { 
+
+
+        ////Nitin Art Stock Status
+
+        // Fetch the current SalesNoPacks value
+        $currentSalesNoPacks = DB::table('artstockstatus')
+            ->where(['outletId' => 0])
+            ->where(['ArticleId' => $dataresult[0]->ArticleId])
+            ->value('SalesNoPacks');
+
+
+        $artD = DB::table('article')
+            ->join('category', 'article.CategoryId', '=', 'category.Id')
+            ->where('article.Id', $dataresult[0]->ArticleId)
+            ->first();
+
+
+        // Calculate the new SalesNoPacks value by adding the new value to the current value
+        if ($currentSalesNoPacks == '' || $currentSalesNoPacks == null) {
+            $newSalesNoPacks = $NoPacks;
+        } else {
+            $newSalesNoPacks = $currentSalesNoPacks + $NoPacks;
+        }
+
+        $packes = $newSalesNoPacks;
+        $packesArray = explode(',', $packes);
+        $sum = array_sum($packesArray);
+
+        // Perform the updateOrInsert operation with the new SalesNoPacks value
+        DB::table('artstockstatus')->updateOrInsert(
+            [
+                'outletId' => 0,
+                'ArticleId' => $dataresult[0]->ArticleId
+            ],
+            [
+                'Title' => $artD->Title,
+                'ArticleNumber' => $artD->ArticleNumber,
+                'SalesNoPacks' => $newSalesNoPacks,
+                'TotalPieces' => $sum
+            ]
+        );
+
+        //close
+
+
+
+
+        if ($Colorflag == 1) {
             $TotalSetQuantity = ($countNoPacks * $countration);
         } else {
             $TotalSetQuantity = ($countNoPacks * ($countration * $countcolor));
@@ -311,193 +312,90 @@ class InwardController extends Controller
     {
         return DB::select("select dd.* from (select VendorName(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as Name ,GetTotalInwardPieces(igrn.Id) as TotalInwardPieces, InwardSOCheck(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SOID, SoInwardList(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SODataCheck,inw.GRN, concat(igrn.GRN, '/',fn.StartYear,'-',fn.EndYear) as GRN_Number, igrn.InwardDate from `inward` inw left join inwardgrn igrn on igrn.Id=inw.GRN inner join financialyear fn on fn.Id=igrn.FinancialYearId left join article a on a.Id=inw.ArticleId inner join po p on p.ArticleId=a.Id inner join vendor v on v.Id=p.VendorId left join so s on s.ArticleId=inw.ArticleId group by GRN order by GRN asc) as dd where dd.SOID=0 order by GRN DESC");
     }
-   
-    
-    
-    
-   
 
     public function PostInward(Request $request)
-       {
-           $data = $request->all();
-           $search = $data["search"];
-           $startnumber = $data["start"];
-           $vnddataTotal = DB::select("SELECT COUNT(*) as Total FROM ( SELECT SoInwardList(GROUP_CONCAT(CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SODataCheck FROM `inward` inw INNER JOIN article a ON a.Id = inw.ArticleId WHERE NOT EXISTS ( SELECT 1 FROM article a2 WHERE a2.Id = a.Id AND a2.ArticleOpenFlag = 1 ) GROUP BY inw.GRN ) as dd WHERE dd.SODataCheck = 0");
-           $vnTotal = $vnddataTotal[0]->Total;
-           $length = $data["length"];
-           if ($search['value'] != null && strlen($search['value']) > 2) {
-               $searchstring = "where f.SODataCheck=0 and (f.GRN_Number like '%" . $search['value'] . "%' OR cast(f.InwardDate as char) like '%" . $search['value'] . "%' OR  f.Name like '%" . $search['value'] . "%' OR  f.TotalInwardPieces like '%" . $search['value'] . "%' OR f.Title like '%" . $search['value'] . "%' OR f.PurchaseNumber like '%" . $search['value'] . "%' OR f.ArticleNo like '%" . $search['value'] . "%')";
-               $vnddataTotalFilter = DB::select(" SELECT COUNT(*) AS Total
-               FROM (
-                   SELECT 
-                       GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') AS ArticleNo,
-                       VendorName(a.Id) AS Name,
-                       CountNoPacks(GROUP_CONCAT(DISTINCT CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) AS TotalInwardPieces,
-                       inw.GRN,
-                       CONCAT(igrn.GRN, '/', fn.StartYear,'-', fn.EndYear) AS GRN_Number,
-                       CONCAT(pn.PurchaseNumber, '/', fy1.StartYear,'-', fy1.EndYear) AS PurchaseNumber,
-                       DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') AS InwardDate,
-                       SoInwardList(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) AS SODataCheck,
-                       c.Title
-                   FROM `inward` inw
-                   INNER JOIN inwardgrn igrn ON igrn.Id = inw.GRN
-                   INNER JOIN financialyear fn ON fn.Id = igrn.FinancialYearId
-                   INNER JOIN article a ON a.Id = inw.ArticleId
-                   LEFT JOIN po p ON p.ArticleId = a.Id
-                   LEFT JOIN vendor v ON v.Id = p.VendorId
-                   LEFT JOIN so s ON s.ArticleId = inw.ArticleId
-                   INNER JOIN category c ON c.Id = a.CategoryId
-                   INNER JOIN purchasenumber pn ON pn.Id = p.PO_Number
-                   INNER JOIN financialyear fy1 ON fy1.Id = pn.FinancialYearId
-                   WHERE a.ArticleOpenFlag = 0 -- Assuming 0 represents the condition for closed articles
-                   AND s.Id IS NULL
-                   GROUP BY inw.GRN
-               ) AS f " . $searchstring);
-               $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
-           } else {
-               $searchstring = "where f.SODataCheck=0";
-               $vnddataTotalFilterValue = $vnTotal;
-           }
-           $column = $data["order"][0]["column"];
-           switch ($column) {
-               case 1:
-                   $ordercolumn = "f.GRN";
-                   break;
-               case 2:
-                   $ordercolumn = "f.Name";
-                   break;
-               case 3:
-                   $ordercolumn = "f.Title";
-                   break;
-               case 5:
-                   $ordercolumn = "date(f.inwdate)";
-                   break;
-               case 6:
-                   $ordercolumn = "f.PurchaseNumber";
-                   break;
-               default:
-                   $ordercolumn = "f.GRN";
-                   break;
-           }
-   
-           $order = "";
-           if ($data["order"][0]["dir"]) {
-               $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
-           }
-           $vnddata =  DB::select("SELECT 
-           f.ArticleNo, 
-           f.Name, 
-           f.Notes, 
-           f.Cancellation, 
-           f.Id, 
-           f.GRN, 
-           f.GRN_Number, 
-           f.inwdate, 
-           f.InwardDate, 
-           f.SODataCheck, 
-           f.TotalInwardPieces, 
-           f.Title, 
-           f.PurchaseNumber 
-       FROM (
-           SELECT 
-               GROUP_CONCAT(CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, 
-               v.Name, 
-               inwc.Notes, 
-               'Cancellation' as Cancellation, 
-               igrn.Id, 
-               inwcl.GRN, 
-               CONCAT(igrn.GRN, '/', fn.StartYear,'-', fn.EndYear) as GRN_Number, 
-               igrn.InwardDate as inwdate, 
-               DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate, 
-               'SODataCheck' as SODataCheck, 
-               CountNoPacks(GROUP_CONCAT(CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces, 
-               COALESCE(c.Title, cc.Title) as Title, 
-               COALESCE(CONCAT(pn.PurchaseNumber,'/', fy1.StartYear,'-', fy1.EndYear), 0) as PurchaseNumber 
-           FROM inwardgrn igrn 
-           INNER JOIN `inwardcancellationlogs` inwcl ON igrn.Id = inwcl.GRN 
-           INNER JOIN `inwardcancellation` inwc ON igrn.Id = inwc.GRN 
-           INNER JOIN financialyear fn ON fn.Id = igrn.FinancialYearId 
-           LEFT JOIN article a ON a.Id = inwcl.ArticleId 
-           LEFT JOIN po p ON p.ArticleId = a.Id 
-           LEFT JOIN vendor v ON v.Id = p.VendorId  
-           LEFT JOIN `inward` inw ON inw.Id = igrn.Id 
-           LEFT JOIN category c ON c.Id = p.CategoryId 
-           LEFT JOIN category cc ON cc.Id = a.CategoryId 
-           LEFT JOIN purchasenumber pn ON pn.Id = p.PO_Number 
-           LEFT JOIN financialyear fy1 ON fy1.Id = pn.FinancialYearId 
-           WHERE NOT EXISTS (
-               SELECT 1 
-               FROM article a2 
-               WHERE a2.Id = inwcl.ArticleId AND a2.ArticleOpenFlag = 1
-           )
-           GROUP BY inwc.GRN 
-       
-           UNION ALL 
-       
-           SELECT 
-               GROUP_CONCAT(CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, 
-               v.Name, 
-               '' as Notes, 
-               0 as Cancellation, 
-               igrn.Id, 
-               inw.GRN, 
-               CONCAT(igrn.GRN, '/', fn.StartYear,'-', fn.EndYear) as GRN_Number, 
-               igrn.InwardDate as inwdate, 
-               DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate, 
-               SoInwardList(GROUP_CONCAT(CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SODataCheck, 
-               CountNoPacks(GROUP_CONCAT(CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces, 
-               COALESCE(c.Title, cc.Title) as Title, 
-               COALESCE(CONCAT(pn.PurchaseNumber,'/', fy1.StartYear,'-', fy1.EndYear), '0') as PurchaseNumber 
-           FROM `inward` inw 
-           INNER JOIN inwardgrn igrn ON igrn.Id = inw.GRN 
-           INNER JOIN financialyear fn ON fn.Id = igrn.FinancialYearId 
-           INNER JOIN article a ON a.Id = inw.ArticleId 
-           LEFT JOIN po p ON p.ArticleId = a.Id 
-           LEFT JOIN vendor v ON v.Id = p.VendorId  
-           LEFT JOIN category c ON c.Id = p.CategoryId 
-           LEFT JOIN category cc ON cc.Id = a.CategoryId 
-           LEFT JOIN purchasenumber pn ON pn.Id = p.PO_Number 
-           LEFT JOIN financialyear fy1 ON fy1.Id = pn.FinancialYearId  
-           WHERE NOT EXISTS (
-               SELECT 1 
-               FROM article a2 
-               WHERE a2.Id = inw.ArticleId AND a2.ArticleOpenFlag = 1
-           )
-           GROUP BY inw.GRN
-       ) AS f
-       
-       " . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length);
-           $totalNoPacks = 0;
-           foreach ($vnddata as $vnd) {
-               $grninwaards = DB::select("select NoPacks from inward where GRN=$vnd->GRN");
-               foreach ($grninwaards as $grninwaard) {
-                   $arrayGrninwaard = (array)$grninwaard;
-                   if (strpos($arrayGrninwaard['NoPacks'], ',') !== false) {
-                       $totalNoPacks += array_sum(explode(",", $arrayGrninwaard['NoPacks']));
-                   } else {
-                       $totalNoPacks += $arrayGrninwaard['NoPacks'];
-                   }
-                   $vnd->TotalNoPacks = $totalNoPacks;
-               }
-               $totalNoPacks = 0;
-           }
-           return array(
-               'recordsTotal' => $vnTotal,
-               'recordsFiltered' => $vnddataTotalFilterValue,
-               'response' => 'success',
-               'startnumber' => $startnumber,
-               'data' => $vnddata,
-           );
-       }
-   
-   
-    
-    
+    {
+        $data = $request->all();
+
+        $cacheKey = 'post_inward_' . md5(json_encode($data)); // Generate a unique cache key based on request data
+
+        // Check if the data exists in the cache
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+        $search = $data["search"];
+        $startnumber = $data["start"];
+        $vnddataTotal = DB::select("select count(*) as Total from (select SoInwardList(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SODataCheck FROM `inward` inw inner join article a on a.Id=inw.ArticleId where a.Id not in (SELECT Id FROM `article` where ArticleOpenFlag = 1) group by inw.GRN) as dd where dd.SODataCheck = 0");
+        $vnTotal = $vnddataTotal[0]->Total;
+        $length = $data["length"];
+        if ($search['value'] != null && strlen($search['value']) > 2) {
+            $searchstring = "where f.SODataCheck=0 and (f.GRN_Number like '%" . $search['value'] . "%' OR cast(f.InwardDate as char) like '%" . $search['value'] . "%' OR  f.Name like '%" . $search['value'] . "%' OR  f.TotalInwardPieces like '%" . $search['value'] . "%' OR f.Title like '%" . $search['value'] . "%' OR f.PurchaseNumber like '%" . $search['value'] . "%' OR f.ArticleNo like '%" . $search['value'] . "%')";
+            $vnddataTotalFilter = DB::select("select count(*) as Total  from (select GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, VendorName(a.Id) as Name, CountNoPacks(GROUP_CONCAT(DISTINCT CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces, inw.GRN,concat(igrn.GRN, '/',fn.StartYear,'-',fn.EndYear) as GRN_Number, concat(pn.PurchaseNumber,'/' ,fy1.StartYear,'-',fy1.EndYear) as PurchaseNumber, DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate, SoInwardList(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SODataCheck, c.Title FROM `inward` inw inner join inwardgrn igrn on igrn.Id=inw.GRN inner join financialyear fn on fn.Id=igrn.FinancialYearId inner join article a on a.Id=inw.ArticleId left join po p on p.ArticleId=a.Id left join vendor v on v.Id=p.VendorId left join so s on s.ArticleId=inw.ArticleId inner join category c on c.Id=a.CategoryId inner join purchasenumber pn on pn.Id=p.PO_Number inner join financialyear fy1 on fy1.Id=pn.FinancialYearId  where a.Id not in (SELECT Id FROM `article` where ArticleOpenFlag = 1) and s.Id IS NULL group by GRN) as f " . $searchstring);
+            $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
+        } else {
+            $searchstring = "where f.SODataCheck=0";
+            $vnddataTotalFilterValue = $vnTotal;
+        }
+        $column = $data["order"][0]["column"];
+        switch ($column) {
+            case 1:
+                $ordercolumn = "f.GRN";
+                break;
+            case 2:
+                $ordercolumn = "f.Name";
+                break;
+            case 3:
+                $ordercolumn = "f.Title";
+                break;
+            case 5:
+                $ordercolumn = "date(f.inwdate)";
+                break;
+            case 6:
+                $ordercolumn = "f.PurchaseNumber";
+                break;
+            default:
+                $ordercolumn = "f.GRN";
+                break;
+        }
+
+        $order = "";
+        if ($data["order"][0]["dir"]) {
+            $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
+        }
+        $vnddata =  DB::select("select * from (select GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, v.Name, inwc.Notes,'Cancellation', igrn.Id, inwcl.GRN,concat(igrn.GRN, '/',fn.StartYear,'-',fn.EndYear) as GRN_Number,igrn.InwardDate as inwdate,DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate, 'SODataCheck', CountNoPacks(GROUP_CONCAT(DISTINCT CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces, (case when c.Title IS NULL then cc.Title else c.Title end) as Title, (case when pn.PurchaseNumber IS NULL then 0 else concat(pn.PurchaseNumber,'/' ,fy1.StartYear,'-',fy1.EndYear) end)  as PurchaseNumber FROM inwardgrn igrn inner join `inwardcancellationlogs` inwcl on igrn.Id=inwcl.GRN inner join `inwardcancellation` inwc on igrn.Id=inwc.GRN inner join financialyear fn on fn.Id=igrn.FinancialYearId left join article a on a.Id=inwcl.ArticleId left join po p on p.ArticleId=a.Id left join vendor v on v.Id=p.VendorId  left join `inward` inw  on inw.Id=igrn.Id left join category c on c.Id=p.CategoryId left join category cc on cc.Id=a.CategoryId left join purchasenumber pn on pn.Id=p.PO_Number left join financialyear fy1 on fy1.Id=pn.FinancialYearId group by inwc.GRN UNION ALL select GROUP_CONCAT(DISTINCT CONCAT(a.ArticleNumber) ORDER BY a.Id SEPARATOR ',') as ArticleNo, v.Name, '',0,igrn.Id, inw.GRN,concat(igrn.GRN, '/',fn.StartYear,'-',fn.EndYear) as GRN_Number,igrn.InwardDate as inwdate,DATE_FORMAT(igrn.InwardDate, '%d/%m/%Y') as InwardDate,SoInwardList(GROUP_CONCAT(DISTINCT CONCAT(a.Id) ORDER BY inw.Id SEPARATOR ',')) as SODataCheck,   CountNoPacks(GROUP_CONCAT(DISTINCT CONCAT(inw.NoPacks) ORDER BY a.Id SEPARATOR ',')) as TotalInwardPieces,(case when c.Title IS NULL then cc.Title else c.Title end) as Title, (case when pn.PurchaseNumber IS NULL then 0 else concat(pn.PurchaseNumber,'/' ,fy1.StartYear,'-',fy1.EndYear) end)  as PurchaseNumber FROM `inward` inw inner join inwardgrn igrn on igrn.Id=inw.GRN   inner join financialyear fn on fn.Id=igrn.FinancialYearId inner join article a on a.Id=inw.ArticleId left join po p on p.ArticleId=a.Id left join vendor v on v.Id=p.VendorId  left join so s on s.ArticleId=inw.ArticleId left join category c on c.Id=p.CategoryId left join category cc on cc.Id=a.CategoryId left join purchasenumber pn on pn.Id=p.PO_Number left join financialyear fy1 on fy1.Id=pn.FinancialYearId  where a.Id not in (SELECT Id FROM `article` where ArticleOpenFlag = 1) group by inw.GRN) as f " . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length);
+        $totalNoPacks = 0;
+        foreach ($vnddata as $vnd) {
+            $grninwaards = DB::select("select NoPacks from inward where GRN=$vnd->GRN");
+            foreach ($grninwaards as $grninwaard) {
+                $arrayGrninwaard = (array)$grninwaard;
+                if (strpos($arrayGrninwaard['NoPacks'], ',') !== false) {
+                    $totalNoPacks += array_sum(explode(",", $arrayGrninwaard['NoPacks']));
+                } else {
+                    $totalNoPacks += $arrayGrninwaard['NoPacks'];
+                }
+                $vnd->TotalNoPacks = $totalNoPacks;
+            }
+            $totalNoPacks = 0;
+        }
+
+        $cachedData = [
+            'recordsTotal' => $vnTotal,
+            'recordsFiltered' => $vnddataTotalFilterValue,
+            'response' => 'success',
+            'startnumber' => $startnumber,
+            'data' => $vnddata,
+        ];
+
+        // Store the result in the cache indefinitely (forever)
+        Cache::forever($cacheKey, $cachedData);
+
+        return $cachedData;
+    }
+
+
     public function UpdateInward(Request $request)
     {
 
-       
-        
         $data = $request->all();
         $dataresult = DB::select('select inw.*, a.ArticleNumber, p.PO_Number, p.Id as POID, c.Colorflag from inward inw left join article a on a.Id=inw.ArticleId left join po p on p.ArticleId=inw.ArticleId left join category c on c.Id = a.CategoryId where inw.Id="' . $data['id'] . '"');
         $Colorflag = $dataresult[0]->Colorflag;
@@ -516,7 +414,7 @@ class InwardController extends Controller
         } else {
             $NoPacks .= $data['NoPacks'];
         }
-        
+
         $NoPacks = rtrim($NoPacks, ',');
         $countcolor = count($data['ColorId']);
         $countration = array_sum(explode(",", $data['RatioId']));
@@ -572,58 +470,58 @@ class InwardController extends Controller
         $newLogDesc = rtrim($logDesc, ',');
         DB::beginTransaction();
         try {
-            
-            
-            
+
+
+
             //Nitin Art Stock Status 
-        
-            $prePacks = $request->NoPacks; 
+
+            $prePacks = $request->NoPacks;
             $newPakes = $NoPacks;
             $currentSalesNoPacks = DB::table('artstockstatus')
-                    ->where(['outletId' => 0])
-                    ->where(['ArticleId' => $ArticleId])
-                    ->value('SalesNoPacks');
-                
-                    // Convert comma-separated values to arrays
-                    $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
-                    $dataNoPacksNewArray = explode(',', $newPakes);
-                    $preSalesReturnNoPacksArray = explode(',', $prePacks);
-                
-                    // Perform element-wise addition
-                    $newSalesNoPacksArray = [];
+                ->where(['outletId' => 0])
+                ->where(['ArticleId' => $ArticleId])
+                ->value('SalesNoPacks');
 
-                    for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
-                        $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$preSalesReturnNoPacksArray[$i] + (int)$dataNoPacksNewArray[$i];
-                    }
-                
-                    // Convert back to comma-separated string
-                    $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
-                    $artD = DB::table('article')
-                        ->where('Id', $ArticleId)
-                        ->first();
-                    // Perform the updateOrInsert operation with the new SalesNoPacks value
-                    
-                    $packes = $newSalesNoPacks;
-                    $packesArray = explode(',', $packes);
-                    $sum = array_sum($packesArray);
-                    
-                    DB::table('artstockstatus')->updateOrInsert(
-                        [
-                            'outletId' => 0,
-                            'ArticleId' => $ArticleId
-                        ],
-                        [
-                            'ArticleNumber' => $artD->ArticleNumber,
-                            'SalesNoPacks' => $newSalesNoPacks,
-                            'TotalPieces' => $sum
-                        ]
-                    );
-           
+            // Convert comma-separated values to arrays
+            $currentSalesNoPacksArray = explode(',', $currentSalesNoPacks);
+            $dataNoPacksNewArray = explode(',', $newPakes);
+            $preSalesReturnNoPacksArray = explode(',', $prePacks);
+
+            // Perform element-wise addition
+            $newSalesNoPacksArray = [];
+
+            for ($i = 0; $i < count($dataNoPacksNewArray); $i++) {
+                $newSalesNoPacksArray[$i] = (int)$currentSalesNoPacksArray[$i] - (int)$preSalesReturnNoPacksArray[$i] + (int)$dataNoPacksNewArray[$i];
+            }
+
+            // Convert back to comma-separated string
+            $newSalesNoPacks = implode(',', $newSalesNoPacksArray);
+            $artD = DB::table('article')
+                ->where('Id', $ArticleId)
+                ->first();
+            // Perform the updateOrInsert operation with the new SalesNoPacks value
+
+            $packes = $newSalesNoPacks;
+            $packesArray = explode(',', $packes);
+            $sum = array_sum($packesArray);
+
+            DB::table('artstockstatus')->updateOrInsert(
+                [
+                    'outletId' => 0,
+                    'ArticleId' => $ArticleId
+                ],
+                [
+                    'ArticleNumber' => $artD->ArticleNumber,
+                    'SalesNoPacks' => $newSalesNoPacks,
+                    'TotalPieces' => $sum
+                ]
+            );
+
             //Close
-            
-            
-            
-            
+
+
+
+
             DB::table('article')
                 ->where('Id', $ArticleId)
                 ->update(['ArticleRate' => $data['Rate'], 'ArticleRatio' => $ArticleRatio, 'ArticleStatus' => $ArticleStatus, 'UpdatedDate' => date("Y-m-d H:i:s")]);
@@ -684,49 +582,49 @@ class InwardController extends Controller
         }
         $articleopenflag = DB::select("SELECT inw.TotalSetQuantity, a.ArticleOpenFlag FROM `inward` inw inner join article a on a.Id=inw.ArticleId where inw.Id='" . $id . "'");
         $mixnopacks = DB::select("SELECT count(*) as total, Id, NoPacks FROM `mixnopacks` where ArticleId ='" . $ArticleId . "'");
-            
-            
+
+
         if ($articleopenflag[0]->ArticleOpenFlag == 1) {
-            
-            
+
+
             ////Nitin Art Stock Status
-			
-					// Fetch the current SalesNoPacks value
-						$currentSalesNoPacks = DB::table('artstockstatus')
-							->where(['outletId' => 0])
-							->where(['ArticleId' => $ArticleId])
-							->value('SalesNoPacks');
-						
-							
-						$artD = DB::table('article')
-							->join('category', 'article.CategoryId', '=', 'category.Id')
-							->where('article.Id', $ArticleId)
-							->first();
-						
-						// Calculate the new SalesNoPacks value by adding the new value to the current value
-						if($currentSalesNoPacks == '' || $currentSalesNoPacks == null){
-						  DB::table('artstockstatus')->where('artstockstatus.ArticleId', $ArticleId)->where('outletId', 0)->delete();
-						}else{
-						    $newSalesNoPacks = $currentSalesNoPacks - $articleopenflag[0]->TotalSetQuantity;
-						}
-						
-						// Perform the updateOrInsert operation with the new SalesNoPacks value
-						DB::table('artstockstatus')->updateOrInsert(
-							[
-								'outletId' => 0,
-								'ArticleId' => $ArticleId
-							],
-							[
-								'Title' => $artD->Title,
-								'ArticleNumber' => $artD->ArticleNumber,
-								'SalesNoPacks' => $newSalesNoPacks,
-								'TotalPieces' => $newSalesNoPacks 
-							] 
-						);
-			
-			//close
-            
-            
+
+            // Fetch the current SalesNoPacks value
+            $currentSalesNoPacks = DB::table('artstockstatus')
+                ->where(['outletId' => 0])
+                ->where(['ArticleId' => $ArticleId])
+                ->value('SalesNoPacks');
+
+
+            $artD = DB::table('article')
+                ->join('category', 'article.CategoryId', '=', 'category.Id')
+                ->where('article.Id', $ArticleId)
+                ->first();
+
+            // Calculate the new SalesNoPacks value by adding the new value to the current value
+            if ($currentSalesNoPacks == '' || $currentSalesNoPacks == null) {
+                DB::table('artstockstatus')->where('artstockstatus.ArticleId', $ArticleId)->where('outletId', 0)->delete();
+            } else {
+                $newSalesNoPacks = $currentSalesNoPacks - $articleopenflag[0]->TotalSetQuantity;
+            }
+
+            // Perform the updateOrInsert operation with the new SalesNoPacks value
+            DB::table('artstockstatus')->updateOrInsert(
+                [
+                    'outletId' => 0,
+                    'ArticleId' => $ArticleId
+                ],
+                [
+                    'Title' => $artD->Title,
+                    'ArticleNumber' => $artD->ArticleNumber,
+                    'SalesNoPacks' => $newSalesNoPacks,
+                    'TotalPieces' => $newSalesNoPacks
+                ]
+            );
+
+            //close
+
+
             $mixnopacks = DB::select("SELECT count(*) as total, Id, NoPacks FROM `mixnopacks` where ArticleId ='" . $ArticleId . "'");
             if ($mixnopacks[0]->total > 0) {
                 $totalnopacks = ($mixnopacks[0]->NoPacks - $articleopenflag[0]->TotalSetQuantity);
@@ -734,7 +632,6 @@ class InwardController extends Controller
                     ->where('Id', $mixnopacks[0]->Id)
                     ->update(['NoPacks' => $totalnopacks, 'UpdatedDate' => date("Y-m-d H:i:s")]);
             }
-            
         }
         $userName = Users::where('Id', $LoggedId)->first();
         $inwardRec = DB::select("select ig.Id as GrnId, a.ArticleNumber,concat(ig.GRN,'/', fn.StartYear,'-',fn.EndYear) as GRNnumber from inward i inner join inwardgrn ig on ig.Id=i.GRN inner join article a on a.Id=i.ArticleId inner join financialyear fn on fn.Id=ig.FinancialYearId where i.Id= '" . $id . "'");
@@ -793,51 +690,49 @@ class InwardController extends Controller
                     DB::table('mixnopacks')
                         ->where('Id', $mixnopacks[0]->Id)
                         ->update(['NoPacks' => $totalnopacks, 'UpdatedDate' => date("Y-m-d H:i:s")]);
-                        
-                        
-                        ////Nitin Art Stock Status
-			
-					// Fetch the current SalesNoPacks value
-						$currentSalesNoPacks = DB::table('artstockstatus')
-							->where(['outletId' => 0])
-							->where(['ArticleId' => $ArticleId])
-							->value('SalesNoPacks');
-						
-							
-						$artD = DB::table('article')
-							->join('category', 'article.CategoryId', '=', 'category.Id')
-							->where('article.Id', $ArticleId)
-							->first();
-						
-						// Calculate the new SalesNoPacks value by adding the new value to the current value
-						if($currentSalesNoPacks == '' || $currentSalesNoPacks == null){
-						  DB::table('artstockstatus')->where('artstockstatus.ArticleId', $ArticleId)->where('outletId', 0)->delete();
-						}else{
-						    $newSalesNoPacks = $currentSalesNoPacks - $articleopenflag[0]->TotalSetQuantity;
-						}
-						
-						// Perform the updateOrInsert operation with the new SalesNoPacks value
-						DB::table('artstockstatus')->updateOrInsert(
-							[
-								'outletId' => 0,
-								'ArticleId' => $ArticleId
-							],
-							[
-								'Title' => $artD->Title,
-								'ArticleNumber' => $artD->ArticleNumber,
-								'SalesNoPacks' => $newSalesNoPacks,
-								'TotalPieces' => $newSalesNoPacks 
-							] 
-						);
-			
-			//close
+
+
+                    ////Nitin Art Stock Status
+
+                    // Fetch the current SalesNoPacks value
+                    $currentSalesNoPacks = DB::table('artstockstatus')
+                        ->where(['outletId' => 0])
+                        ->where(['ArticleId' => $ArticleId])
+                        ->value('SalesNoPacks');
+
+
+                    $artD = DB::table('article')
+                        ->join('category', 'article.CategoryId', '=', 'category.Id')
+                        ->where('article.Id', $ArticleId)
+                        ->first();
+
+                    // Calculate the new SalesNoPacks value by adding the new value to the current value
+                    if ($currentSalesNoPacks == '' || $currentSalesNoPacks == null) {
+                        DB::table('artstockstatus')->where('artstockstatus.ArticleId', $ArticleId)->where('outletId', 0)->delete();
+                    } else {
+                        $newSalesNoPacks = $currentSalesNoPacks - $articleopenflag[0]->TotalSetQuantity;
+                    }
+
+                    // Perform the updateOrInsert operation with the new SalesNoPacks value
+                    DB::table('artstockstatus')->updateOrInsert(
+                        [
+                            'outletId' => 0,
+                            'ArticleId' => $ArticleId
+                        ],
+                        [
+                            'Title' => $artD->Title,
+                            'ArticleNumber' => $artD->ArticleNumber,
+                            'SalesNoPacks' => $newSalesNoPacks,
+                            'TotalPieces' => $newSalesNoPacks
+                        ]
+                    );
+
+                    //close
                 }
-                
-                
             }
-            
-            
-            
+
+
+
             DB::table('inward')->where('Id', '=', $id)->delete();
             DB::table('inwardarticle')->where('InwardId', '=', $id)->delete();
         }
@@ -924,7 +819,7 @@ class InwardController extends Controller
 
     public function InwardListFromGRN($id, Request $request)
     {
-           $data = $request->all();
+        $data = $request->all();
         $search = $data["search"];
         $startnumber = $data["start"];
         $vnddataTotal = DB::select("select count(*) as Total from ( SELECT (case ar.ArticleOpenFlag when '1' then IF(CONVERT((select mr.NoPacks from mixnopacks mr where mr.ArticleId=inw.ArticleId), UNSIGNED)>=CONVERT(inw.NoPacks, UNSIGNED),'true','false') else 0 END) MixDeleteStatus,inw.Id,inw.ArticleId,v.Name,count(ac.ArticleId) as ColorCount,cc.Colorflag, cc.Title, inw.GRN,ar.ArticleNumber, (CASE WHEN s.Id IS NULL THEN '0' ELSE '1' END) as SOID, ar.ArticleRate,ar.ArticleColor,ar.ArticleSize,ar.ArticleRatio,ar.ArticleOpenFlag,inw.NoPacks,inw.InwardDate,inw.Weight FROM `inward` inw LEFT JOIN article ar on ar.Id = inw.ArticleId left JOIN po p on p.ArticleId = ar.Id left Join category c on c.Id=p.CategoryId left Join category cc on cc.Id=ar.CategoryId left join vendor v on v.Id=p.VendorId left join so s on s.ArticleId=inw.ArticleId left join articlecolor ac on ac.ArticleId=inw.ArticleId where inw.GRN='" . $id . "' group by inw.Id ) as d ");
@@ -932,7 +827,7 @@ class InwardController extends Controller
         $length = $data["length"];
         if ($search['value'] != null && strlen($search['value']) > 2) {
             $searchstring = "where d.NoPacks like '%" . $search['value'] . "%' OR d.Name like '%" . $search['value'] . "%' OR d.ArticleNumber like '%" . $search['value'] . "%' OR d.Title like '%" . $search['value'] . "%' ";
-            $vnddataTotalFilter = DB::select("select count(*) as Total from ( SELECT (case ar.ArticleOpenFlag when '1' then IF(CONVERT((select mr.NoPacks from mixnopacks mr where mr.ArticleId=inw.ArticleId), UNSIGNED)>=CONVERT(inw.NoPacks, UNSIGNED),'true','false') else 0 END) MixDeleteStatus,inw.Id,inw.ArticleId,v.Name,count(ac.ArticleId) as ColorCount,cc.Colorflag, cc.Title, inw.GRN,ar.ArticleNumber, (CASE WHEN s.Id IS NULL THEN '0' ELSE '1' END) as SOID, ar.ArticleRate,ar.ArticleColor,ar.ArticleSize,ar.ArticleRatio,ar.ArticleOpenFlag,inw.NoPacks,inw.InwardDate,inw.Weight FROM `inward` inw LEFT JOIN article ar on ar.Id = inw.ArticleId left JOIN po p on p.ArticleId = ar.Id left Join category c on c.Id=p.CategoryId left Join category cc on cc.Id=ar.CategoryId left join vendor v on v.Id=p.VendorId left join so s on s.ArticleId=inw.ArticleId left join articlecolor ac on ac.ArticleId=inw.ArticleId where inw.GRN='" . $id . "' group by inw.Id ) as d "  . $searchstring );
+            $vnddataTotalFilter = DB::select("select count(*) as Total from ( SELECT (case ar.ArticleOpenFlag when '1' then IF(CONVERT((select mr.NoPacks from mixnopacks mr where mr.ArticleId=inw.ArticleId), UNSIGNED)>=CONVERT(inw.NoPacks, UNSIGNED),'true','false') else 0 END) MixDeleteStatus,inw.Id,inw.ArticleId,v.Name,count(ac.ArticleId) as ColorCount,cc.Colorflag, cc.Title, inw.GRN,ar.ArticleNumber, (CASE WHEN s.Id IS NULL THEN '0' ELSE '1' END) as SOID, ar.ArticleRate,ar.ArticleColor,ar.ArticleSize,ar.ArticleRatio,ar.ArticleOpenFlag,inw.NoPacks,inw.InwardDate,inw.Weight FROM `inward` inw LEFT JOIN article ar on ar.Id = inw.ArticleId left JOIN po p on p.ArticleId = ar.Id left Join category c on c.Id=p.CategoryId left Join category cc on cc.Id=ar.CategoryId left join vendor v on v.Id=p.VendorId left join so s on s.ArticleId=inw.ArticleId left join articlecolor ac on ac.ArticleId=inw.ArticleId where inw.GRN='" . $id . "' group by inw.Id ) as d "  . $searchstring);
             $vnddataTotalFilterValue = $vnddataTotalFilter[0]->Total;
         } else {
             $searchstring = "";
@@ -950,8 +845,8 @@ class InwardController extends Controller
                 $ordercolumn = "d.Title";
                 break;
             case 4:
-            $ordercolumn = "d.NoPacks";
-            break;
+                $ordercolumn = "d.NoPacks";
+                break;
             default:
                 $ordercolumn = "d.CreatedDate";
                 break;
@@ -961,12 +856,12 @@ class InwardController extends Controller
             $order = "order by " . $ordercolumn . " " . $data["order"][0]["dir"];
         }
         $vnddata = DB::select("select d.* from (SELECT (case ar.ArticleOpenFlag when '1' then IF(CONVERT((select mr.NoPacks from mixnopacks mr where mr.ArticleId=inw.ArticleId), UNSIGNED)>=CONVERT(inw.NoPacks, UNSIGNED),'true','false') else 0 END) MixDeleteStatus,inw.Id,inw.ArticleId,v.Name,count(ac.ArticleId) as ColorCount,cc.Colorflag, cc.Title, inw.GRN,ar.ArticleNumber, (CASE WHEN s.Id IS NULL THEN '0' ELSE '1' END) as SOID, ar.ArticleRate,ar.ArticleColor,ar.ArticleSize,ar.ArticleRatio,ar.ArticleOpenFlag,inw.NoPacks,inw.InwardDate,inw.Weight FROM `inward` inw LEFT JOIN article ar on ar.Id = inw.ArticleId left JOIN po p on p.ArticleId = ar.Id left Join category c on c.Id=p.CategoryId left Join category cc on cc.Id=ar.CategoryId left join vendor v on v.Id=p.VendorId left join so s on s.ArticleId=inw.ArticleId left join articlecolor ac on ac.ArticleId=inw.ArticleId where inw.GRN='" . $id . "' group by inw.Id) as d " . $searchstring . " " . $order . " limit " . $data["start"] . "," . $length);
-    
-           foreach ($vnddata as $key => $val) {
-                $object = (object)$val;
-                $object->ArticleColor = json_decode($val->ArticleColor, false);
-            }
-    
+
+        foreach ($vnddata as $key => $val) {
+            $object = (object)$val;
+            $object->ArticleColor = json_decode($val->ArticleColor, false);
+        }
+
 
         return array(
             'datadraw' => $data["draw"],
@@ -977,12 +872,12 @@ class InwardController extends Controller
             'search' => count($vnddata),
             'data' => $vnddata,
         );
-    
-        
-        
-        
-        
-        
+
+
+
+
+
+
         // $as = DB::select("SELECT (case ar.ArticleOpenFlag when '1' then IF(CONVERT((select mr.NoPacks from mixnopacks mr where mr.ArticleId=inw.ArticleId), UNSIGNED)>=CONVERT(inw.NoPacks, UNSIGNED),'true','false') else 0 END) MixDeleteStatus,inw.Id,inw.ArticleId,v.Name,count(ac.ArticleId) as ColorCount,cc.Colorflag, cc.Title, inw.GRN,ar.ArticleNumber, (CASE WHEN s.Id IS NULL THEN '0' ELSE '1' END) as SOID, ar.ArticleRate,ar.ArticleColor,ar.ArticleSize,ar.ArticleRatio,ar.ArticleOpenFlag,inw.NoPacks,inw.InwardDate,inw.Weight FROM `inward` inw LEFT JOIN article ar on ar.Id = inw.ArticleId left JOIN po p on p.ArticleId = ar.Id left Join category c on c.Id=p.CategoryId left Join category cc on cc.Id=ar.CategoryId left join vendor v on v.Id=p.VendorId left join so s on s.ArticleId=inw.ArticleId left join articlecolor ac on ac.ArticleId=inw.ArticleId where inw.GRN='" . $id . "' group by inw.Id");
         // foreach ($as as $key => $val) {
         //     $object = (object)$val;
@@ -1100,10 +995,10 @@ class InwardController extends Controller
             if ($ArticleOpenFlag == 0) {
                 $ArticleRate = $vl->ArticleRate;
                 $countRate = $ArticleRate++;
-                if($vl->ArticleColor == null){
+                if ($vl->ArticleColor == null) {
                     $vl->ArticleColor = '[]';
                 }
-                if($vl->ArticleSize == null){
+                if ($vl->ArticleSize == null) {
                     $vl->ArticleSize = '[]';
                 }
                 $getcolor = json_decode($vl->ArticleColor);
@@ -1135,7 +1030,7 @@ class InwardController extends Controller
                     $Totalstockvalue = "";
                     if ($stringcomma == 1) {
                         foreach ($string as $value) {
-                            if($TotalArticleRatio == 0){
+                            if ($TotalArticleRatio == 0) {
                                 $TotalArticleRatio = 1;
                             }
                             $Tempnumber = ($value / $TotalArticleRatio);
@@ -1202,27 +1097,27 @@ class InwardController extends Controller
 
             $numbers_packQty = explode(",", $NoPacks);
             // return $numbers_colorQty;
-            if($numbers_colorQty == [""]){
+            if ($numbers_colorQty == [""]) {
                 $numbers_colorQty = $numbers_packQty;
             }
-            $C=array_combine($numbers_colorQty,$numbers_packQty);
+            $C = array_combine($numbers_colorQty, $numbers_packQty);
 
             $jsonData = json_encode($C);
 
             $arrayData = json_decode($jsonData, true);
-            $TotalCQty="";
-            $allkey="";
-            $allvalue="";
-            foreach ($arrayData as $key => $value) { 
+            $TotalCQty = "";
+            $allkey = "";
+            $allvalue = "";
+            foreach ($arrayData as $key => $value) {
                 if (!empty($key)) {
                     $TotalCQty .= '<b>' . $key . " : " . '</b>' . $value . ", ";
                 } else {
-                    $TotalCQty .= '<b>' . '--' . " : " . '</b>'. $value. ', ';
+                    $TotalCQty .= '<b>' . '--' . " : " . '</b>' . $value . ', ';
                 }
             }
 
 
-            $challendata[] = json_decode(json_encode(array("ColorWiseQty"  => $TotalCQty,"Notes" => $Notes,"TotalQty" => $TotalQty , "rejections" => $rejections,  "PreparedBy" => $PreparedBy, "InwardDate" => $InwardDate, "PoDate" => $PoDate, "GRN" => $GRN, "PurchaseNumber" => $PurchaseNumber, "BrandName" => $BrandName, "Remark" => $Remark, "Name" => $Name, "Address" => $Address, "GSTNumber" => $GSTNumber, "ArticleNumber" => $ArticleNumber, "Title" => $Title, "StyleDescription" => $StyleDescription, "TotalSetQuantity" => $Totalstockvalue, "NoPacks" => $NoPacks, "ArticleRate" => number_format($ArticleRate, 2), "Weight" => number_format($Weight, 2), "ArticleColor" => $ArticleColor, "ArticleSize" => $ArticleSize, "ArticleRatio" => $ArticleRatio)), false);
+            $challendata[] = json_decode(json_encode(array("ColorWiseQty"  => $TotalCQty, "Notes" => $Notes, "TotalQty" => $TotalQty, "rejections" => $rejections,  "PreparedBy" => $PreparedBy, "InwardDate" => $InwardDate, "PoDate" => $PoDate, "GRN" => $GRN, "PurchaseNumber" => $PurchaseNumber, "BrandName" => $BrandName, "Remark" => $Remark, "Name" => $Name, "Address" => $Address, "GSTNumber" => $GSTNumber, "ArticleNumber" => $ArticleNumber, "Title" => $Title, "StyleDescription" => $StyleDescription, "TotalSetQuantity" => $Totalstockvalue, "NoPacks" => $NoPacks, "ArticleRate" => number_format($ArticleRate, 2), "Weight" => number_format($Weight, 2), "ArticleColor" => $ArticleColor, "ArticleSize" => $ArticleSize, "ArticleRatio" => $ArticleRatio)), false);
         }
 
         $as  = array($challendata, array("countNoPacks" => $countNoPacks, "

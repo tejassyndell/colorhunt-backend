@@ -1042,7 +1042,7 @@ class ReportController extends Controller
 
 
         }else{
-              $article = Artstockstatus::select('artstockstatus.*', 'artstockstatus.SalesNoPacks as STOCKS')->where('outletId', $PartyId)->get();
+            $article = Artstockstatus::select('artstockstatus.*', 'artstockstatus.SalesNoPacks as STOCKS')->where('TotalPieces', '>', 0)->where('outletId', $PartyId)->get();
             // return $article;
             $partyName = Party::select('Name')->where('Id', $PartyId)->first();
             return array("data" => $article, 'PartyName' => $partyName->Name);

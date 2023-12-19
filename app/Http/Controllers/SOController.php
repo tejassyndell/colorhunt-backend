@@ -769,19 +769,19 @@ class SOController extends Controller
 
         ///////////////// OPTIMIZE ////////////
         
-		$articlesArray = DB::select('
-        SELECT `artstockstatus`.`ArticleId`, `artstockstatus`.`ArticleNumber`, `artstockstatus`.`TotalPieces`
-        FROM `artstockstatus`
-        WHERE `artstockstatus`.`outletId` = 0 
-    	');
+		// $articlesArray = DB::select('
+        // SELECT `artstockstatus`.`ArticleId`, `artstockstatus`.`ArticleNumber`, `artstockstatus`.`TotalPieces`
+        // FROM `artstockstatus`
+        // WHERE `artstockstatus`.`outletId` = 0 
+    	// ');
 
 
-		$jsonData = array_values($articlesArray);
-		$filteredData = array_filter($jsonData, function ($item) {
-			return isset($item->TotalPieces) && $item->TotalPieces !== "0";
-		});
-		$jsonData = array_values($filteredData);
-		return $jsonData;
+		// $jsonData = array_values($articlesArray);
+		// $filteredData = array_filter($jsonData, function ($item) {
+		// 	return isset($item->TotalPieces) && $item->TotalPieces !== "0";
+		// });
+		// $jsonData = array_values($filteredData);
+		// return $jsonData;
         
         
         ////////////////////////////////////////

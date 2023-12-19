@@ -1714,6 +1714,432 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
         }
     }
 
+    // public function GetOutwardChallen($id)
+    // {
+    //     $getoutwardchallen = DB::select("SELECT d.NAME AS username, p.NAME, p.Address, p.State , p.City , p.UserId as PartyUserId , p.PinCode , p.Country , p.PhoneNumber, p.gstnumber, d.outwarddate, d.outwardnumber, d.OTNOId, d.GSTType, d.SoNumberGen, d.transporter, d.gstamount, d.gstpercentage, d.discount, d.Remarks, d.articleopenflag, d.articlenumber, d.Discount_amount, c.title, c.colorflag, d.articlecolor, d.articlesize, d.articlerate, d.articleratio, d.OutwardBox, d.OutwardRate, o.PartyDiscount, o.OutwardWeight, d.PreparedUserName ,  d.nopacks, i.weight FROM (SELECT  prepareduser.Name as PreparedUserName ,  u.NAME, sn.partyid, sn.transporter, s.id, s.sonumberid, concat( sn.sonumber, '/', fn.startyear,'-',fn.endyear	) AS SoNumberGen, s.articleid, a.articleopenflag, a.articlenumber, a.articlerate, a.articlecolor, a.articlesize, a.articleratio, a.CategoryId, concat(own.outwardnumber, '/',fn1.startyear,'-',fn1.endyear) AS outwardnumber, own.Id as OTNOId, own.GSTType, own.outwarddate, own.gstamount, own.gstpercentage, own.discount, own.Discount_amount, own.Remarks, ( SELECT GROUP_CONCAT(id SEPARATOR ',') as id FROM outward WHERE outwardnumberid=own.Id and ArticleId=s.ArticleId) AS oid, ( SELECT GROUP_CONCAT(nopacks SEPARATOR '#')as nopacks FROM outward WHERE outwardnumberid=own.id AND articleid=s.articleid) AS nopacks, ( SELECT GROUP_CONCAT(OutwardBox SEPARATOR '#')as nopacks FROM outward WHERE outwardnumberid=own.id AND articleid=s.articleid) AS OutwardBox,( SELECT GROUP_CONCAT(OutwardRate SEPARATOR '#') as OutwardRate FROM outward WHERE outwardnumberid=own.id AND  articleid=s.articleid) AS OutwardRate FROM `so` s INNER JOIN outwardnumber own ON own.soid=s.sonumberid INNER JOIN article a ON a.id=s.articleid INNER JOIN users prepareduser on own.UserId=prepareduser.Id INNER JOIN sonumber sn ON sn.id=s.sonumberid INNER JOIN users u ON u.id=sn.userid INNER JOIN financialyear fn ON fn.id=sn.financialyearid INNER JOIN financialyear fn1 ON fn1.id=own.financialyearid WHERE s.articleid IN (SELECT articleid FROM outward WHERE OutwardNumberId='" . $id . "') and own.Id='" . $id . "') AS d INNER JOIN outward o ON o.id IN(oid) INNER JOIN inward i ON i.articleid=d.articleid left JOIN po po ON po.articleid=d.articleid INNER JOIN category c ON c.id=d.categoryid INNER JOIN party p ON p.id=d.partyid WHERE oid IS NOT NULL GROUP BY d.id ORDER BY c.Title ASC");
+    //     $array = [];
+    //     $PartyTotalDiscount = 0;
+    //     foreach ($getoutwardchallen as $vl) {
+    //         if (!is_null($vl->City)) {
+    //             $fullAddress = $vl->Address . ', ' . $vl->City . ', ' . $vl->State . ', ' . $vl->Country . ' - ' . $vl->PinCode;
+    //         } else {
+    //             $fullAddress = $vl->Address;
+    //         }
+    //         if (!is_null($vl->PartyUserId)) {
+    //             $user = Users::where('Id', $vl->PartyUserId)->first();
+    //             $vl->sonumber = str_replace(' ', '', $user->Name . $vl->SoNumberGen);
+    //             $username = $user->Name;
+    //         } else {
+    //             $vl->sonumber = str_replace(' ', '', $vl->username . $vl->SoNumberGen);
+    //             $username = $vl->username;
+    //         }
+
+    //         $Name = $vl->NAME;
+    //         $Discount_in_amount = $vl->Discount_amount;
+    //         $PreparedUserName = $vl->PreparedUserName;
+    //         $address = $fullAddress;
+    //         $PhoneNumber = $vl->PhoneNumber;
+    //         $gstnumber = $vl->gstnumber;
+    //         $outwarddate = $vl->outwarddate;
+    //         $outwardnumber = $vl->outwardnumber;
+    //         $OutNumId = $vl->OTNOId;
+    //         $sonumber = $vl->sonumber;
+    //         $transporter = $vl->transporter;
+    //         $gstamount = $vl->gstamount;
+    //         $gstpercentage = $vl->gstpercentage;
+    //         $GSTType = $vl->GSTType;
+    //         $discount = $vl->discount;
+    //         $Remarks = $vl->Remarks;
+    //         $articleopenflag = $vl->articleopenflag;
+    //         $articlenumber = $vl->articlenumber;
+    //         $title = $vl->title;
+    //         $colorflag = $vl->colorflag;
+    //         $articlecolor = $vl->articlecolor;
+    //         $articlesize = $vl->articlesize;
+    //         $articlerate = $vl->articlerate;
+    //         $articleratio = $vl->articleratio;
+    //         $OutwardBox = $vl->OutwardBox;
+    //         $OutwardRate = $vl->OutwardRate;
+    //         $PartyDiscount = $vl->PartyDiscount;
+    //         $OutwardWeight = $vl->OutwardWeight;
+    //         $nopacks = $vl->nopacks;
+    //         $weight = $vl->weight;
+    //         if ($vl->PartyDiscount != 0) {
+    //             $PartyTotalDiscount = $vl->PartyDiscount++;
+    //         }
+    //         if (strpos($OutwardBox, "#") !== false) {
+    //             $OutwardBox1 = explode('#', $OutwardBox);
+    //             $OutwardRate1 = explode('#', $vl->OutwardRate);
+    //             $nopacks1 = explode('#', $vl->nopacks);
+
+
+    //             foreach ($OutwardBox1 as $key => $outwarddata) {
+    //                 $tmp["OutwardBox"] = $outwarddata;
+    //                 $tmp["UserName"] = $username;
+    //                 $tmp["Name"] = $Name;
+    //                 $tmp["PreparedUserName"] = $PreparedUserName;
+    //                 $tmp["Address"] = $address;
+    //                 $tmp["PhoneNumber"] = $PhoneNumber;
+    //                 $tmp["GSTNumber"] = $gstnumber;
+    //                 $tmp["OutwardDate"] = $outwarddate;
+    //                 $tmp["OutwardNumber"] = $outwardnumber;
+    //                 $tmp['OutNumId'] = $OutNumId;
+    //                 $tmp["SoNumber"] = $sonumber;
+    //                 $tmp["Transporter"] = $transporter;
+    //                 $tmp["GSTAmount"] = $gstamount;
+    //                 $tmp["GSTPercentage"] = $gstpercentage;
+    //                 $tmp["GSTType"] = $GSTType;
+    //                 $tmp["Discount"] = $discount;
+    //                 $tmp["Remarks"] = $Remarks;
+    //                 $tmp["ArticleOpenFlag"] = $articleopenflag;
+    //                 $tmp["ArticleNumber"] = $articlenumber;
+    //                 $tmp["Title"] = $title;
+    //                 $tmp["Colorflag"] = $colorflag;
+    //                 $tmp["ArticleColor"] = $articlecolor;
+    //                 $tmp["ArticleSize"] = $articlesize;
+    //                 $tmp["ArticleRate"] = $articlerate;
+    //                 $tmp["ArticleRatio"] = $articleratio;
+    //                 $tmp["OutwardRate"] = $OutwardRate1[$key];
+    //                 $tmp["PartyDiscount"] = $PartyDiscount;
+    //                 $tmp["OutwardWeight"] = $OutwardWeight;
+    //                 $tmp["NoPacks"] = $nopacks1[$key];
+    //                 $tmp["Weight"] = $weight;
+    //                 array_push($array, $tmp);
+    //                 break;
+    //             }
+    //         } else {
+    //             array_push($array, array("OutwardBox" => $OutwardBox, "PreparedUserName" => $PreparedUserName, "UserName" => $username, "Name" => $Name, "Address" => $address, "PhoneNumber" => $PhoneNumber, "GSTNumber" => $gstnumber, "OutwardDate" => $outwarddate, "OutwardNumber" => $outwardnumber, "OutwardNumberId" => $OutNumId, "SoNumber" => $sonumber, "Transporter" => $transporter, "GSTAmount" => $gstamount, "GSTPercentage" => $gstpercentage, "GSTType" => $GSTType, "Discount" => $discount, "Discount_in_amount" => $Discount_in_amount, "Remarks" => $Remarks, "ArticleOpenFlag" => $articleopenflag, "ArticleNumber" => $articlenumber, "Title" => $title, "Colorflag" => $colorflag, "ArticleColor" => $articlecolor, "ArticleSize" => $articlesize, "ArticleRate" => $articlerate, "ArticleRatio" => $articleratio, "OutwardRate" => $OutwardRate, "PartyDiscount" => $PartyDiscount, "OutwardWeight" => $OutwardWeight, "NoPacks" => $nopacks, "Weight" => $weight));
+    //         }
+    //     }
+    //     // asort($array);
+    //     $arrayorderdata = array_values($array);
+    //     $challendata = [];
+    //     $TotalNoPacks = 0;
+    //     $TotalAmount = 0;
+    //     $TotalWeight = 0;
+    //     $TotalQuantityInSet = 0;
+    //     $result = [];
+    //     $arrayvl = array();
+    //     $Weight1 = 0;
+    //     $ch = 0;
+    //     $i = 0;
+    //     $SRNO = 1;
+    //     foreach ($arrayorderdata as $vl) {
+    //         $srno = $SRNO++;
+    //         $Name = $vl["Name"];
+    //         $Discount_in_amount = $vl["Discount_in_amount"];
+    //         $UserName = $vl['UserName'];
+    //         $Address = $vl['Address'];
+    //         $PreparedUserName = $vl['PreparedUserName'];
+    //         $PhoneNumber = $vl['PhoneNumber'];
+    //         $GSTNumber = $vl['GSTNumber'];
+    //         $OutwardDate = $vl['OutwardDate'];
+    //         $OutwardNumber = $vl['OutwardNumber'];
+    //         $OutwardNumberId = $vl['OutwardNumberId'];
+    //         $SoNumber = $vl['SoNumber'];
+    //         $Transporter = $vl['Transporter'];
+    //         $Remarks = $vl['Remarks'];
+    //         $ArticleOpenFlag = $vl['ArticleOpenFlag'];
+    //         $ArticleNumber = $vl['ArticleNumber'];
+    //         $Title = $vl['Title'];
+    //         $NoPacks = $vl['NoPacks'];
+    //         $ArticleRate = $vl['ArticleRate'];
+    //         $ArticleRatio = $vl['ArticleRatio'];
+    //         $OutwardBox = $vl['OutwardBox'];
+    //         $OutwardRate = $vl['OutwardRate'];
+    //         $OutwardWeight = $vl['OutwardWeight'];
+    //         $PartyDiscount = $vl['PartyDiscount'];
+    //         $Weight = $vl['Weight'];
+    //         $Colorflag = $vl['Colorflag'];
+    //         $GSTPercentage = $vl['GSTPercentage'];
+    //         $GSTAmount = $vl['GSTAmount'];
+    //         $Discount = $vl['Discount'];
+    //         if ($Colorflag == 0) {
+    //             if ($ArticleOpenFlag == 0) {
+    //                 $ArticleRatio = $vl['ArticleRatio'];
+    //                 $TotalNoPacks += $NoPacks;
+    //             }
+    //         } else {
+    //             if ($ArticleOpenFlag == 0) {
+    //                 $ArticleRatio = $vl['ArticleRatio'];
+    //                 $countNoSet = array_sum(explode(",", $NoPacks));
+    //                 $TotalNoPacks += array_sum(explode(",", $NoPacks));
+    //             }
+    //         }
+    //         if ($ArticleOpenFlag == 0) {
+    //             if (strpos($NoPacks, ',') !== false) {
+    //                 $countNoSet = array_sum(explode(",", $NoPacks));
+    //             } else {
+    //                 if (strpos($ArticleRatio, ',') !== false) {
+    //                     $ArticleRatio = array_sum(explode(",", $ArticleRatio));
+    //                 }
+    //                 $countNoSet = $NoPacks;
+    //             }
+    //             $Weight = $Weight * $countNoSet;
+    //             $TotalWeight += $Weight;
+    //             if ($PartyDiscount != 0) {
+    //                 $Amount = $countNoSet * $OutwardRate;
+    //                 $DiscountAmount = (($Amount * $PartyDiscount) / 100);
+    //                 $Amount = $Amount - $DiscountAmount;
+    //             } else {
+    //                 $Amount = $countNoSet * $OutwardRate;
+    //             }
+    //             $TotalAmount += $Amount;
+
+
+
+
+
+    //             //COLOR
+    //             $colorsv = $vl['ArticleColor'];
+    //             $decodedData = json_decode($colorsv, true);
+    //             $results = [];
+    //             foreach ($decodedData as $item) {
+    //                 $results[] = $item['Name'];
+    //             }
+    //             $jsonResult = $results;
+    //             //COLOR
+
+    //             //PACKS
+    //             $data = $NoPacks;
+    //             $results = explode(",", $data);
+
+    //             // Convert the results to JSON if needed
+    //             $jsonResultP = $results;
+
+    //             //PACKS
+
+
+    //             $C = array_combine($jsonResult, $jsonResultP);
+
+    //             $jsonData = json_encode($C);
+
+    //             $arrayData = json_decode($jsonData, true);
+    //             $TotalCQty = "";
+    //             $allkey = "";
+    //             $allvalue = "";
+    //             foreach ($arrayData as $key => $value) {
+    //                 if (!empty($key)) {
+    //                     $TotalCQty .= '<b>' . $key . " : " . '</b>' . $value . ", ";
+    //                 } else {
+    //                     $TotalCQty .= '<b>' . '--' . " : " . '</b>' . $value . ', ';
+    //                 }
+    //             }
+
+    //             // return $TotalCQty
+
+
+
+
+
+
+
+
+
+
+
+
+    //             $getcolor = json_decode($vl['ArticleColor']);
+    //             $getsize = json_decode($vl['ArticleSize']);
+    //             $ArticleColor = "";
+    //             foreach ($getcolor as $vl) {
+    //                 $ArticleColor .= $vl->Name . ", ";
+    //             }
+    //             $ArticleColor = rtrim($ArticleColor, ', ');
+    //             $ArticleSize = "";
+    //             foreach ($getsize as $vl) {
+    //                 $ArticleSize .= $vl->Name . ", ";
+    //             }
+    //             $ArticleSize = rtrim($ArticleSize, ', ');
+
+
+
+
+
+
+
+
+
+
+    //         } else {
+    //             $countNoSet = $NoPacks;
+    //             $TotalCQty = "";
+    //             $ArticleRatio = "";
+    //             $ArticleRate = "";
+    //             $ArticleColor = "";
+    //             $ArticleSize = "";
+    //             if ($OutwardWeight != "") {
+    //                 $Weight = $OutwardWeight * $countNoSet;
+    //                 $TotalWeight += $Weight;
+    //             } else {
+    //                 $Weight = "";
+    //             }
+    //             if ($PartyDiscount != 0) {
+    //                 $Amount = $NoPacks * $OutwardRate;
+    //                 $DiscountAmount = (($Amount * $PartyDiscount) / 100);
+    //                 $Amount = $Amount - $DiscountAmount;
+    //             } else {
+    //                 $Amount = $NoPacks * $OutwardRate;
+    //             }
+    //             $TotalAmount += $Amount;
+    //         }
+    //         if ($Weight == "") {
+    //             $weightset = 0;
+    //         } else {
+    //             $weightset = $Weight;
+    //         }
+    //         if ($ch == 0) {
+    //             array_push($arrayvl, $OutwardBox);
+    //             $ch = $OutwardBox;
+    //             $Weight1 = "";
+    //             $Weight1 = $weightset;
+    //         } else {
+    //             if ($ch != $OutwardBox) {
+    //                 array_push($arrayvl, $OutwardBox);
+    //                 $ch = $OutwardBox;
+    //                 $Weight1 = $weightset;
+    //                 $i++;
+    //             } else {
+    //                 $Weight1 += $weightset;
+    //             }
+    //         }
+    //         $qtyTotal = array_sum(explode(",", $NoPacks)); //jignesh
+    //         $TotalQuantityInSet += $qtyTotal;
+
+
+    //         $numbers_array = explode(",", $NoPacks);
+    //         // return $numbers_array;
+    //         $numbers_array = array_sum($numbers_array);
+    //         // return $numbers_array;
+
+    //         // $valer = json_decode($numbers_array, true);
+
+    //         // return $valer;  
+    //         // $numbers_array = array_sum($numbers_array);
+    //         // $TotalQty = $sum;
+    //         // return $numbers_array;
+    //         // return $sum;;
+    //         // $arr = json_decode($numbers_array, true);
+    //         // return $arr;
+    //         $result[$i]['OutwardBox'] = $ch;
+    //         $result[$i]['Weight'] = number_format($Weight1, 2);
+    //         $result[$i]['ArticleNumber'][] = $ArticleNumber;
+    //         $result[$i]['ArticleColor'][] = $ArticleColor;
+    //         $result[$i]['TotalCQty'][] = $TotalCQty;
+    //         $result[$i]['Srno'][] = $srno;
+    //         $result[$i]['Title'][] = $Title;
+    //         $result[$i]['ArticleRatio'][] = $ArticleRatio;
+    //         $result[$i]['TotalQty'][] = $numbers_array;
+    //         $result[$i]['NoPacks'][] = $NoPacks;
+    //         $result[$i]['ArticleRate'][] = $ArticleRate;
+    //         $result[$i]['Amount'][] = number_format($Amount, 2);
+    //         $result[$i]['ArticleSize'][] = $ArticleSize;
+    //         $result[$i]['OutwardRate'][] = number_format($OutwardRate, 2);
+    //         $result[$i]['Transporter'][] = $Transporter;
+    //         $result[$i]['PartyDiscount'][] = $PartyDiscount;
+
+
+    //         $TotalQtyColor = $result[0]['TotalQty'][0];
+
+
+    //         // $TotalColorsPack = $result[0]['ArticleColor'][0];
+    //         // $TotalNumbersOfQty = $result[0]['NoPacks'][0];
+
+    //         // $numbers_colorQty = explode(",", $TotalColorsPack);
+
+    //         // $numbers_packQty = explode(",", $TotalNumbersOfQty);
+
+    //         // $C=array_combine($numbers_colorQty,$numbers_packQty);
+
+    //         // $jsonData = json_encode($C);
+
+    //         // $arrayData = json_decode($jsonData, true);
+    //         // $TotalCQty="";
+    //         // $allkey="";
+    //         // $allvalue="";
+    //         // foreach ($arrayData as $key => $value) { 
+    //         //     $TotalCQty .= $key . " - " . $value .", "; 
+    //         //     $allkey .= $key;
+    //         //     $allvalue .= $value; 
+    //         // }
+
+
+
+
+    //         $challendata[] = json_decode(json_encode(array("PreparedUserName" => $PreparedUserName, "UserName" => $UserName, "OutwardDate" => $OutwardDate, "OutwardNumber" => $OutwardNumber, "OutwardNumberId" => $OutwardNumberId, "Discount_in_amount" => $Discount_in_amount, "SoNumber" => $SoNumber, "Name" => $Name, "Address" => $Address, "PhoneNumber" => $PhoneNumber, "GSTNumber" => $GSTNumber, "Remarks" => $Remarks, "Srno" => $srno, "ArticleNumber" => $ArticleNumber, "Title" => $Title, "ArticleRatio" => $ArticleRatio, "TotalQty" => $TotalQtyColor, "QuantityInSet" => $NoPacks, "TotalQtyInSet" => $qtyTotal, "ArticleRate" => $ArticleRate, "Amount" => $Amount, "ArticleColor" => $ArticleColor, "TotalCQty" => $TotalCQty, "ArticleSize" => $ArticleSize, "OutwardBox" => $OutwardBox, "OutwardRate" => $OutwardRate, "Weight" => $Weight, "Transporter" => $Transporter, "PartyDiscount" => $PartyDiscount)), false);
+    //         // return $challendata;    
+    //     }
+    //     $TotalFinalAmount = 0;
+    //     $SubTotalAmount = 0;
+    //     $TotalFinalAmountDiscount = 0;
+    //     $GSTLabel = "";
+    //     $GSTValue = 0;
+    //     $CGSTValue = 0;
+    //     $SGSTValue = 0;
+
+
+
+
+                
+    //     if ($Discount > 0 || $Discount != "") {
+    //         $TotalFinalAmountDiscount = (($TotalAmount * $Discount) / 100);
+    //         $SubTotalAmount = $TotalAmount - $TotalFinalAmountDiscount;
+    //         $TotalFinalAmount = $SubTotalAmount;
+    //     } 
+    //     elseif($Discount_in_amount > 0 || $Discount_in_amount != ""){
+    //         $SubTotalAmount = $TotalAmount - $Discount_in_amount;
+    //         $TotalFinalAmount = $SubTotalAmount;
+    //     }
+    //     else {
+    //         if ($TotalFinalAmount == 0) {
+    //             $TotalFinalAmount = $TotalAmount;
+    //         }
+    //     }
+
+        
+    //     if ($Discount > 0 || $Discount != "") {
+    //         $TotalFinalAmountDiscount = (($TotalAmount * $Discount) / 100);
+    //         $SubTotalAmount = $TotalAmount - $TotalFinalAmountDiscount;
+    //         $TotalFinalAmount = $SubTotalAmount;
+    //     } else {
+    //         if ($TotalFinalAmount == 0) {
+    //             $TotalFinalAmount = $TotalAmount;
+    //         }
+    //     }
+
+    //     if ($Discount_in_amount > 0 || $Discount_in_amount != "") {
+    //         $SubTotalAmount = $TotalAmount - $Discount_in_amount;
+    //         $TotalFinalAmount = $SubTotalAmount;
+    //     } 
+
+    //     // if ($GSTPercentage != "" || $GSTAmount != "") {
+    //     //     if ($GSTPercentage > 0) {
+    //     //         $GSTLabel = "GST " . $GSTPercentage . "%";
+    //     //         $GSTValue = (($TotalFinalAmount * $GSTPercentage) / 100);
+    //     //         $CGSTValue = ($GSTValue / 2);
+    //     //         $SGSTValue = ($GSTValue / 2);
+    //     //         $TotalGSTValue = round(($GSTValue / 2), 2) * 2;
+    //     //         $TotalFinalAmount = ($TotalFinalAmount + $TotalGSTValue);
+    //     //     } else {
+    //     //         $GSTValue = number_format($GSTAmount, 2);
+    //     //         $GSTValue1 = $GSTAmount;
+    //     //         $TotalFinalAmount = ($TotalFinalAmount + $GSTValue1);
+    //     //         $GSTLabel = "GST Amount";
+    //     //     }
+    //     // }
+
+    //     $SubtotalStatus = 0;
+    //     if (is_float($TotalFinalAmount)) {
+    //         $SubtotalStatus = 1;
+    //     }
+    //     if ($TotalWeight != 0) {
+    //         $TotalWeight = number_format($TotalWeight, 2);
+    //     }
+    //     $as = array($challendata, array("RoundOff" => $this->splitter(number_format($TotalFinalAmount, 2, '.', '')), "SubtotalStatus" => $SubtotalStatus, "PartyTotalDiscount" => $PartyTotalDiscount, "TotalNoPacks" => $TotalNoPacks, "TotalQuantityAllInSet" => $TotalQuantityInSet, "TotalAmount" => number_format($TotalAmount, 2), "TotalWeight" => $TotalWeight, "Discount_in_amount" => $Discount_in_amount, "ExtraDiscountpercentage" => $Discount, "Discount" => number_format($TotalFinalAmountDiscount, 2), "SubTotalAmount" => number_format($SubTotalAmount, 2), "TotalFinalAmount" => number_format($TotalFinalAmount, 2), "GSTLabel" => $GSTLabel, "GSTPercentage" => (int) $GSTPercentage, "GSTValue" => $GSTValue, "CGSTValue" => number_format($CGSTValue, 2), "SGSTValue" => number_format($SGSTValue, 2), "GSTType" => $GSTType), $result);
+    //     return $as;
+    // }
+
+    //yaswant code
     public function GetOutwardChallen($id)
     {
         $getoutwardchallen = DB::select("SELECT d.NAME AS username, p.NAME, p.Address, p.State , p.City , p.UserId as PartyUserId , p.PinCode , p.Country , p.PhoneNumber, p.gstnumber, d.outwarddate, d.outwardnumber, d.OTNOId, d.GSTType, d.SoNumberGen, d.transporter, d.gstamount, d.gstpercentage, d.discount, d.Remarks, d.articleopenflag, d.articlenumber, d.Discount_amount, c.title, c.colorflag, d.articlecolor, d.articlesize, d.articlerate, d.articleratio, d.OutwardBox, d.OutwardRate, o.PartyDiscount, o.OutwardWeight, d.PreparedUserName ,  d.nopacks, i.weight FROM (SELECT  prepareduser.Name as PreparedUserName ,  u.NAME, sn.partyid, sn.transporter, s.id, s.sonumberid, concat( sn.sonumber, '/', fn.startyear,'-',fn.endyear	) AS SoNumberGen, s.articleid, a.articleopenflag, a.articlenumber, a.articlerate, a.articlecolor, a.articlesize, a.articleratio, a.CategoryId, concat(own.outwardnumber, '/',fn1.startyear,'-',fn1.endyear) AS outwardnumber, own.Id as OTNOId, own.GSTType, own.outwarddate, own.gstamount, own.gstpercentage, own.discount, own.Discount_amount, own.Remarks, ( SELECT GROUP_CONCAT(id SEPARATOR ',') as id FROM outward WHERE outwardnumberid=own.Id and ArticleId=s.ArticleId) AS oid, ( SELECT GROUP_CONCAT(nopacks SEPARATOR '#')as nopacks FROM outward WHERE outwardnumberid=own.id AND articleid=s.articleid) AS nopacks, ( SELECT GROUP_CONCAT(OutwardBox SEPARATOR '#')as nopacks FROM outward WHERE outwardnumberid=own.id AND articleid=s.articleid) AS OutwardBox,( SELECT GROUP_CONCAT(OutwardRate SEPARATOR '#') as OutwardRate FROM outward WHERE outwardnumberid=own.id AND  articleid=s.articleid) AS OutwardRate FROM `so` s INNER JOIN outwardnumber own ON own.soid=s.sonumberid INNER JOIN article a ON a.id=s.articleid INNER JOIN users prepareduser on own.UserId=prepareduser.Id INNER JOIN sonumber sn ON sn.id=s.sonumberid INNER JOIN users u ON u.id=sn.userid INNER JOIN financialyear fn ON fn.id=sn.financialyearid INNER JOIN financialyear fn1 ON fn1.id=own.financialyearid WHERE s.articleid IN (SELECT articleid FROM outward WHERE OutwardNumberId='" . $id . "') and own.Id='" . $id . "') AS d INNER JOIN outward o ON o.id IN(oid) INNER JOIN inward i ON i.articleid=d.articleid left JOIN po po ON po.articleid=d.articleid INNER JOIN category c ON c.id=d.categoryid INNER JOIN party p ON p.id=d.partyid WHERE oid IS NOT NULL GROUP BY d.id ORDER BY c.Title ASC");
@@ -1928,17 +2354,6 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
 
                 // return $TotalCQty
 
-
-
-
-
-
-
-
-
-
-
-
                 $getcolor = json_decode($vl['ArticleColor']);
                 $getsize = json_decode($vl['ArticleSize']);
                 $ArticleColor = "";
@@ -1951,16 +2366,6 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
                     $ArticleSize .= $vl->Name . ", ";
                 }
                 $ArticleSize = rtrim($ArticleSize, ', ');
-
-
-
-
-
-
-
-
-
-
             } else {
                 $countNoSet = $NoPacks;
                 $TotalCQty = "";
@@ -2080,26 +2485,13 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
 
 
 
-                
-        if ($Discount > 0 || $Discount != "") {
-            $TotalFinalAmountDiscount = (($TotalAmount * $Discount) / 100);
-            $SubTotalAmount = $TotalAmount - $TotalFinalAmountDiscount;
-            $TotalFinalAmount = $SubTotalAmount;
-        } 
-        elseif($Discount_in_amount > 0 || $Discount_in_amount != ""){
-            $SubTotalAmount = $TotalAmount - $Discount_in_amount;
-            $TotalFinalAmount = $SubTotalAmount;
-        }
-        else {
-            if ($TotalFinalAmount == 0) {
-                $TotalFinalAmount = $TotalAmount;
-            }
-        }
 
-        
         if ($Discount > 0 || $Discount != "") {
             $TotalFinalAmountDiscount = (($TotalAmount * $Discount) / 100);
             $SubTotalAmount = $TotalAmount - $TotalFinalAmountDiscount;
+            $TotalFinalAmount = $SubTotalAmount;
+        } elseif ($Discount_in_amount > 0 || $Discount_in_amount != "") {
+            $SubTotalAmount = $TotalAmount - $Discount_in_amount;
             $TotalFinalAmount = $SubTotalAmount;
         } else {
             if ($TotalFinalAmount == 0) {
@@ -2107,27 +2499,37 @@ $salesNoPacksDataString = implode(',', $salesNoPacksData);
             }
         }
 
-        if ($Discount_in_amount > 0 || $Discount_in_amount != "") {
-            $SubTotalAmount = $TotalAmount - $Discount_in_amount;
-            $TotalFinalAmount = $SubTotalAmount;
-        } 
 
-        // if ($GSTPercentage != "" || $GSTAmount != "") {
-        //     if ($GSTPercentage > 0) {
-        //         $GSTLabel = "GST " . $GSTPercentage . "%";
-        //         $GSTValue = (($TotalFinalAmount * $GSTPercentage) / 100);
-        //         $CGSTValue = ($GSTValue / 2);
-        //         $SGSTValue = ($GSTValue / 2);
-        //         $TotalGSTValue = round(($GSTValue / 2), 2) * 2;
-        //         $TotalFinalAmount = ($TotalFinalAmount + $TotalGSTValue);
-        //     } else {
-        //         $GSTValue = number_format($GSTAmount, 2);
-        //         $GSTValue1 = $GSTAmount;
-        //         $TotalFinalAmount = ($TotalFinalAmount + $GSTValue1);
-        //         $GSTLabel = "GST Amount";
+        // if ($Discount > 0 || $Discount != "") {
+        //     $TotalFinalAmountDiscount = (($TotalAmount * $Discount) / 100);
+        //     $SubTotalAmount = $TotalAmount - $TotalFinalAmountDiscount;
+        //     $TotalFinalAmount = $SubTotalAmount;
+        // } else {
+        //     if ($TotalFinalAmount == 0) {
+        //         $TotalFinalAmount = $TotalAmount;
         //     }
         // }
 
+        // if ($Discount_in_amount > 0 || $Discount_in_amount != "") {
+        //     $SubTotalAmount = $TotalAmount - $Discount_in_amount;
+        //     $TotalFinalAmount = $SubTotalAmount;
+        // } 
+
+        if ($GSTPercentage != "" || $GSTAmount != "") {
+            if ($GSTPercentage > 0) {
+                $GSTLabel = "GST " . $GSTPercentage . "%";
+                $GSTValue = (($TotalFinalAmount * $GSTPercentage) / 100);
+                $CGSTValue = ($GSTValue / 2);
+                $SGSTValue = ($GSTValue / 2);
+                $TotalGSTValue = round(($GSTValue / 2), 2) * 2;
+                $TotalFinalAmount = ($TotalFinalAmount + $TotalGSTValue);
+            } else {
+                $GSTValue = number_format($GSTAmount, 2);
+                $GSTValue1 = $GSTAmount;
+                $TotalFinalAmount = ($TotalFinalAmount + $GSTValue1);
+                $GSTLabel = "GST Amount";
+            }
+        }
         $SubtotalStatus = 0;
         if (is_float($TotalFinalAmount)) {
             $SubtotalStatus = 1;

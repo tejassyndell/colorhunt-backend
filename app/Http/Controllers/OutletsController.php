@@ -1012,22 +1012,25 @@ class OutletsController extends Controller
 						$articleId = $data['ArticleId'];
 						$noPacksNewKey = 'NoPacksNew_' . $numberofpacks;
 						$noPacksKey = 'NoPacks_' . $numberofpacks;
-
+						
 						if (isset($data[$noPacksNewKey]) && isset($data[$noPacksKey])) {
 							$noPacksNewValue = (int) $data[$noPacksNewKey];
 							$noPacksValue = (int) $data[$noPacksKey];
 							$salesNoPacksData[] = abs($noPacksValue - $noPacksNewValue);
+						} elseif (isset($data[$noPacksKey])) {
+							// If new value is not set, use the previous value
+							$noPacksValue = (int) $data[$noPacksKey];
+							$salesNoPacksData[] = $noPacksValue;
 						} else {
 							$salesNoPacksData[] = 0;
 						}
-
-					$totalPieces = array_sum($salesNoPacksData);
-					$salesNoPacksDataString = implode(',', $salesNoPacksData);
-
-					DB::table('artstockstatus')
-						->where(['outletId' => $data['PartyId'], 'ArticleId' => $articleId])
-						->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
-
+						
+						$totalPieces = array_sum($salesNoPacksData);
+						$salesNoPacksDataString = implode(',', $salesNoPacksData);
+						
+						DB::table('artstockstatus')
+							->where(['outletId' => $data['PartyId'], 'ArticleId' => $articleId])
+							->update(['SalesNoPacks' => $salesNoPacksDataString, 'TotalPieces' => $totalPieces]);
 					//close
 
 						if ($data["NoPacksNew_" . $numberofpacks] != "") {

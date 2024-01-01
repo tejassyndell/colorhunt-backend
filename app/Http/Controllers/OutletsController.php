@@ -161,15 +161,24 @@ class OutletsController extends Controller
         FROM `artstockstatus`
         WHERE `artstockstatus`.`outletId` = ? 
     	', [$PartyId]);
-
-
+        foreach ($articlesArray as $article){
+            if($article->TotalPieces < 0){
+                $str = 'OutletPartyId';
+                $getRealStock = $this->GetOutletSingleArticle($PartyId, $article->ArticleId, $str );
+                
+                //Checking... is this article has really zero Q.
+                $ttlRealStock = array_sum(array_map('intval', explode(',', $getRealStock[0]->SalesNoPacks)));
+                if($ttlRealStock == 0){
+                    DB::table('artstockstatus')->where(['outletId' => $PartyId, 'ArticleId' => $article->ArticleId])->delete();
+                }else{
+                    DB::table('artstockstatus')
+                        ->where(['outletId' => $PartyId, 'ArticleId' => $article->ArticleId])
+                        ->update(['SalesNoPacks' => $getRealStock[0]->SalesNoPacks, 'TotalPieces' => $ttlRealStock]);
+                }
+            }
+        }
 		$jsonData = array_values($articlesArray);
-		$filteredData = array_filter($jsonData, function ($item) {
-			return isset($item->TotalPieces) && $item->TotalPieces !== "0";
-		});
-		$jsonData = array_values($filteredData);
 		return $jsonData;
-	
 	}
 
 	public function GetOutletSingleArticle($PartyId, $ArtId, $OutletPartyId)

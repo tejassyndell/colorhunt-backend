@@ -3066,7 +3066,8 @@ class ReportController extends Controller
 
 
         //start daily stock
-        $maininwardRecordss = DB::select("select * from (select ig.InwardDate, ig.Id as GRNId, concat(ig.GRN,'/', fn.StartYear,'-',fn.EndYear) as GRNnumber, DATE_FORMAT(i.created_at ,'%Y-%m-%d') as CreatedAt, DATE_FORMAT(i.created_at ,'%d-%m-%Y') as CreatedDate from inwardgrn ig inner join inward i on ig.Id=i.GRN inner join financialyear fn on fn.Id=ig.FinancialYearId) as dd where dd.InwardDate = '" . $RangeDate . "'");
+        // $maininwardRecordss = DB::select("select * from (select ig.InwardDate, ig.Id as GRNId, concat(ig.GRN,'/', fn.StartYear,'-',fn.EndYear) as GRNnumber, DATE_FORMAT(i.created_at ,'%Y-%m-%d') as CreatedAt, DATE_FORMAT(i.created_at ,'%d-%m-%Y') as CreatedDate from inwardgrn ig inner join inward i on ig.Id=i.GRN inner join financialyear fn on fn.Id=ig.FinancialYearId) as dd where dd.InwardDate = '" . $RangeDate . "'");
+        $maininwardRecordss = DB::select("SELECT dd.GRNnumber, MAX(dd.InwardDate) AS InwardDate, MAX(dd.GRNId) AS GRNId, MAX(dd.CreatedAt) AS CreatedAt, MAX(dd.CreatedDate) AS CreatedDate FROM (SELECT ig.InwardDate, ig.Id AS GRNId, CONCAT(ig.GRN, '/', fn.StartYear, '-', fn.EndYear) AS GRNnumber, DATE_FORMAT(i.created_at, '%Y-%m-%d') AS CreatedAt, DATE_FORMAT(i.created_at, '%d-%m-%Y') AS CreatedDate FROM inwardgrn ig INNER JOIN inward i ON ig.Id = i.GRN INNER JOIN financialyear fn ON fn.Id = ig.FinancialYearId) AS dd WHERE dd.InwardDate = '" . $RangeDate . "' GROUP BY dd.GRNnumber");
         $collectioncateInwa = collect($maininwardRecordss);
         $maininwardRecords = $collectioncateInwa->unique()->values()->all();
         $maintotalInwardSalesNoPacks = 0;

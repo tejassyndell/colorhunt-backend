@@ -297,7 +297,7 @@ if ($existingRecord) {
     
     if (!empty($getresult)) {
         $GetNoPacks = $getresult[0]->SalesNoPacks;
-        $dataupdate = $GetNoPacks + $data['NoPacksNew'];
+        $dataupdate = (int)$GetNoPacks + (int)$data['NoPacksNew'];
         
         DB::table('artstockstatus')->where(['outletId' => $data['PartyId']])->where(['ArticleId' => $articleId])->update(['SalesNoPacks' => $dataupdate, 'TotalPieces' => $dataupdate]);
         
